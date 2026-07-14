@@ -13,8 +13,9 @@ from cores.core.runtime_context import RuntimeContext
 
 
 class MockModule(Module):
-    async def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
+    def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
         return ModuleResult(module_name=self.name, success=True)
+
 
 
 def test_runtime_initialization() -> None:

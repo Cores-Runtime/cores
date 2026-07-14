@@ -14,8 +14,9 @@ class StubModule(Module):
     A concrete stub module for testing scheduler behavior.
     """
 
-    async def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
+    def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
         return ModuleResult(module_name=self.name, success=True)
+
 
 
 def test_default_scheduling_policy() -> None:

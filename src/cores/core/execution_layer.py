@@ -1,6 +1,7 @@
 from cores.core.robot_state import RobotState
 from cores.core.runtime_context import RuntimeContext
 from cores.core.execution_plan import ExecutionPlan
+from cores.events.event_bus import EventBus
 
 
 class ExecutionLayer:
@@ -13,8 +14,12 @@ class ExecutionLayer:
         plan: ExecutionPlan,
         state: RobotState,
         context: RuntimeContext,
+        event_bus: EventBus,
     ) -> None:
         """
-        Execute modules in the order defined by the ExecutionPlan.
+        Execute modules in the order defined by the ExecutionPlan and publish their events.
         """
-        pass
+        for module in plan.modules:
+            result = module.execute(state, context)
+            for event in result.events:
+                event_bus.publish(event)

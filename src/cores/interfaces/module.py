@@ -25,8 +25,9 @@ class Module(ABC):
         self.name = name
 
     @abstractmethod
-    async def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
+    def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
         """
         Perform computation based on the current state and context.
         """
         pass
+
