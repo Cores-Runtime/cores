@@ -31,12 +31,13 @@ MANIFEST
 
 # PyTest
 .pytest_cache/
+/.ruff_cache
 
 # Mypy
-.mypy_cache/
+/.mypy_cache
 
 # Virtual Environments
 .venv/
 venv/
 ENV/
-env/
+env/
