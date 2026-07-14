@@ -1,6 +1,7 @@
 .env
 .local.env
 /AI-Instructions
+/.ai
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
