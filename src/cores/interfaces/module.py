@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Any
 from pydantic import BaseModel, Field
-from cores.models import RobotState, RuntimeContext
+from cores.core import RobotState, RuntimeContext
 from cores.events import Event
 
 
