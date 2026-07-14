@@ -66,8 +66,11 @@ class Runtime:
         )
 
         # 3. Execution Phase
-        self.execution_layer.execute(plan, self.state, self.context, self.event_bus)
-
+        results = self.execution_layer.execute(plan, self.state, self.context)
+        for result in results:
+            for event in result.events:
+                self.event_bus.publish(event)
 
         # 4. Post-execution cycle maintenance
         self.context.cycle_count += 1
+

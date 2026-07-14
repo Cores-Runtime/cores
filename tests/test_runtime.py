@@ -7,14 +7,14 @@ from cores.core import (
     ExecutionPlan,
 )
 from cores.events import Event, EventType
-from cores.interfaces import Module, ModuleResult
+from cores.interfaces import Module, ModuleResult, ModuleStatus
 from cores.core.robot_state import RobotState
 from cores.core.runtime_context import RuntimeContext
 
 
 class MockModule(Module):
     def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
-        return ModuleResult(module_name=self.name, success=True)
+        return ModuleResult(module_name=self.name, status=ModuleStatus.SUCCESS)
 
 
 
@@ -62,7 +62,7 @@ def test_runtime_cycle_execution() -> None:
     # Mock scheduler
     scheduler.schedule = MagicMock(return_value=ExecutionPlan())
     # Mock execution layer
-    execution_layer.execute = MagicMock()
+    execution_layer.execute = MagicMock(return_value=[])
 
     runtime = Runtime(scheduler, execution_layer)
     module = MockModule("m1")

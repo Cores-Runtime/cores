@@ -9,7 +9,7 @@ from cores.core import (
     Runtime,
 )
 from cores.events import EventType, Event, EventBus
-from cores.interfaces import Module, ModuleResult
+from cores.interfaces import Module, ModuleResult, ModuleStatus
 
 __version__ = "0.1.0"
 
@@ -27,4 +27,5 @@ __all__ = [
     "EventBus",
     "Module",
     "ModuleResult",
+    "ModuleStatus",
 ]

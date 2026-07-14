@@ -7,7 +7,7 @@ from cores.core import (
     RobotState,
     RuntimeContext,
 )
-from cores.interfaces import Module, ModuleResult
+from cores.interfaces import Module, ModuleResult, ModuleStatus
 from cores.events import Event, EventType
 
 
@@ -31,9 +31,10 @@ class DummyModule(Module):
         )
         return ModuleResult(
             module_name=self.name,
-            success=True,
+            status=ModuleStatus.SUCCESS,
             events=[emitted_event],
         )
+
 
 
 class EventRecordingPolicy(SchedulingPolicy):
