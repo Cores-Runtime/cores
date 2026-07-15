@@ -5,7 +5,7 @@ from cores.core import (
     DefaultSchedulingPolicy,
     ExecutionPlan,
 )
-from cores.interfaces import Module, ModuleResult
+from cores.interfaces import Module, ModuleResult, ModuleStatus
 from cores.events import Event, EventType
 
 
@@ -15,7 +15,7 @@ class StubModule(Module):
     """
 
     def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
-        return ModuleResult(module_name=self.name, success=True)
+        return ModuleResult(module_name=self.name, status=ModuleStatus.SUCCESS)
 
 
 

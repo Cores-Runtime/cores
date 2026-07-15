@@ -5,6 +5,7 @@ from cores.core import (
     DefaultSchedulingPolicy,
     ExecutionLayer,
     ExecutionPlan,
+    SimulatedStateEstimator,
 )
 from cores.events import Event, EventType
 from cores.interfaces import Module, ModuleResult, ModuleStatus
@@ -109,3 +110,27 @@ def test_runtime_event_harvesting() -> None:
     scheduler.schedule.assert_called_once_with(
         runtime.modules, runtime.state, runtime.context, [event]
     )
+
+
+def test_runtime_state_estimator_updates_state() -> None:
+    """
+    Verify that a configured StateEstimator updates RobotState at the start of each cycle.
+    """
+    scheduler = Scheduler(DefaultSchedulingPolicy())
+    execution_layer = ExecutionLayer()
+    estimator = SimulatedStateEstimator()
+    runtime = Runtime(scheduler, execution_layer, state_estimator=estimator)
+
+    assert runtime.state.battery_level == 1.0
+    assert runtime.state.pose == {}
+
+    runtime.step()
+
+    assert runtime.state.battery_level == 1.0
+    assert runtime.state.pose["x"] == 0.0
+    assert runtime.state.metadata["source"] == "simulated"
+
+    runtime.step()
+
+    assert runtime.state.battery_level == 0.99
+    assert runtime.state.pose["x"] == 0.1

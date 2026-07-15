@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 from cores.core.robot_state import RobotState
 from cores.core.runtime_context import RuntimeContext
 from cores.core.execution_layer import ExecutionLayer
 from cores.core.scheduler import Scheduler
+from cores.core.state_estimator import StateEstimator
 from cores.events.event_bus import EventBus
 from cores.events.event import Event
 from cores.events.event_type import EventType
@@ -21,7 +22,9 @@ class Runtime:
         self,
         scheduler: Scheduler,
         execution_layer: ExecutionLayer,
+        state_estimator: Optional[StateEstimator] = None,
     ) -> None:
+        self.state_estimator = state_estimator
         self.state = RobotState()
         self.context = RuntimeContext()
         self.event_bus = EventBus()
@@ -51,26 +54,31 @@ class Runtime:
     def step(self) -> None:
         """
         Execute one complete, sequential runtime cycle:
-        1. Collect events from the previous cycle.
-        2. Delegate planning to the Scheduler.
-        3. Delegate plan execution to the ExecutionLayer.
-        4. Advance runtime context metadata.
+        1. Update RobotState via the StateEstimator.
+        2. Collect events from the previous cycle.
+        3. Delegate planning to the Scheduler.
+        4. Delegate plan execution to the ExecutionLayer.
+        5. Advance runtime context metadata.
         """
-        # 1. Collect and flush buffered events
+        # 1. State estimation
+        if self.state_estimator is not None:
+            self.state = self.state_estimator.estimate(self.context.cycle_count)
+
+        # 2. Collect and flush buffered events
         events_to_process = self._buffered_events.copy()
         self._buffered_events.clear()
 
-        # 2. Planning Phase
+        # 3. Planning Phase
         plan = self.scheduler.schedule(
             self.modules, self.state, self.context, events_to_process
         )
 
-        # 3. Execution Phase
+        # 4. Execution Phase
         results = self.execution_layer.execute(plan, self.state, self.context)
         for result in results:
             for event in result.events:
                 self.event_bus.publish(event)
 
-        # 4. Post-execution cycle maintenance
+        # 5. Post-execution cycle maintenance
         self.context.cycle_count += 1
 

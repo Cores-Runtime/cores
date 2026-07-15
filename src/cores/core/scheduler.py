@@ -42,6 +42,29 @@ class DefaultSchedulingPolicy(SchedulingPolicy):
         return ExecutionPlan(modules=modules.copy())
 
 
+class OperatorSchedulingPolicy(SchedulingPolicy):
+    """
+    Baseline Operator scheduling policy.
+
+    Orders modules by priority (higher first). Modules with equal priority
+    retain their registration order. No optimization algorithms.
+    """
+
+    def schedule(
+        self,
+        modules: List[Module],
+        state: RobotState,
+        context: RuntimeContext,
+        events: List[Event],
+    ) -> ExecutionPlan:
+        sorted_modules = sorted(
+            modules,
+            key=lambda module: module.priority,
+            reverse=True,
+        )
+        return ExecutionPlan(modules=sorted_modules)
+
+
 class Scheduler:
     """
     Scheduler decides which cognitive modules execute next using a SchedulingPolicy.

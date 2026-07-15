@@ -32,8 +32,9 @@ class Module(ABC):
     Abstract base class for all cognitive modules.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, priority: int = 0) -> None:
         self.name = name
+        self.priority = priority
 
     @abstractmethod
     def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
