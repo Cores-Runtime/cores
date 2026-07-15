@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="490.0" y="28" font-size="20" text-anchor="middle" fill="#111827">Decision Time Ms by Scenario</text>
+<text x="20" y="210.0" font-size="14" transform="rotate(-90 20 210.0)" fill="#374151">Decision Time Ms</text>
+<line x1="80" y1="330.0" x2="956" y2="330.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="334.0" font-size="12" text-anchor="end" fill="#6b7280">0.000</text>
+<line x1="80" y1="275.2" x2="956" y2="275.2" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="279.2" font-size="12" text-anchor="end" fill="#6b7280">0.154</text>
+<line x1="80" y1="220.4" x2="956" y2="220.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="224.4" font-size="12" text-anchor="end" fill="#6b7280">0.308</text>
+<line x1="80" y1="165.6" x2="956" y2="165.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="169.6" font-size="12" text-anchor="end" fill="#6b7280">0.462</text>
+<line x1="80" y1="110.8" x2="956" y2="110.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="114.8" font-size="12" text-anchor="end" fill="#6b7280">0.616</text>
+<line x1="80" y1="56.0" x2="956" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="60.0" font-size="12" text-anchor="end" fill="#6b7280">0.770</text>
+<text x="101.9" y="390" font-size="12" text-anchor="middle" fill="#374151">Actuator Degradation #002</text>
+<rect x="86.6" y="255.6" width="1.7" height="74.4" fill="#2563eb" rx="2"/>
+<text x="87.4" y="249.6" font-size="11" text-anchor="middle" fill="#111827">0.2093</text>
+<rect x="94.2" y="159.4" width="1.7" height="170.6" fill="#dc2626" rx="2"/>
+<text x="95.1" y="153.4" font-size="11" text-anchor="middle" fill="#111827">0.4798</text>
+<rect x="101.9" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="102.7" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="109.6" y="230.4" width="1.7" height="99.6" fill="#9333ea" rx="2"/>
+<text x="110.4" y="224.4" font-size="11" text-anchor="middle" fill="#111827">0.2801</text>
+<text x="145.7" y="390" font-size="12" text-anchor="middle" fill="#374151">Budget Exhaustion #005</text>
+<rect x="130.4" y="271.6" width="1.7" height="58.4" fill="#2563eb" rx="2"/>
+<text x="131.2" y="265.6" font-size="11" text-anchor="middle" fill="#111827">0.1643</text>
+<rect x="138.0" y="91.7" width="1.7" height="238.3" fill="#dc2626" rx="2"/>
+<text x="138.9" y="85.7" font-size="11" text-anchor="middle" fill="#111827">0.6700</text>
+<rect x="145.7" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="146.5" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="153.4" y="240.7" width="1.7" height="89.3" fill="#9333ea" rx="2"/>
+<text x="154.2" y="234.7" font-size="11" text-anchor="middle" fill="#111827">0.2512</text>
+<text x="189.5" y="390" font-size="12" text-anchor="middle" fill="#374151">Communication Loss #009</text>
+<rect x="174.2" y="160.9" width="1.7" height="169.1" fill="#2563eb" rx="2"/>
+<text x="175.0" y="154.9" font-size="11" text-anchor="middle" fill="#111827">0.4756</text>
+<rect x="181.8" y="178.7" width="1.7" height="151.3" fill="#dc2626" rx="2"/>
+<text x="182.7" y="172.7" font-size="11" text-anchor="middle" fill="#111827">0.4254</text>
+<rect x="189.5" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="190.3" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="197.2" y="235.2" width="1.7" height="94.8" fill="#9333ea" rx="2"/>
+<text x="198.0" y="229.2" font-size="11" text-anchor="middle" fill="#111827">0.2666</text>
+<text x="233.3" y="390" font-size="12" text-anchor="middle" fill="#374151">Communication Loss #011</text>
+<rect x="218.0" y="266.0" width="1.7" height="64.0" fill="#2563eb" rx="2"/>
+<text x="218.8" y="260.0" font-size="11" text-anchor="middle" fill="#111827">0.1799</text>
+<rect x="225.6" y="187.8" width="1.7" height="142.2" fill="#dc2626" rx="2"/>
+<text x="226.5" y="181.8" font-size="11" text-anchor="middle" fill="#111827">0.4000</text>
+<rect x="233.3" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="234.1" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="241.0" y="223.9" width="1.7" height="106.1" fill="#9333ea" rx="2"/>
+<text x="241.8" y="217.9" font-size="11" text-anchor="middle" fill="#111827">0.2984</text>
+<text x="277.1" y="390" font-size="12" text-anchor="middle" fill="#374151">Deadline Overload #007</text>
+<rect x="261.8" y="256.7" width="1.7" height="73.3" fill="#2563eb" rx="2"/>
+<text x="262.6" y="250.7" font-size="11" text-anchor="middle" fill="#111827">0.2062</text>
+<rect x="269.4" y="178.1" width="1.7" height="151.9" fill="#dc2626" rx="2"/>
+<text x="270.3" y="172.1" font-size="11" text-anchor="middle" fill="#111827">0.4271</text>
+<rect x="277.1" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="277.9" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="284.8" y="230.4" width="1.7" height="99.6" fill="#9333ea" rx="2"/>
+<text x="285.6" y="224.4" font-size="11" text-anchor="middle" fill="#111827">0.2802</text>
+<text x="320.9" y="390" font-size="12" text-anchor="middle" fill="#374151">Emergency Event #001</text>
+<rect x="305.6" y="222.6" width="1.7" height="107.4" fill="#2563eb" rx="2"/>
+<text x="306.4" y="216.6" font-size="11" text-anchor="middle" fill="#111827">0.3021</text>
+<rect x="313.2" y="148.9" width="1.7" height="181.1" fill="#dc2626" rx="2"/>
+<text x="314.1" y="142.9" font-size="11" text-anchor="middle" fill="#111827">0.5093</text>
+<rect x="320.9" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="321.7" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="328.6" y="154.1" width="1.7" height="175.9" fill="#9333ea" rx="2"/>
+<text x="329.4" y="148.1" font-size="11" text-anchor="middle" fill="#111827">0.4947</text>
+<text x="364.7" y="390" font-size="12" text-anchor="middle" fill="#374151">GPS Drift #019</text>
+<rect x="349.4" y="267.0" width="1.7" height="63.0" fill="#2563eb" rx="2"/>
+<text x="350.2" y="261.0" font-size="11" text-anchor="middle" fill="#111827">0.1772</text>
+<rect x="357.0" y="193.6" width="1.7" height="136.4" fill="#dc2626" rx="2"/>
+<text x="357.9" y="187.6" font-size="11" text-anchor="middle" fill="#111827">0.3835</text>
+<rect x="364.7" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="365.5" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="372.4" y="227.1" width="1.7" height="102.9" fill="#9333ea" rx="2"/>
+<text x="373.2" y="221.1" font-size="11" text-anchor="middle" fill="#111827">0.2894</text>
+<text x="408.5" y="390" font-size="12" text-anchor="middle" fill="#374151">High Temperature #008</text>
+<rect x="393.2" y="257.7" width="1.7" height="72.3" fill="#2563eb" rx="2"/>
+<text x="394.0" y="251.7" font-size="11" text-anchor="middle" fill="#111827">0.2033</text>
+<rect x="400.8" y="192.3" width="1.7" height="137.7" fill="#dc2626" rx="2"/>
+<text x="401.7" y="186.3" font-size="11" text-anchor="middle" fill="#111827">0.3873</text>
+<rect x="408.5" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="409.3" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="416.2" y="215.0" width="1.7" height="115.0" fill="#9333ea" rx="2"/>
+<text x="417.0" y="209.0" font-size="11" text-anchor="middle" fill="#111827">0.3233</text>
+<text x="452.3" y="390" font-size="12" text-anchor="middle" fill="#374151">LIDAR Failure #006</text>
+<rect x="437.0" y="249.2" width="1.7" height="80.8" fill="#2563eb" rx="2"/>
+<text x="437.8" y="243.2" font-size="11" text-anchor="middle" fill="#111827">0.2273</text>
+<rect x="444.6" y="190.3" width="1.7" height="139.7" fill="#dc2626" rx="2"/>
+<text x="445.5" y="184.3" font-size="11" text-anchor="middle" fill="#111827">0.3928</text>
+<rect x="452.3" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="453.1" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="460.0" y="199.2" width="1.7" height="130.8" fill="#9333ea" rx="2"/>
+<text x="460.8" y="193.2" font-size="11" text-anchor="middle" fill="#111827">0.3679</text>
+<text x="496.1" y="390" font-size="12" text-anchor="middle" fill="#374151">Low Battery #012</text>
+<rect x="480.8" y="231.7" width="1.7" height="98.3" fill="#2563eb" rx="2"/>
+<text x="481.6" y="225.7" font-size="11" text-anchor="middle" fill="#111827">0.2765</text>
+<rect x="488.4" y="205.5" width="1.7" height="124.5" fill="#dc2626" rx="2"/>
+<text x="489.3" y="199.5" font-size="11" text-anchor="middle" fill="#111827">0.3502</text>
+<rect x="496.1" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="496.9" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="503.8" y="232.5" width="1.7" height="97.5" fill="#9333ea" rx="2"/>
+<text x="504.6" y="226.5" font-size="11" text-anchor="middle" fill="#111827">0.2741</text>
+<text x="539.9" y="390" font-size="12" text-anchor="middle" fill="#374151">Memory Pressure #015</text>
+<rect x="524.6" y="265.8" width="1.7" height="64.2" fill="#2563eb" rx="2"/>
+<text x="525.4" y="259.8" font-size="11" text-anchor="middle" fill="#111827">0.1805</text>
+<rect x="532.2" y="194.7" width="1.7" height="135.3" fill="#dc2626" rx="2"/>
+<text x="533.1" y="188.7" font-size="11" text-anchor="middle" fill="#111827">0.3804</text>
+<rect x="539.9" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="540.7" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="547.6" y="231.6" width="1.7" height="98.4" fill="#9333ea" rx="2"/>
+<text x="548.4" y="225.6" font-size="11" text-anchor="middle" fill="#111827">0.2767</text>
+<text x="583.7" y="390" font-size="12" text-anchor="middle" fill="#374151">Mission Change #013</text>
+<rect x="568.4" y="264.8" width="1.7" height="65.2" fill="#2563eb" rx="2"/>
+<text x="569.2" y="258.8" font-size="11" text-anchor="middle" fill="#111827">0.1834</text>
+<rect x="576.0" y="187.1" width="1.7" height="142.9" fill="#dc2626" rx="2"/>
+<text x="576.9" y="181.1" font-size="11" text-anchor="middle" fill="#111827">0.4018</text>
+<rect x="583.7" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="584.5" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="591.4" y="210.0" width="1.7" height="120.0" fill="#9333ea" rx="2"/>
+<text x="592.2" y="204.0" font-size="11" text-anchor="middle" fill="#111827">0.3374</text>
+<text x="627.5" y="390" font-size="12" text-anchor="middle" fill="#374151">Multi-Sensor Failure #014</text>
+<rect x="612.2" y="244.4" width="1.7" height="85.6" fill="#2563eb" rx="2"/>
+<text x="613.0" y="238.4" font-size="11" text-anchor="middle" fill="#111827">0.2407</text>
+<rect x="619.8" y="170.5" width="1.7" height="159.5" fill="#dc2626" rx="2"/>
+<text x="620.7" y="164.5" font-size="11" text-anchor="middle" fill="#111827">0.4485</text>
+<rect x="627.5" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="628.3" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="635.2" y="194.9" width="1.7" height="135.1" fill="#9333ea" rx="2"/>
+<text x="636.0" y="188.9" font-size="11" text-anchor="middle" fill="#111827">0.3798</text>
+<text x="671.3" y="390" font-size="12" text-anchor="middle" fill="#374151">Navigation Loss #004</text>
+<rect x="656.0" y="266.9" width="1.7" height="63.1" fill="#2563eb" rx="2"/>
+<text x="656.8" y="260.9" font-size="11" text-anchor="middle" fill="#111827">0.1773</text>
+<rect x="663.6" y="194.7" width="1.7" height="135.3" fill="#dc2626" rx="2"/>
+<text x="664.5" y="188.7" font-size="11" text-anchor="middle" fill="#111827">0.3804</text>
+<rect x="671.3" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="672.1" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="679.0" y="236.3" width="1.7" height="93.7" fill="#9333ea" rx="2"/>
+<text x="679.8" y="230.3" font-size="11" text-anchor="middle" fill="#111827">0.2636</text>
+<text x="715.1" y="390" font-size="12" text-anchor="middle" fill="#374151">Navigation Loss #010</text>
+<rect x="699.8" y="272.5" width="1.7" height="57.5" fill="#2563eb" rx="2"/>
+<text x="700.6" y="266.5" font-size="11" text-anchor="middle" fill="#111827">0.1617</text>
+<rect x="707.4" y="198.7" width="1.7" height="131.3" fill="#dc2626" rx="2"/>
+<text x="708.3" y="192.7" font-size="11" text-anchor="middle" fill="#111827">0.3692</text>
+<rect x="715.1" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="715.9" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="722.8" y="228.1" width="1.7" height="101.9" fill="#9333ea" rx="2"/>
+<text x="723.6" y="222.1" font-size="11" text-anchor="middle" fill="#111827">0.2865</text>
+<text x="758.9" y="390" font-size="12" text-anchor="middle" fill="#374151">Navigation Loss #020</text>
+<rect x="743.6" y="278.9" width="1.7" height="51.1" fill="#2563eb" rx="2"/>
+<text x="744.4" y="272.9" font-size="11" text-anchor="middle" fill="#111827">0.1438</text>
+<rect x="751.2" y="206.5" width="1.7" height="123.5" fill="#dc2626" rx="2"/>
+<text x="752.1" y="200.5" font-size="11" text-anchor="middle" fill="#111827">0.3472</text>
+<rect x="758.9" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="759.7" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="766.6" y="144.1" width="1.7" height="185.9" fill="#9333ea" rx="2"/>
+<text x="767.4" y="138.1" font-size="11" text-anchor="middle" fill="#111827">0.5227</text>
+<text x="802.7" y="390" font-size="12" text-anchor="middle" fill="#374151">Nominal Exploration #003</text>
+<rect x="787.4" y="261.3" width="1.7" height="68.7" fill="#2563eb" rx="2"/>
+<text x="788.2" y="255.3" font-size="11" text-anchor="middle" fill="#111827">0.1933</text>
+<rect x="795.0" y="182.3" width="1.7" height="147.7" fill="#dc2626" rx="2"/>
+<text x="795.9" y="176.3" font-size="11" text-anchor="middle" fill="#111827">0.4153</text>
+<rect x="802.7" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="803.5" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="810.4" y="218.6" width="1.7" height="111.4" fill="#9333ea" rx="2"/>
+<text x="811.2" y="212.6" font-size="11" text-anchor="middle" fill="#111827">0.3133</text>
+<text x="846.5" y="390" font-size="12" text-anchor="middle" fill="#374151">Nominal Exploration #018</text>
+<rect x="831.2" y="274.7" width="1.7" height="55.3" fill="#2563eb" rx="2"/>
+<text x="832.0" y="268.7" font-size="11" text-anchor="middle" fill="#111827">0.1555</text>
+<rect x="838.8" y="134.3" width="1.7" height="195.7" fill="#dc2626" rx="2"/>
+<text x="839.7" y="128.3" font-size="11" text-anchor="middle" fill="#111827">0.5502</text>
+<rect x="846.5" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="847.3" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="854.2" y="223.3" width="1.7" height="106.7" fill="#9333ea" rx="2"/>
+<text x="855.0" y="217.3" font-size="11" text-anchor="middle" fill="#111827">0.3001</text>
+<text x="890.3" y="390" font-size="12" text-anchor="middle" fill="#374151">Obstacle Detected #016</text>
+<rect x="875.0" y="267.0" width="1.7" height="63.0" fill="#2563eb" rx="2"/>
+<text x="875.8" y="261.0" font-size="11" text-anchor="middle" fill="#111827">0.1772</text>
+<rect x="882.6" y="211.1" width="1.7" height="118.9" fill="#dc2626" rx="2"/>
+<text x="883.5" y="205.1" font-size="11" text-anchor="middle" fill="#111827">0.3344</text>
+<rect x="890.3" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="891.1" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="898.0" y="209.6" width="1.7" height="120.4" fill="#9333ea" rx="2"/>
+<text x="898.8" y="203.6" font-size="11" text-anchor="middle" fill="#111827">0.3386</text>
+<text x="934.1" y="390" font-size="12" text-anchor="middle" fill="#374151">Unknown Environment #017</text>
+<rect x="918.8" y="267.1" width="1.7" height="62.9" fill="#2563eb" rx="2"/>
+<text x="919.6" y="261.1" font-size="11" text-anchor="middle" fill="#111827">0.1769</text>
+<rect x="926.4" y="227.1" width="1.7" height="102.9" fill="#dc2626" rx="2"/>
+<text x="927.3" y="221.1" font-size="11" text-anchor="middle" fill="#111827">0.2893</text>
+<rect x="934.1" y="330.0" width="1.7" height="0.0" fill="#16a34a" rx="2"/>
+<text x="934.9" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0000</text>
+<rect x="941.8" y="242.4" width="1.7" height="87.6" fill="#9333ea" rx="2"/>
+<text x="942.6" y="236.4" font-size="11" text-anchor="middle" fill="#111827">0.2463</text>
+<rect x="80" y="364" width="14" height="14" fill="#2563eb" rx="2"/>
+<text x="102" y="376" font-size="12" fill="#374151">Criticality</text>
+<rect x="260" y="364" width="14" height="14" fill="#dc2626" rx="2"/>
+<text x="282" y="376" font-size="12" fill="#374151">Lexicographic</text>
+<rect x="440" y="364" width="14" height="14" fill="#16a34a" rx="2"/>
+<text x="462" y="376" font-size="12" fill="#374151">Priority</text>
+<rect x="620" y="364" width="14" height="14" fill="#9333ea" rx="2"/>
+<text x="642" y="376" font-size="12" fill="#374151">Risk Aware Knapsack</text>
+</svg>

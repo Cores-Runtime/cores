@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="490.0" y="28" font-size="20" text-anchor="middle" fill="#111827">Ablation Study: Mission Utility</text>
+<text x="20" y="210.0" font-size="14" transform="rotate(-90 20 210.0)" fill="#374151">Mission Utility</text>
+<line x1="80" y1="330.0" x2="956" y2="330.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="334.0" font-size="12" text-anchor="end" fill="#6b7280">0</text>
+<line x1="80" y1="275.2" x2="956" y2="275.2" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="279.2" font-size="12" text-anchor="end" fill="#6b7280">20</text>
+<line x1="80" y1="220.4" x2="956" y2="220.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="224.4" font-size="12" text-anchor="end" fill="#6b7280">40</text>
+<line x1="80" y1="165.6" x2="956" y2="165.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="169.6" font-size="12" text-anchor="end" fill="#6b7280">60</text>
+<line x1="80" y1="110.8" x2="956" y2="110.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="114.8" font-size="12" text-anchor="end" fill="#6b7280">80</text>
+<line x1="80" y1="56.0" x2="956" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="60.0" font-size="12" text-anchor="end" fill="#6b7280">100</text>
+<text x="518.0" y="390" font-size="12" text-anchor="middle" fill="#374151">Full System</text>
+<rect x="211.4" y="329.0" width="62.1" height="1.0" fill="#2563eb" rx="2"/>
+<text x="242.5" y="323.0" font-size="11" text-anchor="middle" fill="#111827">0.4</text>
+<rect x="279.5" y="329.0" width="62.1" height="1.0" fill="#dc2626" rx="2"/>
+<text x="310.6" y="323.0" font-size="11" text-anchor="middle" fill="#111827">0.4</text>
+<rect x="347.7" y="329.6" width="62.1" height="0.4" fill="#16a34a" rx="2"/>
+<text x="378.7" y="323.6" font-size="11" text-anchor="middle" fill="#111827">0.1</text>
+<rect x="415.8" y="329.3" width="62.1" height="0.7" fill="#9333ea" rx="2"/>
+<text x="446.9" y="323.3" font-size="11" text-anchor="middle" fill="#111827">0.3</text>
+<rect x="483.9" y="329.2" width="62.1" height="0.8" fill="#ea580c" rx="2"/>
+<text x="515.0" y="323.2" font-size="11" text-anchor="middle" fill="#111827">0.3</text>
+<rect x="552.1" y="329.2" width="62.1" height="0.8" fill="#0891b2" rx="2"/>
+<text x="583.1" y="323.2" font-size="11" text-anchor="middle" fill="#111827">0.3</text>
+<rect x="620.2" y="329.0" width="62.1" height="1.0" fill="#7c3aed" rx="2"/>
+<text x="651.3" y="323.0" font-size="11" text-anchor="middle" fill="#111827">0.4</text>
+<rect x="688.3" y="329.0" width="62.1" height="1.0" fill="#2563eb" rx="2"/>
+<text x="719.4" y="323.0" font-size="11" text-anchor="middle" fill="#111827">0.4</text>
+<rect x="756.5" y="329.0" width="62.1" height="1.0" fill="#dc2626" rx="2"/>
+<text x="787.5" y="323.0" font-size="11" text-anchor="middle" fill="#111827">0.4</text>
+<rect x="80" y="364" width="14" height="14" fill="#2563eb" rx="2"/>
+<text x="102" y="376" font-size="12" fill="#374151">Full</text>
+<rect x="260" y="364" width="14" height="14" fill="#dc2626" rx="2"/>
+<text x="282" y="376" font-size="12" fill="#374151">No Dependency Graph</text>
+<rect x="440" y="364" width="14" height="14" fill="#16a34a" rx="2"/>
+<text x="462" y="376" font-size="12" fill="#374151">No Lexicographic Ordering</text>
+<rect x="620" y="364" width="14" height="14" fill="#9333ea" rx="2"/>
+<text x="642" y="376" font-size="12" fill="#374151">No Mandatory Modules</text>
+<rect x="800" y="364" width="14" height="14" fill="#ea580c" rx="2"/>
+<text x="822" y="376" font-size="12" fill="#374151">No Safety Critical Distinction</text>
+<rect x="980" y="364" width="14" height="14" fill="#0891b2" rx="2"/>
+<text x="1002" y="376" font-size="12" fill="#374151">No Module Classes</text>
+<rect x="1160" y="364" width="14" height="14" fill="#7c3aed" rx="2"/>
+<text x="1182" y="376" font-size="12" fill="#374151">No Redundancy Handling</text>
+<rect x="1340" y="364" width="14" height="14" fill="#2563eb" rx="2"/>
+<text x="1362" y="376" font-size="12" fill="#374151">No Mutual Exclusion</text>
+<rect x="1520" y="364" width="14" height="14" fill="#dc2626" rx="2"/>
+<text x="1542" y="376" font-size="12" fill="#374151">No Shared Info</text>
+</svg>

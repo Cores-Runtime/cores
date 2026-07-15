@@ -64,6 +64,8 @@ class ScenarioComparisonResult:
     safety_coverage: float
     resource_efficiency: float
     decision_time_ms: float
+    energy_headroom: float
+    energy_headroom: float = 0.0
 
 
 def _measure(name: str, fn: Callable[[], None], iterations: int) -> BenchmarkResult:
@@ -348,6 +350,12 @@ def _resource_efficiency(
     return useful_compute / available_compute
 
 
+def _energy_headroom(modules: List[Module], selected_names: List[str], battery_level: float) -> float:
+    total_energy = sum(m.profile.energy_cost for m in modules if m.name in selected_names)
+    energy_budget = 0.2 if battery_level < 0.10 else (0.5 if battery_level < 0.30 else 1.0)
+    return max(0.0, energy_budget - total_energy) / max(energy_budget, 1e-9)
+
+
 def compare_scheduler_scenarios() -> List[ScenarioComparisonResult]:
     modules = _build_scheduler_modules()
     scenarios = _build_scheduler_scenarios()
@@ -390,6 +398,7 @@ def compare_scheduler_scenarios() -> List[ScenarioComparisonResult]:
                     decision_time_ms=float(
                         context.metrics.get("decision_time_ms", 0.0)
                     ),
+                    energy_headroom=_energy_headroom(modules, selected_names, state.battery_level),
                 )
             )
 
