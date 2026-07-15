@@ -1,99 +1,60 @@
 # CORES
 
-> **A cognitive runtime for autonomous robots.**
+CORES is a deterministic cognitive runtime for embodied systems.
 
-CORES (**Context-Optimized Resilient Ensemble System**) is a research-grade runtime that manages **how autonomous robots allocate computational resources across cognitive tasks**.
+It does not implement robot intelligence directly. It manages which cognitive modules run, in what order, and under what resource constraints.
 
-Instead of implementing AI itself, CORES decides:
+## Repository Focus
 
-- **What should run**
-- **When it should run**
-- **How much compute it should receive**
-- **Which tasks should be prioritized under resource constraints**
+The current repository contains:
 
-Think of it as an **operating system for robot cognition**.
+- the runtime foundation in `src/cores/`
+- unit tests in `tests/`
+- microbenchmarks and validation tooling in `benchmarks/`
+- research design and discussion documents in `research/`
+- project rules and architecture guidance in `AI-Instructions/`
 
----
+## Current State
 
-## Why CORES?
+Phase 1 runtime infrastructure exists.
 
-Modern robotics provides excellent tools for perception, planning, and hardware control.
+Research work for adaptive scheduling is underway through:
 
-Examples include:
+- `OperatorSchedulingPolicy` as the fixed-priority baseline
+- `EnergyAwarePriorityPolicy` as the resource-aware baseline
+- `CriticalitySchedulingPolicy` as the first adaptive policy
+- Phase 2A.5 validation artifacts for comparison, sensitivity analysis, and ablation studies
+- Phase 2A.6 evaluation framework for rerunning benchmarks under a revised mission-utility definition
+- generated scenario suites and Monte Carlo evaluation for broader evidence
 
-- ROS 2
-- Nav2
-- MoveIt
-- PX4
+## Common Commands
 
-However, there is no standard runtime responsible for coordinating **cognitive execution**.
+From the `cores/` directory:
 
-As robots become more intelligent, they must continuously decide:
-
-- Should planning run now?
-- Should obstacle avoidance interrupt mapping?
-- Should memory be compressed?
-- Which reasoning task should be suspended when power is low?
-
-CORES exists to solve this problem.
-
----
-
-## Where CORES Fits
-
-```
-Mission
-    │
-    ▼
-CORES Runtime
-    │
-    ▼
-ROS 2 / Robot Middleware
-    │
-    ▼
-Robot Hardware
+```bash
+python -m pytest
+python benchmarks/run_benchmarks.py
+python benchmarks/validation.py
+python benchmarks/evaluation_framework.py
 ```
 
-CORES sits between high-level AI and robot software, scheduling cognitive modules according to mission priority, safety, available compute, and system state.
+See [docs/commands.md](docs/commands.md) for the full command reference.
 
----
+## Key Documents
 
-## Core Principles
+- [docs/README.md](docs/README.md)
+- [AI-Instructions/ARCHITECTURE.md](AI-Instructions/ARCHITECTURE.md)
+- [AI-Instructions/ADR/README.md](AI-Instructions/ADR/README.md)
+- [research/adaptive_scheduler_design.md](research/adaptive_scheduler_design.md)
+- [research/phase_2a5_validation.md](research/phase_2a5_validation.md)
+- [research/phase_2a5_discussion.md](research/phase_2a5_discussion.md)
+- [research/mission_utility_definition.md](research/mission_utility_definition.md)
+- [research/phase_2a6_evaluation_framework.md](research/phase_2a6_evaluation_framework.md)
+- [research/phase_2a6_discussion.md](research/phase_2a6_discussion.md)
+- [research/experiment_001.md](research/experiment_001.md)
 
-- Runtime, not AI
-- Modular architecture
-- Deterministic execution
-- Adaptive scheduling
-- Simulation first
-- Benchmark-driven development
+## Project Principle
 
----
+CORES is intended to be evidence-driven infrastructure.
 
-## Current Status
-
-🚧 **Phase 1 — Runtime Foundation**
-
-Current work focuses on building:
-
-- Runtime Loop
-- Scheduler
-- RobotState
-- EventBus
-- Module Interface
-- Simulation Layer
-
-No AI modules are being implemented yet.
-
----
-
-## Long-Term Vision
-
-The goal of CORES is **not** to build one intelligent robot.
-
-The goal is to build the runtime that future intelligent robots can execute on.
-
-If ROS standardized robot software,
-
-**CORES aims to standardize cognitive runtime infrastructure.**
-
----
+Scheduler claims should be supported by reproducible tests, benchmarks, and validation artifacts rather than intuition.

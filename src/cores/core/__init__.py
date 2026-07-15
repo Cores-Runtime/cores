@@ -3,10 +3,15 @@ from cores.core.runtime_context import RuntimeContext
 from cores.core.execution_layer import ExecutionLayer
 from cores.core.execution_plan import ExecutionPlan
 from cores.core.scheduler import (
+    CriticalitySchedulingPolicy,
+    CriticalityWeights,
+    DefaultCriticalityScoringStrategy,
     Scheduler,
     SchedulingPolicy,
     DefaultSchedulingPolicy,
+    GreedySelectionStrategy,
     OperatorSchedulingPolicy,
+    ResourcePenaltyWeights,
 )
 from cores.core.runtime import Runtime
 from cores.core.state_estimator import StateEstimator, SimulatedStateEstimator
@@ -20,6 +25,11 @@ __all__ = [
     "SchedulingPolicy",
     "DefaultSchedulingPolicy",
     "OperatorSchedulingPolicy",
+    "CriticalitySchedulingPolicy",
+    "CriticalityWeights",
+    "ResourcePenaltyWeights",
+    "DefaultCriticalityScoringStrategy",
+    "GreedySelectionStrategy",
     "Runtime",
     "StateEstimator",
     "SimulatedStateEstimator",

@@ -1,3 +1,3 @@
-from cores.interfaces.module import Module, ModuleResult, ModuleStatus
+from cores.interfaces.module import Module, ModuleProfile, ModuleResult, ModuleStatus
 
-__all__ = ["Module", "ModuleResult", "ModuleStatus"]
+__all__ = ["Module", "ModuleProfile", "ModuleResult", "ModuleStatus"]

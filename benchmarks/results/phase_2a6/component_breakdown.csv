@@ -1,0 +1,13 @@
+scenario,policy,completion,safety,energy,time,preservation
+Scenario A - Nominal Exploration,priority,1.0,1.0,0.16999999999999993,0.0,0.05666666666666664
+Scenario A - Nominal Exploration,criticality,0.5,1.0,0.6,0.27,0.3
+Scenario B - Low Battery,priority,1.0,1.0,0.0,0.0,0.0
+Scenario B - Low Battery,criticality,0.10526315789473685,1.0,0.050000000000000044,0.64,0.39666666666666667
+Scenario C - Obstacle Detected,priority,1.0,1.0,0.16999999999999993,0.0,0.05666666666666664
+Scenario C - Obstacle Detected,criticality,0.31578947368421056,1.0,0.6799999999999999,0.01666666666666672,0.3022222222222222
+Scenario D - Emergency Event,priority,1.0,1.0,0.16999999999999993,0.0,0.05666666666666664
+Scenario D - Emergency Event,criticality,0.5,1.0,0.6,0.27,0.3
+Scenario E - Budget Exhaustion,priority,1.0,1.0,0.16999999999999993,0.0,0.05666666666666664
+Scenario E - Budget Exhaustion,criticality,0.10526315789473685,1.0,0.91,0.15000000000000002,0.431111111111111
+Scenario G - Sensor Failure,priority,1.0,1.0,0.16999999999999993,0.0,0.05666666666666664
+Scenario G - Sensor Failure,criticality,0.2894736842105263,1.0,0.79,0.0,0.3022222222222222

@@ -1,18 +1,23 @@
 from cores.core import (
+    CriticalitySchedulingPolicy,
+    CriticalityWeights,
+    DefaultCriticalityScoringStrategy,
     RobotState,
     RuntimeContext,
     ExecutionLayer,
     ExecutionPlan,
+    GreedySelectionStrategy,
     Scheduler,
     SchedulingPolicy,
     DefaultSchedulingPolicy,
     OperatorSchedulingPolicy,
+    ResourcePenaltyWeights,
     Runtime,
     StateEstimator,
     SimulatedStateEstimator,
 )
 from cores.events import EventType, Event, EventBus
-from cores.interfaces import Module, ModuleResult, ModuleStatus
+from cores.interfaces import Module, ModuleProfile, ModuleResult, ModuleStatus
 
 __version__ = "0.1.0"
 
@@ -25,6 +30,11 @@ __all__ = [
     "SchedulingPolicy",
     "DefaultSchedulingPolicy",
     "OperatorSchedulingPolicy",
+    "CriticalitySchedulingPolicy",
+    "CriticalityWeights",
+    "ResourcePenaltyWeights",
+    "DefaultCriticalityScoringStrategy",
+    "GreedySelectionStrategy",
     "Runtime",
     "StateEstimator",
     "SimulatedStateEstimator",
@@ -32,6 +42,7 @@ __all__ = [
     "Event",
     "EventBus",
     "Module",
+    "ModuleProfile",
     "ModuleResult",
     "ModuleStatus",
 ]

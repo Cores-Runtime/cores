@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="490.0" y="28" font-size="20" text-anchor="middle" fill="#111827">Phase 2A.6 Utility Score by Scenario</text>
+<text x="20" y="210.0" font-size="14" transform="rotate(-90 20 210.0)" fill="#374151">Utility Score (%)</text>
+<line x1="80" y1="330.0" x2="956" y2="330.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="334.0" font-size="12" text-anchor="end" fill="#6b7280">0</text>
+<line x1="80" y1="275.2" x2="956" y2="275.2" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="279.2" font-size="12" text-anchor="end" fill="#6b7280">20</text>
+<line x1="80" y1="220.4" x2="956" y2="220.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="224.4" font-size="12" text-anchor="end" fill="#6b7280">40</text>
+<line x1="80" y1="165.6" x2="956" y2="165.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="169.6" font-size="12" text-anchor="end" fill="#6b7280">60</text>
+<line x1="80" y1="110.8" x2="956" y2="110.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="114.8" font-size="12" text-anchor="end" fill="#6b7280">80</text>
+<line x1="80" y1="56.0" x2="956" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="60.0" font-size="12" text-anchor="end" fill="#6b7280">100</text>
+<text x="153.0" y="390" font-size="12" text-anchor="middle" fill="#374151">A Nominal Exploration</text>
+<rect x="101.9" y="170.0" width="45.1" height="160.0" fill="#2563eb" rx="2"/>
+<text x="124.5" y="164.0" font-size="11" text-anchor="middle" fill="#111827">58.4</text>
+<rect x="153.0" y="179.2" width="45.1" height="150.8" fill="#dc2626" rx="2"/>
+<text x="175.6" y="173.2" font-size="11" text-anchor="middle" fill="#111827">55.0</text>
+<text x="299.0" y="390" font-size="12" text-anchor="middle" fill="#374151">B Low Battery</text>
+<rect x="247.9" y="179.3" width="45.1" height="150.7" fill="#2563eb" rx="2"/>
+<text x="270.4" y="173.3" font-size="11" text-anchor="middle" fill="#111827">55.0</text>
+<rect x="299.0" y="220.4" width="45.1" height="109.6" fill="#dc2626" rx="2"/>
+<text x="321.6" y="214.4" font-size="11" text-anchor="middle" fill="#111827">40.0</text>
+<text x="445.0" y="390" font-size="12" text-anchor="middle" fill="#374151">C Obstacle Detected</text>
+<rect x="393.9" y="170.0" width="45.1" height="160.0" fill="#2563eb" rx="2"/>
+<text x="416.4" y="164.0" font-size="11" text-anchor="middle" fill="#111827">58.4</text>
+<rect x="445.0" y="203.9" width="45.1" height="126.1" fill="#dc2626" rx="2"/>
+<text x="467.6" y="197.9" font-size="11" text-anchor="middle" fill="#111827">46.0</text>
+<text x="591.0" y="390" font-size="12" text-anchor="middle" fill="#374151">D Emergency Event</text>
+<rect x="539.9" y="170.0" width="45.1" height="160.0" fill="#2563eb" rx="2"/>
+<text x="562.4" y="164.0" font-size="11" text-anchor="middle" fill="#111827">58.4</text>
+<rect x="591.0" y="179.2" width="45.1" height="150.8" fill="#dc2626" rx="2"/>
+<text x="613.5" y="173.2" font-size="11" text-anchor="middle" fill="#111827">55.0</text>
+<text x="737.0" y="390" font-size="12" text-anchor="middle" fill="#374151">E Budget Exhaustion</text>
+<rect x="685.9" y="170.0" width="45.1" height="160.0" fill="#2563eb" rx="2"/>
+<text x="708.4" y="164.0" font-size="11" text-anchor="middle" fill="#111827">58.4</text>
+<rect x="737.0" y="203.8" width="45.1" height="126.2" fill="#dc2626" rx="2"/>
+<text x="759.5" y="197.8" font-size="11" text-anchor="middle" fill="#111827">46.1</text>
+<text x="883.0" y="390" font-size="12" text-anchor="middle" fill="#374151">G Sensor Failure</text>
+<rect x="831.9" y="170.0" width="45.1" height="160.0" fill="#2563eb" rx="2"/>
+<text x="854.4" y="164.0" font-size="11" text-anchor="middle" fill="#111827">58.4</text>
+<rect x="883.0" y="202.5" width="45.1" height="127.5" fill="#dc2626" rx="2"/>
+<text x="905.5" y="196.5" font-size="11" text-anchor="middle" fill="#111827">46.5</text>
+<rect x="80" y="364" width="14" height="14" fill="#2563eb" rx="2"/>
+<text x="102" y="376" font-size="12" fill="#374151">Priority</text>
+<rect x="260" y="364" width="14" height="14" fill="#dc2626" rx="2"/>
+<text x="282" y="376" font-size="12" fill="#374151">Criticality</text>
+</svg>

@@ -1,165 +1,203 @@
-# CORES Runtime — Command Reference
+# CORES Command Reference
 
-All commands are run from the `cores/` project root (where `pyproject.toml` lives).
+All commands are run from the `cores/` project root, where `pyproject.toml` lives.
 
----
+## Environment Setup
 
-## Installation
+### Install the package in editable mode
 
-### Install runtime package (editable)
 ```bash
 pip install -e .
 ```
-Installs `cores-runtime` as an editable package from `src/`.
-Any changes to source files are reflected immediately — no reinstall needed.
 
-### Install with dev dependencies
+Installs `cores-runtime` from `src/` and keeps local edits live without reinstalling.
+
+### Install with development dependencies
+
 ```bash
 pip install -e ".[dev]"
 ```
-Installs the runtime plus all development tools: `pytest`, `ruff`, `mypy`.
-Run this once after cloning the repo.
 
----
+Installs the runtime plus `pytest`, `ruff`, and `mypy`.
 
 ## Testing
 
-### Run all tests
+### Run the full test suite
+
 ```bash
 python -m pytest
 ```
-Discovers and runs all test files in the `tests/` directory.
-Configured via `pyproject.toml` → `[tool.pytest.ini_options]`.
 
-### Run all tests with verbose output
+Discovers and runs all tests under `tests/`.
+
+### Run tests with verbose output
+
 ```bash
 python -m pytest -v
 ```
-Prints each individual test name and its pass/fail status.
-Use this to identify exactly which test failed.
 
-### Run a specific test file
-```bash
-python -m pytest tests/test_event_bus.py
-```
-Runs only the tests in the specified file.
+Shows each test name and status.
 
-### Run a specific test by name
-```bash
-python -m pytest -k "test_event_bus_routing"
-```
-Runs only tests whose name matches the given string.
+### Stop on the first failure
 
-### Run tests and show local variable values on failure
-```bash
-python -m pytest -l
-```
-Prints local variable state at the point of failure — useful for debugging.
-
-### Run tests and stop at first failure
 ```bash
 python -m pytest -x
 ```
-Stops the entire test run immediately on the first failing test.
 
----
+Useful when iterating on a single failing change.
+
+### Show locals for failing tests
+
+```bash
+python -m pytest -l
+```
+
+Prints local variable state at the point of failure.
+
+### Run one test file
+
+```bash
+python -m pytest tests/test_criticality_policy.py
+```
+
+Runs only the named test module.
+
+### Run tests by keyword
+
+```bash
+python -m pytest -k "sensor_failure"
+```
+
+Filters the test run by substring expression.
 
 ## Linting
 
-### Check code style and quality
+### Lint the source tree
+
 ```bash
 python -m ruff check src tests
 ```
-Runs the Ruff linter over `src/` and `tests/`. Reports any rule violations.
-Rules are configured via `pyproject.toml` → `[tool.ruff]`.
 
-### Auto-fix fixable lint violations
+Runs Ruff checks across runtime and test code.
+
+### Auto-fix Ruff issues where safe
+
 ```bash
 python -m ruff check src tests --fix
 ```
-Automatically corrects violations that Ruff can safely fix (e.g., unused imports).
-Always review the diff after running this.
 
-### Check a single file
-```bash
-python -m ruff check src/cores/core/runtime.py
-```
-Lints only the specified file. Useful for quick pre-commit checks.
-
----
+Applies fixable lint corrections.
 
 ## Type Checking
 
-### Run static type checker
+### Run mypy on the runtime package
+
 ```bash
 python -m mypy src
 ```
-Runs mypy over the entire `src/` directory.
-Catches type annotation errors without executing the code.
 
-### Check a single file
+Performs static type checking on the runtime source.
+
+## Benchmarks
+
+### Run microbenchmarks
+
 ```bash
-python -m mypy src/cores/core/runtime.py
+python benchmarks/run_benchmarks.py
 ```
-Runs mypy on a specific file.
 
----
+Runs latency-oriented benchmarks for the EventBus, scheduler, execution layer, runtime cycle, and scenario comparison summary.
 
-## Full Quality Check (run before every commit)
+### Generate Phase 2A.5 validation artifacts
+
+```bash
+python benchmarks/validation.py
+```
+
+Generates policy-comparison CSVs, sensitivity-analysis CSVs, ablation-study CSVs, SVG charts, and a Markdown validation report under `benchmarks/results/phase_2a5/`.
+
+### Generate Phase 2A.6 evaluation artifacts
+
+```bash
+python benchmarks/evaluation_framework.py
+```
+
+Re-runs the benchmark scenarios under the revised multi-objective mission-utility definition, compares against `EnergyAwarePriorityPolicy`, generates a 100-scenario deterministic suite, runs a 1000-trial Monte Carlo study, and writes comparison CSVs, summary CSVs, SVG charts, and a Markdown evaluation report under `benchmarks/results/phase_2a6/`.
+
+### Review Experiment Report v1
+
+```bash
+Get-Content research/experiment_001.md
+```
+
+Prints the first experiment report that summarizes the current hypothesis, method, results, discussion, and conclusion.
+
+## Quality Gate
+
+### Run the standard pre-commit check
 
 ```bash
 python -m ruff check src tests && python -m pytest
 ```
-Lints the entire codebase, then runs the full test suite.
-Both must pass before any commit is made.
 
----
+Runs linting and then the full test suite.
 
-## Git Workflow
+### Run validation after tests
 
-### Stage all changes
 ```bash
-git add .
+python -m pytest && python benchmarks/validation.py
 ```
-Stages every modified and new file in the working directory.
 
-### Commit staged changes
-```bash
-git commit -m "Short descriptive message"
-```
-Creates a commit. Message should be imperative, specific, and under 72 characters.
-
-### Push to remote
-```bash
-git push
-```
-Pushes the current branch to `origin`.
-
-### Check working tree status
-```bash
-git status
-```
-Shows which files are staged, modified, or untracked.
-
-### Untrack a file from git (without deleting it locally)
-```bash
-git rm -r --cached <path>
-```
-Removes a file or directory from git's index while keeping it on disk.
-Use this when adding a previously committed file/folder to `.gitignore`.
-
----
+Confirms correctness first, then regenerates research artifacts.
 
 ## Package Inspection
 
-### List installed package details
-```bash
-pip show cores-runtime
-```
-Shows version, location, and dependencies of the installed package.
+### Verify the package imports
 
-### Verify the package is importable
 ```bash
 python -c "import cores; print(cores.__version__)"
 ```
-Quick sanity check that the package installs and imports correctly.
+
+Quick import and version sanity check.
+
+### Show installed package metadata
+
+```bash
+pip show cores-runtime
+```
+
+Displays the installed package version, location, and dependencies.
+
+## Git
+
+### Show working tree status
+
+```bash
+git status
+```
+
+Shows staged, modified, and untracked files.
+
+### Stage all local changes
+
+```bash
+git add .
+```
+
+Stages all modified and new files in the repo.
+
+### Commit staged changes
+
+```bash
+git commit -m "Short descriptive message"
+```
+
+Creates a commit from the current index.
+
+### Push the current branch
+
+```bash
+git push
+```
+
+Pushes the current branch to its configured remote.
