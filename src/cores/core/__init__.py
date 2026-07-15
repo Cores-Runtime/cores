@@ -13,6 +13,26 @@ from cores.core.scheduler import (
     OperatorSchedulingPolicy,
     ResourcePenaltyWeights,
 )
+from cores.core.knapsack_scheduler import (
+    RiskAwareKnapsackSchedulingPolicy,
+    KnapsackSelectionStrategy,
+    ExactKnapsackSolver,
+    RiskAwareCriticalityScoringStrategy,
+)
+from cores.core.module_graph import (
+    ModuleGraph,
+    ModuleRelation,
+    ModuleRelationType,
+    ModuleClassifier,
+    DefaultModuleClassifier,
+    ModuleClass,
+)
+from cores.core.lexicographic_scheduler import (
+    LexicographicRiskAwareSchedulingPolicy,
+    LexicographicSelectionStrategy,
+    LexicographicKnapsackSolver,
+    LexicographicValue,
+)
 from cores.core.runtime import Runtime
 from cores.core.state_estimator import StateEstimator, SimulatedStateEstimator
 
@@ -26,6 +46,8 @@ __all__ = [
     "DefaultSchedulingPolicy",
     "OperatorSchedulingPolicy",
     "CriticalitySchedulingPolicy",
+    "RiskAwareKnapsackSchedulingPolicy",
+    "LexicographicRiskAwareSchedulingPolicy",
     "CriticalityWeights",
     "ResourcePenaltyWeights",
     "DefaultCriticalityScoringStrategy",
@@ -33,4 +55,16 @@ __all__ = [
     "Runtime",
     "StateEstimator",
     "SimulatedStateEstimator",
+    "KnapsackSelectionStrategy",
+    "ExactKnapsackSolver",
+    "RiskAwareCriticalityScoringStrategy",
+    "ModuleGraph",
+    "ModuleRelation",
+    "ModuleRelationType",
+    "ModuleClassifier",
+    "DefaultModuleClassifier",
+    "ModuleClass",
+    "LexicographicSelectionStrategy",
+    "LexicographicKnapsackSolver",
+    "LexicographicValue",
 ]

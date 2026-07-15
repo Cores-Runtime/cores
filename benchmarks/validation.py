@@ -22,7 +22,9 @@ from cores.core import (
     CriticalitySchedulingPolicy,
     CriticalityWeights,
     DefaultCriticalityScoringStrategy,
+    LexicographicRiskAwareSchedulingPolicy,
     OperatorSchedulingPolicy,
+    RiskAwareKnapsackSchedulingPolicy,
     RuntimeContext,
 )
 from cores.interfaces import Module
@@ -159,6 +161,12 @@ def compare_policies() -> list[PolicyScenarioMetrics]:
         results.append(evaluate_policy("priority", OperatorSchedulingPolicy(), scenario))
         results.append(
             evaluate_policy("criticality", CriticalitySchedulingPolicy(), scenario)
+        )
+        results.append(
+            evaluate_policy("risk_aware_knapsack", RiskAwareKnapsackSchedulingPolicy(), scenario)
+        )
+        results.append(
+            evaluate_policy("lexicographic", LexicographicRiskAwareSchedulingPolicy(), scenario)
         )
     return results
 
@@ -478,7 +486,7 @@ def generate_validation_artifacts(output_dir: Path = DEFAULT_OUTPUT_DIR) -> Vali
     scenario_order = [scenario.name for scenario in bench._build_scheduler_scenarios()]
     comparison_by_policy = {
         policy: [row for row in comparison if row.policy == policy]
-        for policy in ("priority", "criticality")
+        for policy in ("priority", "criticality", "risk_aware_knapsack", "lexicographic")
     }
 
     write_grouped_bar_chart(
@@ -486,10 +494,10 @@ def generate_validation_artifacts(output_dir: Path = DEFAULT_OUTPUT_DIR) -> Vali
         title="Mission Utility by Scenario",
         categories=[_scenario_label(name) for name in scenario_order],
         series={
-            policy.title(): [
+            policy.replace("_", " ").title(): [
                 record.mission_utility * 100.0 for record in comparison_by_policy[policy]
             ]
-            for policy in ("priority", "criticality")
+            for policy in ("priority", "criticality", "risk_aware_knapsack", "lexicographic")
         },
         y_label="Mission Utility (%)",
         percent_scale=True,
@@ -499,10 +507,10 @@ def generate_validation_artifacts(output_dir: Path = DEFAULT_OUTPUT_DIR) -> Vali
         title="Energy Headroom by Scenario",
         categories=[_scenario_label(name) for name in scenario_order],
         series={
-            policy.title(): [
+            policy.replace("_", " ").title(): [
                 record.energy_headroom * 100.0 for record in comparison_by_policy[policy]
             ]
-            for policy in ("priority", "criticality")
+            for policy in ("priority", "criticality", "risk_aware_knapsack", "lexicographic")
         },
         y_label="Energy Headroom (%)",
         percent_scale=True,
@@ -512,10 +520,10 @@ def generate_validation_artifacts(output_dir: Path = DEFAULT_OUTPUT_DIR) -> Vali
         title="Scheduler Decision Time by Scenario",
         categories=[_scenario_label(name) for name in scenario_order],
         series={
-            policy.title(): [
+            policy.replace("_", " ").title(): [
                 record.decision_time_ms for record in comparison_by_policy[policy]
             ]
-            for policy in ("priority", "criticality")
+            for policy in ("priority", "criticality", "risk_aware_knapsack", "lexicographic")
         },
         y_label="Decision Time (ms)",
     )

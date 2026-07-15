@@ -1,0 +1,19 @@
+scenario,variant,mission_utility,energy_headroom,decision_time_ms
+Scenario A - Nominal Exploration,full,0.5,0.6,0.1735000405460596
+Scenario B - Low Battery,full,0.10526315789473685,0.050000000000000044,0.12089998926967382
+Scenario C - Obstacle Detected,full,0.31578947368421056,0.6799999999999999,0.12600002810359
+Scenario D - Emergency Event,full,0.5,0.6,0.21609989926218987
+Scenario E - Budget Exhaustion,full,0.10526315789473685,0.91,0.166199984960258
+Scenario G - Sensor Failure,full,0.2894736842105263,0.79,0.2658999292179942
+Scenario A - Nominal Exploration,no_urgency,0.3684210526315789,0.56,0.18069997895509005
+Scenario B - Low Battery,no_urgency,0.10526315789473685,0.050000000000000044,0.15819992404431105
+Scenario C - Obstacle Detected,no_urgency,0.2631578947368421,0.62,0.16459997277706861
+Scenario D - Emergency Event,no_urgency,0.3684210526315789,0.56,0.14979997649788857
+Scenario E - Budget Exhaustion,no_urgency,0.10526315789473685,0.91,0.14020001981407404
+Scenario G - Sensor Failure,no_urgency,0.2894736842105263,0.79,0.1810999820008874
+Scenario A - Nominal Exploration,no_resource_penalty,0.5,0.6,0.1517999917268753
+Scenario B - Low Battery,no_resource_penalty,0.10526315789473685,0.050000000000000044,0.15570002142339945
+Scenario C - Obstacle Detected,no_resource_penalty,0.31578947368421056,0.6799999999999999,0.18640002235770226
+Scenario D - Emergency Event,no_resource_penalty,0.5,0.6,0.11110003106296062
+Scenario E - Budget Exhaustion,no_resource_penalty,0.0,0.89,0.14650006778538227
+Scenario G - Sensor Failure,no_resource_penalty,0.2894736842105263,0.79,0.15849992632865906

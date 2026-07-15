@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="490.0" y="28" font-size="20" text-anchor="middle" fill="#111827">Safety Weight Sensitivity vs Mission Utility</text>
+<text x="490.0" y="404" font-size="14" text-anchor="middle" fill="#374151">Safety Weight (wS)</text>
+<text x="20" y="210.0" font-size="14" transform="rotate(-90 20 210.0)" fill="#374151">Mission Utility (%)</text>
+<line x1="80" y1="330.0" x2="956" y2="330.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="334.0" font-size="12" text-anchor="end" fill="#6b7280">0</text>
+<line x1="80" y1="275.2" x2="956" y2="275.2" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="279.2" font-size="12" text-anchor="end" fill="#6b7280">20</text>
+<line x1="80" y1="220.4" x2="956" y2="220.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="224.4" font-size="12" text-anchor="end" fill="#6b7280">40</text>
+<line x1="80" y1="165.6" x2="956" y2="165.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="169.6" font-size="12" text-anchor="end" fill="#6b7280">60</text>
+<line x1="80" y1="110.8" x2="956" y2="110.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="114.8" font-size="12" text-anchor="end" fill="#6b7280">80</text>
+<line x1="80" y1="56.0" x2="956" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="60.0" font-size="12" text-anchor="end" fill="#6b7280">100</text>
+<line x1="80.0" y1="56" x2="80.0" y2="330" stroke="#f3f4f6" stroke-width="1"/>
+<text x="80.0" y="384" font-size="12" text-anchor="middle" fill="#6b7280">0.20</text>
+<line x1="408.5" y1="56" x2="408.5" y2="330" stroke="#f3f4f6" stroke-width="1"/>
+<text x="408.5" y="384" font-size="12" text-anchor="middle" fill="#6b7280">0.35</text>
+<line x1="518.0" y1="56" x2="518.0" y2="330" stroke="#f3f4f6" stroke-width="1"/>
+<text x="518.0" y="384" font-size="12" text-anchor="middle" fill="#6b7280">0.40</text>
+<line x1="956.0" y1="56" x2="956.0" y2="330" stroke="#f3f4f6" stroke-width="1"/>
+<text x="956.0" y="384" font-size="12" text-anchor="middle" fill="#6b7280">0.60</text>
+<polyline fill="none" stroke="#2563eb" stroke-width="3" points="80.0,193.0 408.5,193.0 518.0,193.0 956.0,193.0"/>
+<circle cx="80.0" cy="193.0" r="4" fill="#2563eb"/>
+<circle cx="408.5" cy="193.0" r="4" fill="#2563eb"/>
+<circle cx="518.0" cy="193.0" r="4" fill="#2563eb"/>
+<circle cx="956.0" cy="193.0" r="4" fill="#2563eb"/>
+<polyline fill="none" stroke="#dc2626" stroke-width="3" points="80.0,301.2 408.5,301.2 518.0,301.2 956.0,301.2"/>
+<circle cx="80.0" cy="301.2" r="4" fill="#dc2626"/>
+<circle cx="408.5" cy="301.2" r="4" fill="#dc2626"/>
+<circle cx="518.0" cy="301.2" r="4" fill="#dc2626"/>
+<circle cx="956.0" cy="301.2" r="4" fill="#dc2626"/>
+<polyline fill="none" stroke="#16a34a" stroke-width="3" points="80.0,221.8 408.5,250.7 518.0,250.7 956.0,301.2"/>
+<circle cx="80.0" cy="221.8" r="4" fill="#16a34a"/>
+<circle cx="408.5" cy="250.7" r="4" fill="#16a34a"/>
+<circle cx="518.0" cy="250.7" r="4" fill="#16a34a"/>
+<circle cx="956.0" cy="301.2" r="4" fill="#16a34a"/>
+<polyline fill="none" stroke="#9333ea" stroke-width="3" points="80.0,238.7 408.5,248.3 518.0,248.3 956.0,265.1"/>
+<circle cx="80.0" cy="238.7" r="4" fill="#9333ea"/>
+<circle cx="408.5" cy="248.3" r="4" fill="#9333ea"/>
+<circle cx="518.0" cy="248.3" r="4" fill="#9333ea"/>
+<circle cx="956.0" cy="265.1" r="4" fill="#9333ea"/>
+<line x1="80" y1="367" x2="98" y2="367" stroke="#2563eb" stroke-width="3"/>
+<text x="104" y="371" font-size="12" fill="#374151">A Nominal Exploration</text>
+<line x1="210" y1="367" x2="228" y2="367" stroke="#dc2626" stroke-width="3"/>
+<text x="234" y="371" font-size="12" fill="#374151">B Low Battery</text>
+<line x1="340" y1="367" x2="358" y2="367" stroke="#16a34a" stroke-width="3"/>
+<text x="364" y="371" font-size="12" fill="#374151">G Sensor Failure</text>
+<line x1="470" y1="367" x2="488" y2="367" stroke="#9333ea" stroke-width="3"/>
+<text x="494" y="371" font-size="12" fill="#374151">Average</text>
+</svg>

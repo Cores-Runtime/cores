@@ -17,7 +17,9 @@ from cores.core import (
     DefaultSchedulingPolicy,
     ExecutionLayer,
     ExecutionPlan,
+    LexicographicRiskAwareSchedulingPolicy,
     OperatorSchedulingPolicy,
+    RiskAwareKnapsackSchedulingPolicy,
     RobotState,
     Runtime,
     RuntimeContext,
@@ -355,6 +357,8 @@ def compare_scheduler_scenarios() -> List[ScenarioComparisonResult]:
         for policy_name, policy in (
             ("priority", OperatorSchedulingPolicy()),
             ("criticality", CriticalitySchedulingPolicy()),
+            ("risk_aware_knapsack", RiskAwareKnapsackSchedulingPolicy()),
+            ("lexicographic", LexicographicRiskAwareSchedulingPolicy()),
         ):
             context = scenario.context.model_copy(deep=True)
             state = scenario.state.model_copy(deep=True)
@@ -452,6 +456,32 @@ def benchmark_criticality_scheduler_latency() -> BenchmarkResult:
     return _measure("Criticality Scheduler", run, BENCHMARK_ITERATIONS)
 
 
+def benchmark_knapsack_scheduler_latency() -> BenchmarkResult:
+    scheduler = Scheduler(RiskAwareKnapsackSchedulingPolicy())
+    modules = _build_scheduler_modules()
+    state = RobotState(battery_level=0.6, mission_status="explore")
+    context = RuntimeContext(compute_budget=0.6, time_budget_ms=40.0)
+    events = [Event(source="gps", event_type=EventType.MODULE_FAILED)]
+
+    def run() -> None:
+        scheduler.schedule(modules, state, context, events)
+
+    return _measure("Risk-Aware Knapsack Scheduler", run, BENCHMARK_ITERATIONS)
+
+
+def benchmark_lexicographic_scheduler_latency() -> BenchmarkResult:
+    scheduler = Scheduler(LexicographicRiskAwareSchedulingPolicy())
+    modules = _build_scheduler_modules()
+    state = RobotState(battery_level=0.6, mission_status="explore")
+    context = RuntimeContext(compute_budget=0.6, time_budget_ms=40.0)
+    events = [Event(source="gps", event_type=EventType.MODULE_FAILED)]
+
+    def run() -> None:
+        scheduler.schedule(modules, state, context, events)
+
+    return _measure("Lexicographic Risk-Aware Scheduler", run, BENCHMARK_ITERATIONS)
+
+
 def _print_result(result: BenchmarkResult) -> None:
     print(f"\n{result.name}")
     print(f"  iterations : {result.iterations}")
@@ -472,6 +502,8 @@ def main() -> None:
         benchmark_event_bus_latency(),
         benchmark_scheduler_latency(),
         benchmark_criticality_scheduler_latency(),
+        benchmark_knapsack_scheduler_latency(),
+        benchmark_lexicographic_scheduler_latency(),
         benchmark_execution_layer_latency(),
         benchmark_runtime_cycle_latency(),
     ]

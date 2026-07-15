@@ -41,10 +41,12 @@ def test_scheduler_scenario_comparison_includes_sensor_failure_case() -> None:
         result for result in results if result.scenario == "Scenario G - Sensor Failure"
     ]
 
-    assert len(sensor_failure_results) == 2
+    assert len(sensor_failure_results) == 4
     assert {result.policy for result in sensor_failure_results} == {
         "priority",
         "criticality",
+        "risk_aware_knapsack",
+        "lexicographic",
     }
     criticality_result = next(
         result for result in sensor_failure_results if result.policy == "criticality"

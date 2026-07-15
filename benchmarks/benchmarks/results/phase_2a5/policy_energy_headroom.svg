@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="490.0" y="28" font-size="20" text-anchor="middle" fill="#111827">Energy Headroom by Scenario</text>
+<text x="20" y="210.0" font-size="14" transform="rotate(-90 20 210.0)" fill="#374151">Energy Headroom (%)</text>
+<line x1="80" y1="330.0" x2="956" y2="330.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="334.0" font-size="12" text-anchor="end" fill="#6b7280">0</text>
+<line x1="80" y1="275.2" x2="956" y2="275.2" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="279.2" font-size="12" text-anchor="end" fill="#6b7280">20</text>
+<line x1="80" y1="220.4" x2="956" y2="220.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="224.4" font-size="12" text-anchor="end" fill="#6b7280">40</text>
+<line x1="80" y1="165.6" x2="956" y2="165.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="169.6" font-size="12" text-anchor="end" fill="#6b7280">60</text>
+<line x1="80" y1="110.8" x2="956" y2="110.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="114.8" font-size="12" text-anchor="end" fill="#6b7280">80</text>
+<line x1="80" y1="56.0" x2="956" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="70" y="60.0" font-size="12" text-anchor="end" fill="#6b7280">100</text>
+<text x="153.0" y="390" font-size="12" text-anchor="middle" fill="#374151">A Nominal Exploration</text>
+<rect x="101.9" y="283.4" width="19.5" height="46.6" fill="#2563eb" rx="2"/>
+<text x="111.7" y="277.4" font-size="11" text-anchor="middle" fill="#111827">17.0</text>
+<rect x="127.5" y="165.6" width="19.5" height="164.4" fill="#dc2626" rx="2"/>
+<text x="137.2" y="159.6" font-size="11" text-anchor="middle" fill="#111827">60.0</text>
+<rect x="153.0" y="165.6" width="19.5" height="164.4" fill="#16a34a" rx="2"/>
+<text x="162.8" y="159.6" font-size="11" text-anchor="middle" fill="#111827">60.0</text>
+<rect x="178.6" y="168.3" width="19.5" height="161.7" fill="#9333ea" rx="2"/>
+<text x="188.3" y="162.3" font-size="11" text-anchor="middle" fill="#111827">59.0</text>
+<text x="299.0" y="390" font-size="12" text-anchor="middle" fill="#374151">B Low Battery</text>
+<rect x="247.9" y="330.0" width="19.5" height="0.0" fill="#2563eb" rx="2"/>
+<text x="257.7" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0</text>
+<rect x="273.4" y="316.3" width="19.5" height="13.7" fill="#dc2626" rx="2"/>
+<text x="283.2" y="310.3" font-size="11" text-anchor="middle" fill="#111827">5.0</text>
+<rect x="299.0" y="316.3" width="19.5" height="13.7" fill="#16a34a" rx="2"/>
+<text x="308.8" y="310.3" font-size="11" text-anchor="middle" fill="#111827">5.0</text>
+<rect x="324.6" y="330.0" width="19.5" height="0.0" fill="#9333ea" rx="2"/>
+<text x="334.3" y="324.0" font-size="11" text-anchor="middle" fill="#111827">0.0</text>
+<text x="445.0" y="390" font-size="12" text-anchor="middle" fill="#374151">C Obstacle Detected</text>
+<rect x="393.9" y="283.4" width="19.5" height="46.6" fill="#2563eb" rx="2"/>
+<text x="403.7" y="277.4" font-size="11" text-anchor="middle" fill="#111827">17.0</text>
+<rect x="419.4" y="143.7" width="19.5" height="186.3" fill="#dc2626" rx="2"/>
+<text x="429.2" y="137.7" font-size="11" text-anchor="middle" fill="#111827">68.0</text>
+<rect x="445.0" y="143.7" width="19.5" height="186.3" fill="#16a34a" rx="2"/>
+<text x="454.8" y="137.7" font-size="11" text-anchor="middle" fill="#111827">68.0</text>
+<rect x="470.5" y="140.9" width="19.5" height="189.1" fill="#9333ea" rx="2"/>
+<text x="480.3" y="134.9" font-size="11" text-anchor="middle" fill="#111827">69.0</text>
+<text x="591.0" y="390" font-size="12" text-anchor="middle" fill="#374151">D Emergency Event</text>
+<rect x="539.9" y="283.4" width="19.5" height="46.6" fill="#2563eb" rx="2"/>
+<text x="549.7" y="277.4" font-size="11" text-anchor="middle" fill="#111827">17.0</text>
+<rect x="565.4" y="165.6" width="19.5" height="164.4" fill="#dc2626" rx="2"/>
+<text x="575.2" y="159.6" font-size="11" text-anchor="middle" fill="#111827">60.0</text>
+<rect x="591.0" y="165.6" width="19.5" height="164.4" fill="#16a34a" rx="2"/>
+<text x="600.8" y="159.6" font-size="11" text-anchor="middle" fill="#111827">60.0</text>
+<rect x="616.5" y="151.9" width="19.5" height="178.1" fill="#9333ea" rx="2"/>
+<text x="626.3" y="145.9" font-size="11" text-anchor="middle" fill="#111827">65.0</text>
+<text x="737.0" y="390" font-size="12" text-anchor="middle" fill="#374151">E Budget Exhaustion</text>
+<rect x="685.9" y="283.4" width="19.5" height="46.6" fill="#2563eb" rx="2"/>
+<text x="695.7" y="277.4" font-size="11" text-anchor="middle" fill="#111827">17.0</text>
+<rect x="711.4" y="80.7" width="19.5" height="249.3" fill="#dc2626" rx="2"/>
+<text x="721.2" y="74.7" font-size="11" text-anchor="middle" fill="#111827">91.0</text>
+<rect x="737.0" y="91.6" width="19.5" height="238.4" fill="#16a34a" rx="2"/>
+<text x="746.8" y="85.6" font-size="11" text-anchor="middle" fill="#111827">87.0</text>
+<rect x="762.5" y="119.0" width="19.5" height="211.0" fill="#9333ea" rx="2"/>
+<text x="772.3" y="113.0" font-size="11" text-anchor="middle" fill="#111827">77.0</text>
+<text x="883.0" y="390" font-size="12" text-anchor="middle" fill="#374151">G Sensor Failure</text>
+<rect x="831.9" y="283.4" width="19.5" height="46.6" fill="#2563eb" rx="2"/>
+<text x="841.7" y="277.4" font-size="11" text-anchor="middle" fill="#111827">17.0</text>
+<rect x="857.4" y="113.5" width="19.5" height="216.5" fill="#dc2626" rx="2"/>
+<text x="867.2" y="107.5" font-size="11" text-anchor="middle" fill="#111827">79.0</text>
+<rect x="883.0" y="108.1" width="19.5" height="221.9" fill="#16a34a" rx="2"/>
+<text x="892.8" y="102.1" font-size="11" text-anchor="middle" fill="#111827">81.0</text>
+<rect x="908.5" y="130.0" width="19.5" height="200.0" fill="#9333ea" rx="2"/>
+<text x="918.3" y="124.0" font-size="11" text-anchor="middle" fill="#111827">73.0</text>
+<rect x="80" y="364" width="14" height="14" fill="#2563eb" rx="2"/>
+<text x="102" y="376" font-size="12" fill="#374151">Priority</text>
+<rect x="260" y="364" width="14" height="14" fill="#dc2626" rx="2"/>
+<text x="282" y="376" font-size="12" fill="#374151">Criticality</text>
+<rect x="440" y="364" width="14" height="14" fill="#16a34a" rx="2"/>
+<text x="462" y="376" font-size="12" fill="#374151">Risk Aware Knapsack</text>
+<rect x="620" y="364" width="14" height="14" fill="#9333ea" rx="2"/>
+<text x="642" y="376" font-size="12" fill="#374151">Lexicographic</text>
+</svg>
