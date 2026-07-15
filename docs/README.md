@@ -7,8 +7,10 @@ This directory contains the developer documentation for the CORES Runtime.
 | Document | Description |
 |---|---|
 | [architecture.md](architecture.md) | System component map, data flow, and dependency rules |
+| [commands.md](commands.md) | All development commands — install, test, lint, type-check, git |
 | [components.md](components.md) | Detailed API reference for each runtime component |
 | [getting-started.md](getting-started.md) | Development environment setup and first run guide |
+
 
 ## Architecture Decision Records
 
