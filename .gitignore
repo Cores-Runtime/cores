@@ -42,3 +42,29 @@ MANIFEST
 venv/
 ENV/
 env/
+
+# Homepage (Next.js)
+homepage/node_modules/
+homepage/.next/
+homepage/out/
+homepage/build
+homepage/*.tsbuildinfo
+homepage/next-env.d.ts
+homepage/.vercel/
+homepage/solve-error.md
+
+# Vercel Deployment
+.vercel
+
+# Logs and Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System & IDE files
+.DS_Store
+.vscode/
+.idea/
+
