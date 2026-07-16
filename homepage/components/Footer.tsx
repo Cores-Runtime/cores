@@ -39,7 +39,7 @@ export function Footer() {
             CORES Runtime — deterministic, modular, dependency-free.
           </p>
           <div className="flex items-center gap-6 text-sm text-paper/40">
-            <Link href="#" className="hover:text-paper transition-colors">GitHub</Link>
+            <Link href="https://github.com/Cores-Runtime/cores" className="hover:text-paper transition-colors" target="_blank" rel="noopener noreferrer">GitHub</Link>
             <Link href="#" className="hover:text-paper transition-colors">Documentation</Link>
             <Link href="#" className="hover:text-paper transition-colors">API Reference</Link>
           </div>
