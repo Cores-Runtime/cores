@@ -23,6 +23,7 @@ export default function Home() {
             <Link href="#policies" className="text-sm text-muted hover:text-ink transition-colors">Policies</Link>
             <Link href="#scenarios" className="text-sm text-muted hover:text-ink transition-colors">Scenarios</Link>
             <Link href="#visualizations" className="text-sm text-muted hover:text-ink transition-colors">Visualizations</Link>
+            <Link href="/simulator" className="text-sm text-accent font-medium hover:text-accentHover transition-colors">Simulator</Link>
           </div>
           <div className="flex items-center gap-4">
             <Link href="#policies" className="btn-secondary text-sm px-4 py-2">Compare Policies</Link>

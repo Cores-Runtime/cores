@@ -42,6 +42,7 @@ export function Footer() {
             <Link href="https://github.com/Cores-Runtime/cores" className="hover:text-paper transition-colors" target="_blank" rel="noopener noreferrer">GitHub</Link>
             <Link href="#" className="hover:text-paper transition-colors">Documentation</Link>
             <Link href="#" className="hover:text-paper transition-colors">API Reference</Link>
+            <Link href="/simulator" className="hover:text-paper transition-colors">Simulator</Link>
           </div>
         </div>
       </div>
