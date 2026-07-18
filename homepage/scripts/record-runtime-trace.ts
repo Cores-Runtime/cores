@@ -5,15 +5,15 @@ import type { TraceData, TraceSnapshot, WorldState, RobotState, Decision, Module
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const MODULE_DEFS: ModuleDef[] = [
-  { id: "operator", name: "Operator", priority: 1, cpuCost: 12, deps: [], purpose: "Mission-level decision making." },
-  { id: "scientist", name: "Scientist", priority: 2, cpuCost: 18, deps: ["operator"], purpose: "Analyzes terrain and samples." },
-  { id: "mathematician", name: "Mathematician", priority: 3, cpuCost: 24, deps: ["scientist"], purpose: "Trajectory optimization." },
-  { id: "physicist", name: "Physicist", priority: 7, cpuCost: 8, deps: ["mathematician"], purpose: "Thermal and power modeling." },
-  { id: "builder", name: "Builder", priority: 1, cpuCost: 6, deps: ["operator", "physicist"], purpose: "Obstacle avoidance." },
-  { id: "traveller", name: "Traveller", priority: 4, cpuCost: 14, deps: ["builder", "mathematician"], purpose: "Path execution." },
-  { id: "human", name: "Human", priority: 9, cpuCost: 2, deps: ["operator"], purpose: "Mission control interface." },
-  { id: "narrator", name: "Narrator", priority: 5, cpuCost: 2, deps: [], purpose: "Mission logging." },
-  { id: "philosopher", name: "Philosopher", priority: 8, cpuCost: 1, deps: ["operator", "narrator"], purpose: "Ethical validation." },
+  { id: "mission-manager", name: "Mission Manager", priority: 1, cpuCost: 12, deps: [], purpose: "Mission-level decision making." },
+  { id: "perception-engine", name: "Perception Engine", priority: 2, cpuCost: 18, deps: ["mission-manager"], purpose: "Analyzes terrain and samples." },
+  { id: "planning-engine", name: "Planning Engine", priority: 3, cpuCost: 24, deps: ["perception-engine"], purpose: "Trajectory optimization." },
+  { id: "state-estimator", name: "State Estimator", priority: 7, cpuCost: 8, deps: ["planning-engine"], purpose: "Thermal and power modeling." },
+  { id: "navigation-controller", name: "Navigation Controller", priority: 1, cpuCost: 6, deps: ["mission-manager", "state-estimator"], purpose: "Obstacle avoidance." },
+  { id: "motion-controller", name: "Motion Controller", priority: 4, cpuCost: 14, deps: ["navigation-controller", "planning-engine"], purpose: "Path execution." },
+  { id: "safety-supervisor", name: "Safety Supervisor", priority: 9, cpuCost: 2, deps: ["mission-manager"], purpose: "Mission control interface." },
+  { id: "telemetry-logger", name: "Telemetry / Logger", priority: 5, cpuCost: 2, deps: [], purpose: "Mission logging." },
+  { id: "policy-engine", name: "Policy Engine", priority: 8, cpuCost: 1, deps: ["mission-manager", "telemetry-logger"], purpose: "Ethical validation." },
 ];
 
 const MISSION = {
@@ -33,7 +33,7 @@ const METADATA = {
 function buildModules(overrides: Record<string, Partial<ModuleState>> = {}): Record<string, Mutable<ModuleState>> {
   const base: Record<string, ModuleState> = {};
   for (const m of MODULE_DEFS) {
-    const active = m.id === "operator" || m.id === "narrator";
+    const active = m.id === "mission-manager" || m.id === "telemetry-logger";
     base[m.id] = {
       status: active ? "running" : "sleeping",
       reason: active ? "Core" : "Awaiting trigger",
@@ -117,7 +117,7 @@ function initRobot(): Mutable<RobotState> {
 
 function nominalChange(w: Mutable<WorldState>, r: Mutable<RobotState>, mods: Record<string, Mutable<ModuleState>>, _d: Decision | null, _t: EventEntry[], m: Record<string, number[]>) {
   r.battery = Math.max(0, r.battery - 0.3);
-  r.missionProgress = Math.min(100, r.missionProgress + 0.5);
+  r.missionProgress = Math.min(100, r.missionProgress + 1.5);
   w.obstacleDistance = Math.max(1, w.obstacleDistance - 0.02);
   r.cpu = 15 + Math.round(Math.random() * 5);
   for (const mod of Object.values(mods)) {
@@ -167,15 +167,15 @@ const snapshots: TraceSnapshot[] = [];
   const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   t.push({ tick: 10, time: 3000, event: "Rockslide — obstacle at 0.3m", type: "warning" });
-  mods.builder.status = "running"; mods.builder.reason = "Activated: Obstacle avoidance"; mods.builder.lastActivation = 10; mods.builder.wakeCount = 1; mods.builder.task = "Active";
-  mods.traveller.status = "suspended"; mods.traveller.reason = "Obstacle at 0.3m";
-  mods.scientist.status = "running"; mods.scientist.reason = "Activated: Route replan"; mods.scientist.lastActivation = 10; mods.scientist.wakeCount = 1; mods.scientist.task = "Active";
-  mods.mathematician.status = "suspended"; mods.mathematician.reason = "Obstacle at 0.3m";
-  const decision: Decision = { tick: 10, reason: "Obstacle within 0.3m. Builder activated for avoidance.", wake: ["builder", "scientist"], sleep: [], suspend: ["traveller", "mathematician"], priority: "Safety", hierarchy: ["Safety", "Mission", "Energy", "Memory"], decisionTimeMs: 0.82 };
+  mods["navigation-controller"].status = "running"; mods["navigation-controller"].reason = "Activated: Obstacle avoidance"; mods["navigation-controller"].lastActivation = 10; mods["navigation-controller"].wakeCount = 1; mods["navigation-controller"].task = "Active";
+  mods["motion-controller"].status = "suspended"; mods["motion-controller"].reason = "Obstacle at 0.3m";
+  mods["perception-engine"].status = "running"; mods["perception-engine"].reason = "Activated: Route replan"; mods["perception-engine"].lastActivation = 10; mods["perception-engine"].wakeCount = 1; mods["perception-engine"].task = "Active";
+  mods["planning-engine"].status = "suspended"; mods["planning-engine"].reason = "Obstacle at 0.3m";
+  const decision: Decision = { tick: 10, reason: "Obstacle within 0.3m. Navigation Controller activated for avoidance.", wake: ["navigation-controller", "perception-engine"], sleep: [], suspend: ["motion-controller", "planning-engine"], priority: "Safety", hierarchy: ["Safety", "Mission", "Energy", "Memory"], decisionTimeMs: 0.82 };
   r.cpu = 25;
   m.battery.push(Math.round(r.battery * 10) / 10); m.cpu.push(25); m.memory.push(Math.round(38 + Math.random() * 3)); m.latency.push(0.82);
   m.missionUtility.push(Math.round(r.missionProgress * 10) / 10); m.safetyScore.push(80); m.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); m.eventsPerSec.push(Math.round(120 + Math.random() * 20));
-  mods.builder.cpu = 6; mods.scientist.cpu = 18; mods.traveller.cpu = 0; mods.mathematician.cpu = 0;
+  mods["navigation-controller"].cpu = 6; mods["perception-engine"].cpu = 18; mods["motion-controller"].cpu = 0; mods["planning-engine"].cpu = 0;
   snapshots.push(buildSnap(10, w, r, mods, decision, t, m));
 }
 
@@ -186,11 +186,11 @@ const snapshots: TraceSnapshot[] = [];
   const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   snapshots.push(...fillSnaps(11, 9, last.world, last.robot, last.modules, last.decision as Decision, t, m, (w, r, mods, _d, _t, _m2) => {
-    r.battery = Math.max(0, r.battery - 0.5); r.missionProgress = Math.min(100, r.missionProgress + 0.3);
+    r.battery = Math.max(0, r.battery - 0.5); r.missionProgress = Math.min(100, r.missionProgress + 1.0);
     w.obstacleDistance = Math.min(8, w.obstacleDistance + 0.2); r.cpu = 28 + Math.round(Math.random() * 4);
     for (const mod of Object.values(mods)) { if (mod.status === "running") { mod.totalRuntime += 1; mod.cpu = Math.round(6 + Math.random() * 12); } if (mod.status !== "running") mod.cpu = 0; }
-    mods.builder.task = "Navigating around obstacle"; mods.builder.reason = "Obstacle Avoidance";
-    mods.scientist.task = "Recalculating safe route"; mods.scientist.reason = "Route Replan";
+    mods["navigation-controller"].task = "Navigating around obstacle"; mods["navigation-controller"].reason = "Obstacle Avoidance";
+    mods["perception-engine"].task = "Recalculating safe route"; mods["perception-engine"].reason = "Route Replan";
     _m2.battery.push(Math.round(r.battery * 10) / 10); _m2.cpu.push(r.cpu); _m2.memory.push(Math.round(40 + Math.random() * 5));
     _m2.latency.push(Math.round((0.7 + Math.random() * 0.3) * 100) / 100); _m2.missionUtility.push(Math.round(r.missionProgress * 10) / 10);
     _m2.safetyScore.push(Math.round(82 + Math.random() * 3)); _m2.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); _m2.eventsPerSec.push(Math.round(130 + Math.random() * 20));
@@ -205,11 +205,11 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   t.push({ tick: 20, time: 6000, event: "Obstacle cleared. Resuming normal operation.", type: "success" });
-  mods.builder.status = "sleeping"; mods.builder.reason = "Standby"; mods.builder.task = "Standby"; mods.builder.cpu = 0;
-  mods.traveller.status = "running"; mods.traveller.reason = "Activated: Path execution"; mods.traveller.wakeCount = 1; mods.traveller.lastActivation = 20; mods.traveller.task = "Executing path";
-  mods.scientist.status = "sleeping"; mods.scientist.reason = "Standby"; mods.scientist.task = "Standby"; mods.scientist.cpu = 0;
-  mods.mathematician.status = "running"; mods.mathematician.reason = "Activated: Trajectory optimization"; mods.mathematician.wakeCount = 1; mods.mathematician.lastActivation = 20; mods.mathematician.task = "Active"; mods.mathematician.cpu = 12;
-  const decision: Decision = { tick: 20, reason: "Obstacle cleared. Resuming primary mission.", wake: ["traveller", "mathematician"], sleep: ["builder", "scientist"], suspend: [], priority: "Mission", hierarchy: ["Mission", "Safety", "Energy", "Memory"], decisionTimeMs: 0.45 };
+  mods["navigation-controller"].status = "sleeping"; mods["navigation-controller"].reason = "Standby"; mods["navigation-controller"].task = "Standby"; mods["navigation-controller"].cpu = 0;
+  mods["motion-controller"].status = "running"; mods["motion-controller"].reason = "Activated: Path execution"; mods["motion-controller"].wakeCount = 1; mods["motion-controller"].lastActivation = 20; mods["motion-controller"].task = "Executing path";
+  mods["perception-engine"].status = "sleeping"; mods["perception-engine"].reason = "Standby"; mods["perception-engine"].task = "Standby"; mods["perception-engine"].cpu = 0;
+  mods["planning-engine"].status = "running"; mods["planning-engine"].reason = "Activated: Trajectory optimization"; mods["planning-engine"].wakeCount = 1; mods["planning-engine"].lastActivation = 20; mods["planning-engine"].task = "Active"; mods["planning-engine"].cpu = 12;
+  const decision: Decision = { tick: 20, reason: "Obstacle cleared. Resuming primary mission.", wake: ["motion-controller", "planning-engine"], sleep: ["navigation-controller", "perception-engine"], suspend: [], priority: "Mission", hierarchy: ["Mission", "Safety", "Energy", "Memory"], decisionTimeMs: 0.45 };
   r.cpu = 18;
   m.battery.push(Math.round(r.battery * 10) / 10); m.cpu.push(18); m.memory.push(Math.round(38 + Math.random() * 3)); m.latency.push(0.45);
   m.missionUtility.push(Math.round(r.missionProgress * 10) / 10); m.safetyScore.push(96); m.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); m.eventsPerSec.push(Math.round(110 + Math.random() * 10));
@@ -222,7 +222,7 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   snapshots.push(...fillSnaps(21, 9, last.world, last.robot, last.modules, last.decision as Decision, t, m, (w, r, mods, _d, _t, _m2) => {
-    nominalChange(w, r, mods, _d, _t, _m2); mods.traveller.task = "Executing path"; mods.mathematician.task = "Idle"; mods.mathematician.reason = "Standby";
+    nominalChange(w, r, mods, _d, _t, _m2); mods["motion-controller"].task = "Executing path"; mods["planning-engine"].task = "Idle"; mods["planning-engine"].reason = "Standby";
     for (const mod of Object.values(mods)) { if (mod.status !== "running") mod.cpu = 0; }
   }));
 }
@@ -235,10 +235,10 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   t.push({ tick: 30, time: 9000, event: "Dust Storm — sensors degraded", type: "warning" });
-  mods.scientist.status = "running"; mods.scientist.reason = "Activated: Sensor fusion"; mods.scientist.wakeCount = 2; mods.scientist.lastActivation = 30; mods.scientist.task = "Active";
-  mods.human.status = "running"; mods.human.reason = "Activated: Comms degraded"; mods.human.wakeCount = 1; mods.human.lastActivation = 30; mods.human.task = "Active";
-  mods.traveller.status = "suspended"; mods.traveller.reason = "Reduced visibility"; mods.traveller.task = "Suspended";
-  const decision: Decision = { tick: 30, reason: "Dust storm detected. Sensors degraded. Scientist activated for sensor fusion.", wake: ["scientist", "human"], sleep: [], suspend: ["traveller"], priority: "Safety", hierarchy: ["Safety", "Mission", "Energy", "Memory"], decisionTimeMs: 0.91 };
+  mods["perception-engine"].status = "running"; mods["perception-engine"].reason = "Activated: Sensor fusion"; mods["perception-engine"].wakeCount = 2; mods["perception-engine"].lastActivation = 30; mods["perception-engine"].task = "Active";
+  mods["safety-supervisor"].status = "running"; mods["safety-supervisor"].reason = "Activated: Comms degraded"; mods["safety-supervisor"].wakeCount = 1; mods["safety-supervisor"].lastActivation = 30; mods["safety-supervisor"].task = "Active";
+  mods["motion-controller"].status = "suspended"; mods["motion-controller"].reason = "Reduced visibility"; mods["motion-controller"].task = "Suspended";
+  const decision: Decision = { tick: 30, reason: "Dust storm detected. Sensors degraded. Perception Engine activated for sensor fusion.", wake: ["perception-engine", "safety-supervisor"], sleep: [], suspend: ["motion-controller"], priority: "Safety", hierarchy: ["Safety", "Mission", "Energy", "Memory"], decisionTimeMs: 0.91 };
   r.cpu = 30;
   m.battery.push(Math.round(r.battery * 10) / 10); m.cpu.push(30); m.memory.push(Math.round(45 + Math.random() * 3)); m.latency.push(0.91);
   m.missionUtility.push(Math.round(r.missionProgress * 10) / 10); m.safetyScore.push(78); m.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); m.eventsPerSec.push(Math.round(140 + Math.random() * 20));
@@ -251,10 +251,10 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   snapshots.push(...fillSnaps(31, 9, last.world, last.robot, last.modules, last.decision as Decision, t, m, (w, r, mods, _d, _t, _m2) => {
-    r.battery = Math.max(0, r.battery - 0.4); r.missionProgress = Math.min(100, r.missionProgress + 0.2); r.cpu = 30 + Math.round(Math.random() * 5);
+    r.battery = Math.max(0, r.battery - 0.4); r.missionProgress = Math.min(100, r.missionProgress + 1.0); r.cpu = 30 + Math.round(Math.random() * 5);
     for (const mod of Object.values(mods)) { if (mod.status === "running") { mod.totalRuntime += 1; mod.cpu = Math.round(6 + Math.random() * 14); } if (mod.status !== "running") mod.cpu = 0; }
-    mods.scientist.task = "Fusing degraded sensor data"; mods.scientist.reason = "Degraded Visibility";
-    mods.human.task = "Alerting mission control"; mods.human.reason = "Comms degraded";
+    mods["perception-engine"].task = "Fusing degraded sensor data"; mods["perception-engine"].reason = "Degraded Visibility";
+    mods["safety-supervisor"].task = "Alerting mission control"; mods["safety-supervisor"].reason = "Comms degraded";
     _m2.battery.push(Math.round(r.battery * 10) / 10); _m2.cpu.push(r.cpu); _m2.memory.push(Math.round(47 + Math.random() * 3));
     _m2.latency.push(Math.round((0.8 + Math.random() * 0.2) * 100) / 100); _m2.missionUtility.push(Math.round(r.missionProgress * 10) / 10);
     _m2.safetyScore.push(Math.round(72 + Math.random() * 5)); _m2.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); _m2.eventsPerSec.push(Math.round(145 + Math.random() * 15));
@@ -269,11 +269,11 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   t.push({ tick: 40, time: 12000, event: "Dust storm passed. Sensors restored.", type: "success" });
-  mods.scientist.status = "sleeping"; mods.scientist.reason = "Standby"; mods.scientist.task = "Standby"; mods.scientist.cpu = 0;
-  mods.human.status = "sleeping"; mods.human.reason = "Standby"; mods.human.task = "Standby"; mods.human.cpu = 0;
-  mods.traveller.status = "running"; mods.traveller.reason = "Activated: Navigation resumed"; mods.traveller.wakeCount = 2; mods.traveller.lastActivation = 40; mods.traveller.task = "Executing path";
-  mods.mathematician.status = "running"; mods.mathematician.reason = "Activated: Rerouting"; mods.mathematician.wakeCount = 2; mods.mathematician.lastActivation = 40; mods.mathematician.task = "Active";
-  const decision: Decision = { tick: 40, reason: "Sensors restored. Resuming standard operation.", wake: ["traveller", "mathematician"], sleep: ["scientist", "human"], suspend: [], priority: "Mission", hierarchy: ["Mission", "Safety", "Energy", "Memory"], decisionTimeMs: 0.38 };
+  mods["perception-engine"].status = "sleeping"; mods["perception-engine"].reason = "Standby"; mods["perception-engine"].task = "Standby"; mods["perception-engine"].cpu = 0;
+  mods["safety-supervisor"].status = "sleeping"; mods["safety-supervisor"].reason = "Standby"; mods["safety-supervisor"].task = "Standby"; mods["safety-supervisor"].cpu = 0;
+  mods["motion-controller"].status = "running"; mods["motion-controller"].reason = "Activated: Navigation resumed"; mods["motion-controller"].wakeCount = 2; mods["motion-controller"].lastActivation = 40; mods["motion-controller"].task = "Executing path";
+  mods["planning-engine"].status = "running"; mods["planning-engine"].reason = "Activated: Rerouting"; mods["planning-engine"].wakeCount = 2; mods["planning-engine"].lastActivation = 40; mods["planning-engine"].task = "Active";
+  const decision: Decision = { tick: 40, reason: "Sensors restored. Resuming standard operation.", wake: ["motion-controller", "planning-engine"], sleep: ["perception-engine", "safety-supervisor"], suspend: [], priority: "Mission", hierarchy: ["Mission", "Safety", "Energy", "Memory"], decisionTimeMs: 0.38 };
   r.cpu = 22;
   m.battery.push(Math.round(r.battery * 10) / 10); m.cpu.push(22); m.memory.push(Math.round(40 + Math.random() * 3)); m.latency.push(0.38);
   m.missionUtility.push(Math.round(r.missionProgress * 10) / 10); m.safetyScore.push(94); m.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); m.eventsPerSec.push(Math.round(110 + Math.random() * 10));
@@ -286,7 +286,7 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   snapshots.push(...fillSnaps(41, 9, last.world, last.robot, last.modules, last.decision as Decision, t, m, (w, r, mods, _d, _t, _m2) => {
-    nominalChange(w, r, mods, _d, _t, _m2); mods.traveller.task = "Executing path"; mods.mathematician.task = "Idle";
+    nominalChange(w, r, mods, _d, _t, _m2); mods["motion-controller"].task = "Executing path"; mods["planning-engine"].task = "Idle";
     for (const mod of Object.values(mods)) { if (mod.status !== "running") mod.cpu = 0; }
   }));
 }
@@ -298,11 +298,11 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   t.push({ tick: 50, time: 15000, event: "Critical battery — 15% remaining", type: "warning" });
-  mods.traveller.status = "suspended"; mods.traveller.reason = "Low battery"; mods.traveller.task = "Suspended";
-  mods.human.status = "running"; mods.human.reason = "Activated: Power conservation"; mods.human.wakeCount = 2; mods.human.lastActivation = 50; mods.human.task = "Active";
-  mods.mathematician.status = "suspended"; mods.mathematician.reason = "Low battery"; mods.mathematician.task = "Suspended";
-  mods.scientist.status = "suspended"; mods.scientist.reason = "Low battery"; mods.scientist.task = "Suspended";
-  const decision: Decision = { tick: 50, reason: "Low battery. Conserving power. Suspending non-critical modules.", wake: ["human"], sleep: [], suspend: ["traveller", "mathematician", "scientist"], priority: "Energy", hierarchy: ["Energy", "Safety", "Mission", "Memory"], decisionTimeMs: 1.12 };
+  mods["motion-controller"].status = "suspended"; mods["motion-controller"].reason = "Low battery"; mods["motion-controller"].task = "Suspended";
+  mods["safety-supervisor"].status = "running"; mods["safety-supervisor"].reason = "Activated: Power conservation"; mods["safety-supervisor"].wakeCount = 2; mods["safety-supervisor"].lastActivation = 50; mods["safety-supervisor"].task = "Active";
+  mods["planning-engine"].status = "suspended"; mods["planning-engine"].reason = "Low battery"; mods["planning-engine"].task = "Suspended";
+  mods["perception-engine"].status = "suspended"; mods["perception-engine"].reason = "Low battery"; mods["perception-engine"].task = "Suspended";
+  const decision: Decision = { tick: 50, reason: "Low battery. Conserving power. Suspending non-critical modules.", wake: ["safety-supervisor"], sleep: [], suspend: ["motion-controller", "planning-engine", "perception-engine"], priority: "Energy", hierarchy: ["Energy", "Safety", "Mission", "Memory"], decisionTimeMs: 1.12 };
   r.cpu = 8; r.powerState = "Reduced";
   m.battery.push(15); m.cpu.push(8); m.memory.push(Math.round(35 + Math.random() * 3)); m.latency.push(1.12);
   m.missionUtility.push(Math.round(r.missionProgress * 10) / 10); m.safetyScore.push(88); m.energyHeadroom.push(3); m.eventsPerSec.push(Math.round(60 + Math.random() * 10));
@@ -315,9 +315,9 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   snapshots.push(...fillSnaps(51, 9, last.world, last.robot, last.modules, last.decision as Decision, t, m, (w, r, mods, _d, _t, _m2) => {
-    r.battery = Math.max(0, r.battery - 0.15); r.missionProgress = Math.min(100, r.missionProgress + 0.2); r.cpu = 6 + Math.round(Math.random() * 3);
+    r.battery = Math.max(0, r.battery - 0.15); r.missionProgress = Math.min(100, r.missionProgress + 1.0); r.cpu = 6 + Math.round(Math.random() * 3);
     for (const mod of Object.values(mods)) { if (mod.status === "running") { mod.totalRuntime += 1; mod.cpu = Math.round(2 + Math.random() * 4); } if (mod.status !== "running") mod.cpu = 0; }
-    mods.human.task = "Conserving power"; mods.human.reason = "Low Power";
+    mods["safety-supervisor"].task = "Conserving power"; mods["safety-supervisor"].reason = "Low Power";
     _m2.battery.push(Math.round(r.battery * 10) / 10); _m2.cpu.push(r.cpu); _m2.memory.push(Math.round(32 + Math.random() * 3));
     _m2.latency.push(Math.round((1.0 + Math.random() * 0.3) * 100) / 100); _m2.missionUtility.push(Math.round(r.missionProgress * 10) / 10);
     _m2.safetyScore.push(Math.round(85 + Math.random() * 3)); _m2.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); _m2.eventsPerSec.push(Math.round(50 + Math.random() * 10));
@@ -330,9 +330,9 @@ const snapshots: TraceSnapshot[] = [];
   const t = last.eventHistory.map(e => ({ ...e })); const m: Record<string, number[]> = {};
   for (const [k, arr] of Object.entries(last.metrics)) m[k] = [...arr];
   snapshots.push(...fillSnaps(60, 10, last.world, last.robot, last.modules, last.decision as Decision, t, m, (w, r, mods, _d, _t, _m2) => {
-    r.battery = Math.max(0, r.battery - 0.2); r.missionProgress = Math.min(100, r.missionProgress + 0.5); r.cpu = 12 + Math.round(Math.random() * 4);
+    r.battery = Math.max(0, r.battery - 0.2); r.missionProgress = Math.min(100, r.missionProgress + 1.5); r.cpu = 12 + Math.round(Math.random() * 4);
     for (const mod of Object.values(mods)) { if (mod.status === "running") { mod.totalRuntime += 1; mod.cpu = Math.round(4 + Math.random() * 6); } if (mod.status !== "running") mod.cpu = 0; }
-    mods.human.task = "Idle"; mods.human.reason = "Standby";
+    mods["safety-supervisor"].task = "Idle"; mods["safety-supervisor"].reason = "Standby";
     _m2.battery.push(Math.round(r.battery * 10) / 10); _m2.cpu.push(r.cpu); _m2.memory.push(Math.round(35 + Math.random() * 3));
     _m2.latency.push(Math.round((0.6 + Math.random() * 0.2) * 100) / 100); _m2.missionUtility.push(Math.round(r.missionProgress * 10) / 10);
     _m2.safetyScore.push(Math.round(90 + Math.random() * 3)); _m2.energyHeadroom.push(Math.round((r.battery * 0.2) * 10) / 10); _m2.eventsPerSec.push(Math.round(80 + Math.random() * 10));

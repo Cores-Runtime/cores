@@ -10,6 +10,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
   private idleState: RuntimeState;
   private tickToSnapshot: Map<number, TraceSnapshot> = new Map();
   private eventTicks: Record<string, number> = {};
+  private _paused = false;
 
   availableMissions: readonly { readonly id: string; readonly name: string; readonly desc: string; readonly constraints: readonly string[] }[] = [];
   availableEvents: readonly EventInfo[] = [];
@@ -77,6 +78,9 @@ export class ReplayRuntimeSource implements RuntimeSource {
     if (this.snapshots.length === 0 || this.index >= this.snapshots.length) {
       return this.idleState;
     }
+    if (this._paused) {
+      return { ...this.snapshots[this.index], status: "paused" } as unknown as RuntimeState;
+    }
     return this.snapshots[this.index] as unknown as RuntimeState;
   }
 
@@ -91,6 +95,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
 
   loadMission(id: string) {
     this.stop();
+    this._paused = false;
     const idx = this.snapshots.findIndex(s => s.mission?.id === id);
     this.index = idx >= 0 ? idx : 0;
     this.notify();
@@ -110,10 +115,26 @@ export class ReplayRuntimeSource implements RuntimeSource {
 
   setStatus(s: RuntimeState["status"]) {
     if (s === "running") {
+      this._paused = false;
       this.start();
     } else {
+      this._paused = true;
       this.stop();
     }
+    this.notify();
+  }
+
+  seek(tick: number) {
+    this.stop();
+    this._paused = false;
+    let idx = this.snapshots.findIndex(s => s.tick >= tick);
+    if (idx === -1) idx = this.snapshots.length - 1;
+    this.index = Math.max(0, idx);
+    this.notify();
+  }
+
+  totalTicks(): number {
+    return this.snapshots.length;
   }
 
   private start() {
@@ -125,7 +146,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
       } else {
         this.stop();
       }
-    }, 300);
+    }, 1200);
   }
 
   private stop() {

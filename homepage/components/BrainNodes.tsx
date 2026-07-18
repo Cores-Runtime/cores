@@ -5,20 +5,20 @@ import { useEffect, useRef } from "react";
 const nodes = [
   { id: "scheduler", label: "Scheduler", x: 250, y: 180 },
   { id: "planner", label: "Planner", x: 550, y: 180 },
-  { id: "builder", label: "Builder", x: 400, y: 320 },
-  { id: "traveller", label: "Traveller", x: 250, y: 460 },
-  { id: "scientist", label: "Scientist", x: 550, y: 460 },
+  { id: "navigation-controller", label: "Navigation Controller", x: 400, y: 320 },
+  { id: "motion-controller", label: "Motion Controller", x: 250, y: 460 },
+  { id: "perception-engine", label: "Perception Engine", x: 550, y: 460 },
 ];
 
 const connections = [
   ["scheduler", "planner"],
-  ["scheduler", "builder"],
-  ["planner", "builder"],
-  ["builder", "traveller"],
-  ["builder", "scientist"],
-  ["traveller", "scientist"],
-  ["scheduler", "traveller"],
-  ["planner", "scientist"],
+  ["scheduler", "navigation-controller"],
+  ["planner", "navigation-controller"],
+  ["navigation-controller", "motion-controller"],
+  ["navigation-controller", "perception-engine"],
+  ["motion-controller", "perception-engine"],
+  ["scheduler", "motion-controller"],
+  ["planner", "perception-engine"],
 ];
 
 export function BrainNodes() {

@@ -21,28 +21,45 @@ export default function SimulatorPage() {
               <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-paper font-mono text-xs">CR</span>
               CORES
             </Link>
-            <span className="text-xs font-mono text-muted/50">Runtime Simulator v0.2</span>
+            <div className="flex items-center gap-3">
+              <Link href="/simulator/replay" className="text-[11px] text-muted/50 hover:text-ink transition-colors">
+                3D Replay
+              </Link>
+              <span className="text-xs font-mono text-muted/50">Dashboard v0.2</span>
+            </div>
           </div>
         </nav>
 
         <main className="pt-14 pb-10 px-4 md:px-6 max-w-7xl mx-auto">
-          <div className="text-center py-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-ink tracking-tight">CORES Runtime Simulator</h1>
-            <p className="text-sm text-muted/60 mt-1">Mission control dashboard — select a mission to begin</p>
+          <div className="pt-6 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-ink tracking-tight">Mission Control</h1>
+                <p className="text-sm text-muted/60 mt-0.5">CORES Runtime Simulator — live dashboard</p>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-min">
+          <div className="flex flex-col gap-4">
             <MissionStatus />
-            <RobotState />
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2 flex flex-col gap-4">
+                <MetricsPanel />
+                <DecisionTimeline />
+              </div>
+              <div className="flex flex-col gap-4">
+                <RobotState />
+                <SchedulerPanel />
+              </div>
+            </div>
+
             <RuntimeModules />
-            <SchedulerPanel />
-            <DecisionTimeline />
             <ScenarioControls />
-            <MetricsPanel />
             <DecisionExplanation />
           </div>
         </main>
       </div>
-      </RuntimeProvider>
+    </RuntimeProvider>
   );
 }
