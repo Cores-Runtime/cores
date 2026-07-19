@@ -46,7 +46,7 @@ The Adaptive Cognitive Scheduler (ACS) is a scheduling research program implemen
 - Not a replacement for ROS2, motion planning, or perception pipelines.
 - Not a learning system in its initial formulation (weights are configurable constants, not trained parameters).
 - Not non-deterministic — identical inputs must produce identical schedules (CORES Rule 5).
-- Not a new runtime component — ACS is implemented as a `SchedulingPolicy` within the existing `Scheduler` abstraction (ADR-0005).
+- Not a new runtime component — ACS is implemented as a `SchedulingPolicy` within the existing `Scheduler` abstraction.
 
 ---
 

@@ -1,8 +1,8 @@
 """
-Benchmark framework for Physicist cognitive node reasoning strategies.
+Benchmark framework for StateEstimation cognitive node reasoning strategies.
 
 Evaluates how different WorldModelStrategy implementations perform
-as the internal reasoning engine of the Physicist.
+as the internal reasoning engine of the StateEstimation.
 
 Measures runtime performance, robotics accuracy, and runtime utility
 across all strategies under identical scenarios.
@@ -210,10 +210,10 @@ def benchmark_explain_latency(model: WorldModelStrategy) -> BenchmarkResult:
 
 
 def benchmark_runtime_integration(model_name: str) -> BenchmarkResult:
-    from cores.core.physicist import Physicist
+    from cores.core.state_estimation import StateEstimation
     result = BenchmarkResult(model_name=model_name)
     model = _make(model_name)
-    physicist = Physicist(strategy=model)
+    state_estimation = StateEstimation(strategy=model)
     scheduler = Scheduler(DefaultSchedulingPolicy())
     execution_layer = ExecutionLayer()
     runtime = Runtime(scheduler, execution_layer, world_model=model)
@@ -232,7 +232,7 @@ def benchmark_runtime_integration(model_name: str) -> BenchmarkResult:
     elapsed = time.perf_counter() - start
 
     result.metrics["runtime_step_10_mean_us"] = (elapsed / 10) * 1e6
-    result.metrics["runtime_obstacle_count"] = runtime.physicist.strategy.obstacle_count
+    result.metrics["runtime_obstacle_count"] = runtime.state_estimation.strategy.obstacle_count
     return result
 
 
@@ -279,7 +279,7 @@ def print_results(results: Dict[str, Dict[str, float]]) -> None:
     header = f"{'Metric':<40} | " + " | ".join(f"{m:<22}" for m in ALL_MODELS)
     sep = "-" * len(header)
 
-    print("\n=== Physicist Strategy Benchmark Results ===\n")
+    print("\n=== StateEstimation Strategy Benchmark Results ===\n")
     print(header)
     print(sep)
 
@@ -306,6 +306,6 @@ def print_results(results: Dict[str, Dict[str, float]]) -> None:
 
 
 if __name__ == "__main__":
-    print("Running Physicist strategy benchmarks...")
+    print("Running StateEstimation strategy benchmarks...")
     results = run_all_benchmarks()
     print_results(results)

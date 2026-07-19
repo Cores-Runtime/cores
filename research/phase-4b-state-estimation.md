@@ -3,7 +3,7 @@
 ## Architecture Migration
 
 The WorldModel hierarchy was migrated from a standalone runtime subsystem to the internal
-reasoning engine of the **Physicist** cognitive node.
+reasoning engine of the **State Estimation** cognitive node.
 
 ### Before
 
@@ -16,7 +16,7 @@ Runtime
 
 ```
 Runtime
-  └── Physicist  (cognitive module)
+  └── StateEstimation  (cognitive module)
         ├── WorldModelStrategy  (reasoning engine)
         │     ├── SimpleObjectRegistry
         │     ├── OccupancyGrid
@@ -33,23 +33,20 @@ Runtime
 
 The `WorldModel` ABC was renamed to `WorldModelStrategy` (with a backward-compatible
 `WorldModel` alias) to reflect that it is a *physical reasoning strategy* used by the
-Physicist, not a standalone runtime subsystem.
+State Estimation, not a standalone runtime subsystem.
 
 ### Heuristic Parameters vs Runtime Config
 
-The Physicist separates **heuristic parameters** (temporary thresholds for
+The State Estimation separates **heuristic parameters** (temporary thresholds for
 rule-based sub-components) from **runtime configuration** (permanent structural
 options like logging or sensor config).
 
 Each sub-component has its own parameter dataclass (e.g.
 `AssociationParameters`, `PhysicalReasoningParameters`), all composed into a
-single `PhysicistHeuristics` object. This makes every heuristic a candidate
+single `StateEstimationHeuristics` object. This makes every heuristic a candidate
+
 model that can be tuned per deployment. When a heuristic is replaced by a
 learned strategy, its parameter group is deleted — no thresholds, no config.
-
-See [ADR 0003](/docs/adr/0003-physicist-config-driven-heuristics.md) for the
-full rationale and migration plan.
-
 ---
 
 ## Research Question
@@ -60,9 +57,9 @@ explainable, useful for planning, scheduling, reasoning, and scalable?
 
 ---
 
-## The Physicist Cognitive Node
+## The State Estimation Cognitive Node
 
-Defined in `src/cores/core/physicist.py`. The Physicist is a `Module` registered with
+Defined in `src/cores/core/state estimation.py`. The State Estimation is a `Module` registered with
 the Runtime's execution cycle. It continuously executes the following cognitive loop:
 
 ```
@@ -75,7 +72,7 @@ Publish understanding → Repeat
 
 | Responsibility | Implementation |
 |---|---|
-| Observation association | Modules write to `context.world_model` (the strategy); Physicist reads after all modules |
+| Observation association | Modules write to `context.world_model` (the strategy); State Estimation reads after all modules |
 | Belief updates | Delegated to the `WorldModelStrategy` (upsert/update) |
 | Physical state estimation | Strategy tracks position, velocity, acceleration per object |
 | Prediction | Strategy's `predict()` method |
@@ -85,11 +82,11 @@ Publish understanding → Repeat
 
 ### Integration
 
-- Runtime creates a `Physicist` in `__init__()`, passing the chosen strategy
-- `runtime.context.world_model` is wired to `physicist.strategy` before module execution
-- After all modules run, `physicist.execute()` runs the cognitive loop
-- `RuntimeStateBuilder` reads from `physicist.strategy` for the world snapshot
-- `physicist.last_explanation` is included in `RuntimeState.explainability`
+- Runtime creates a `State Estimation` in `__init__()`, passing the chosen strategy
+- `runtime.context.world_model` is wired to `state estimation.strategy` before module execution
+- After all modules run, `state estimation.execute()` runs the cognitive loop
+- `RuntimeStateBuilder` reads from `state estimation.strategy` for the world snapshot
+- `state estimation.last_explanation` is included in `RuntimeState.explainability`
 
 ---
 
@@ -114,7 +111,7 @@ Properties: `environment`, `objects`, `uncertainty`, `obstacle_count`,
 `has_sensor_degradation`, `last_update_cycle`
 
 The strategy only answers: "Given observations and current beliefs, how should the
-physical understanding be updated?" All cognitive orchestration belongs to the Physicist.
+physical understanding be updated?" All cognitive orchestration belongs to the State Estimation.
 
 ---
 
@@ -322,7 +319,7 @@ so the Runtime can switch between them without any code changes.
 
 | File | Role |
 |---|---|
-| `src/cores/core/physicist.py` | Physicist cognitive module |
+| `src/cores/core/state estimation.py` | State Estimation cognitive module |
 | `src/cores/core/world_model/interface.py` | `WorldModelStrategy` ABC + `WorldModel` alias |
 | `src/cores/core/world_model/types.py` | Shared data types |
 | `src/cores/core/world_model/simple_registry.py` | Baseline strategy |
@@ -331,7 +328,7 @@ so the Runtime can switch between them without any code changes.
 | `src/cores/core/world_model/probabilistic.py` | Bayesian strategy |
 | `src/cores/core/world_model/dynamic_tracking.py` | Kalman filter strategy |
 | `src/cores/core/world_model/sskpm.py` | CORES proposed strategy |
-| `tests/test_physicist.py` | Physicist unit tests (24) |
+| `tests/test_state_estimation.py` | State Estimation unit tests (24) |
 | `tests/test_world_model.py` | Strategy unit tests (21) |
 | `tests/test_world_model_implementations.py` | Cross-strategy tests (138) |
 | `tests/benchmark_world_models.py` | Strategy benchmark framework |
@@ -347,8 +344,8 @@ so the Runtime can switch between them without any code changes.
 - Evaluate impact on Planner, Traveller, and Scientist node quality
 - Explore hybrid model: SSKPM for tracking + Semantic for reasoning
 - Add Particle Filter as an additional strategy
-- Implement the Physicist's observation ingestion via EventBus
+- Implement the State Estimation's observation ingestion via EventBus
 - **Replace heuristics with learned strategies**: association distance,
   physical reasoning rules, confidence dynamics — all currently configurable
-  via `PhysicistConfig` — should eventually be inferred from evidence
+  via `StateEstimationConfig` — should eventually be inferred from evidence
   (Bayesian programme induction, online parameter optimisation, etc.)

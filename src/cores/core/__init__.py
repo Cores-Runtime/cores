@@ -35,10 +35,10 @@ from cores.core.lexicographic_scheduler import (
 )
 from cores.core.runtime import Runtime
 from cores.core.state_estimator import StateEstimator, SimulatedStateEstimator
-from cores.core.physicist import (
-    Physicist,
-    PhysicistConfig,
-    PhysicistHeuristics,
+from cores.core.state_estimation import (
+    StateEstimation,
+    StateEstimationConfig,
+    StateEstimationHeuristics,
     AssociationParameters,
     FusionParameters,
     PhysicalReasoningParameters,
@@ -90,9 +90,9 @@ __all__ = [
     "LexicographicSelectionStrategy",
     "LexicographicKnapsackSolver",
     "LexicographicValue",
-    "Physicist",
-    "PhysicistConfig",
-    "PhysicistHeuristics",
+    "StateEstimation",
+    "StateEstimationConfig",
+    "StateEstimationHeuristics",
     "AssociationParameters",
     "FusionParameters",
     "PhysicalReasoningParameters",

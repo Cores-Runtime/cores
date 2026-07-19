@@ -116,6 +116,38 @@ python benchmarks/validation.py
 
 Generates policy-comparison CSVs, sensitivity-analysis CSVs, ablation-study CSVs, SVG charts, and a Markdown validation report under `benchmarks/results/phase_2a5/`.
 
+### Run world model strategy benchmarks
+
+```bash
+python tests/benchmark_world_models.py
+```
+
+Runs latency, tracking accuracy, and prediction error benchmarks across all 6 WorldModelStrategy implementations. Outputs a comparison table.
+
+### Run StateEstimation tests
+
+```bash
+python -m pytest tests/test_state_estimation.py -v
+```
+
+Tests the StateEstimation cognitive node: observation pipeline, sensor fusion, physical reasoning, consistency checking, confidence management, and runtime integration (72 tests).
+
+### Run world model cross-strategy tests
+
+```bash
+python -m pytest tests/test_world_model_implementations.py -v
+```
+
+Runs the same battery of behavioral tests against all 6 strategy implementations (138 tests) to verify they all satisfy the interface contract.
+
+### Review Phase 4B research
+
+```bash
+cat research/phase-4b-state-estimation.md
+```
+
+Prints the Phase 4B research document covering the StateEstimation cognitive node, world model strategy comparison, and benchmark results.
+
 ### Generate Phase 2A.6 evaluation artifacts
 
 ```bash

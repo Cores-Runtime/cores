@@ -1,9 +1,9 @@
 """
-Physicist — CORES' cognitive node for understanding and predicting physical reality.
+StateEstimation — CORES' cognitive node for understanding and predicting physical reality.
 
 Architecture:
 
-Physicist
+StateEstimation
 ├── Observation Association   — match new observations to existing tracks
 ├── Sensor Fusion             — confidence-weighted multi-observation fusion
 ├── Belief Manager            — update the strategy with fused beliefs
@@ -38,8 +38,6 @@ from cores.core.world_model.simple_registry import SimpleObjectRegistry
 # These are temporary. Every threshold here is a candidate model that should
 # eventually be replaced by a learned/adaptive strategy (e.g. learned
 # association distance, Bayesian motion classification, adaptive confidence).
-#
-# See ADR 0003 for the full migration plan.
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -104,8 +102,8 @@ class ConfidenceParameters:
 
 
 @dataclass
-class PhysicistHeuristics:
-    """Composite of every heuristic parameter group in the Physicist.
+class StateEstimationHeuristics:
+    """Composite of every heuristic parameter group in the StateEstimation.
 
     This entire object is a candidate model. When a heuristic subsystem is
     replaced by a learned strategy, its parameter group disappears entirely.
@@ -118,19 +116,19 @@ class PhysicistHeuristics:
 
 
 # ---------------------------------------------------------------------------
-# PhysicistConfig — runtime options (NOT heuristics).
-# These control *how* the Physicist operates, not *what* it believes.
+# StateEstimationConfig — runtime options (NOT heuristics).
+# These control *how* the StateEstimation operates, not *what* it believes.
 # ---------------------------------------------------------------------------
 
 @dataclass
-class PhysicistConfig:
-    """Runtime configuration for the Physicist cognitive node.
+class StateEstimationConfig:
+    """Runtime configuration for the StateEstimation cognitive node.
 
-    Unlike PhysicistHeuristics, these are permanent structural options
+    Unlike StateEstimationHeuristics, these are permanent structural options
     (logging, debug mode, sensor config) that control how the node operates.
     They are NOT candidate models for learned replacement.
     """
-    # Placeholder — runtime options will be added as the Physicist evolves.
+    # Placeholder — runtime options will be added as the StateEstimation evolves.
     pass
 
 
@@ -138,10 +136,10 @@ class PhysicistConfig:
 # Data types
 # ---------------------------------------------------------------------------
 
-class PhysicistObservation:
+class StateEstimationObservation:
     """
     A single observation from any sensor module.
-    Modules create these and pass them to the Physicist for association
+    Modules create these and pass them to the StateEstimation for association
     and fusion, rather than writing directly to the strategy.
     """
     __slots__ = (
@@ -223,15 +221,15 @@ class ObservationAssociation:
 
     def associate(
         self,
-        observations: List[PhysicistObservation],
+        observations: List[StateEstimationObservation],
         strategy: WorldModelStrategy,
-    ) -> Dict[str, List[PhysicistObservation]]:
+    ) -> Dict[str, List[StateEstimationObservation]]:
         """
         Returns a mapping from existing track IDs to lists of observations
         that should be associated with them. Observations that don't match
         any existing track are keyed under None.
         """
-        result: Dict[str, List[PhysicistObservation]] = {}
+        result: Dict[str, List[StateEstimationObservation]] = {}
 
         for obs in observations:
             matched_id: Optional[str] = None
@@ -272,7 +270,7 @@ class SensorFusion:
 
     def fuse(
         self,
-        observations: List[PhysicistObservation],
+        observations: List[StateEstimationObservation],
     ) -> Tuple[Dict[str, float], float, Dict[str, Any]]:
         if not observations:
             return {}, 0.0, {}
@@ -512,12 +510,12 @@ class ConfidenceManager:
 
 
 # ---------------------------------------------------------------------------
-# Physicist — the main cognitive node
+# StateEstimation — the main cognitive node
 # ---------------------------------------------------------------------------
 
-class Physicist(Module):
+class StateEstimation(Module):
     """
-    The Physicist is the cognitive node responsible for maintaining CORES'
+    The StateEstimation is the cognitive node responsible for maintaining CORES'
     understanding of physical reality.
 
     It owns a WorldModelStrategy that transforms streaming observations into
@@ -538,16 +536,16 @@ class Physicist(Module):
 
     def __init__(
         self,
-        name: str = "physicist",
+        name: str = "state_estimation",
         strategy: Optional[WorldModelStrategy] = None,
-        heuristics: Optional[PhysicistHeuristics] = None,
-        config: Optional[PhysicistConfig] = None,
+        heuristics: Optional[StateEstimationHeuristics] = None,
+        config: Optional[StateEstimationConfig] = None,
     ) -> None:
         super().__init__(name)
-        self._heuristics = heuristics or PhysicistHeuristics()
-        self._config = config or PhysicistConfig()
+        self._heuristics = heuristics or StateEstimationHeuristics()
+        self._config = config or StateEstimationConfig()
         self._strategy: WorldModelStrategy = strategy or SimpleObjectRegistry()
-        self._observation_buffer: List[PhysicistObservation] = []
+        self._observation_buffer: List[StateEstimationObservation] = []
         self._prediction_cache: Dict[str, Any] = {}
         self._motion_hypotheses: Dict[str, MotionHypothesis] = {}
         self._consistency_issues: List[ConsistencyIssue] = []
@@ -587,10 +585,10 @@ class Physicist(Module):
 
     # --- observation pipeline ---
 
-    def ingest_observation(self, observation: PhysicistObservation) -> None:
+    def ingest_observation(self, observation: StateEstimationObservation) -> None:
         self._observation_buffer.append(observation)
 
-    def ingest_observations(self, observations: List[PhysicistObservation]) -> None:
+    def ingest_observations(self, observations: List[StateEstimationObservation]) -> None:
         self._observation_buffer.extend(observations)
 
     def clear_observation_buffer(self) -> None:
@@ -693,7 +691,7 @@ class Physicist(Module):
     def _generate_explanation(self) -> str:
         parts: List[str] = []
         strategy_name = type(self._strategy).__name__
-        parts.append(f"Physicist [{strategy_name}]")
+        parts.append(f"StateEstimation [{strategy_name}]")
 
         obs_count = self._strategy.obstacle_count
         total = len(self._strategy.objects)

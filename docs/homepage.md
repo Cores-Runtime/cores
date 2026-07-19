@@ -20,9 +20,37 @@ A static documentation and demo site for the CORES robotics runtime, built with 
 | Hero | `components/Hero.tsx` | Title, tagline, key metrics, module status badges |
 | Core Modules | `components/ModulesSection.tsx` | 4 composable scheduler modules |
 | Policies | `components/Policies.tsx` | Priority, Criticality, Knapsack, Lexicographic explainers |
+| Brain Nodes | `components/BrainNodes.tsx` | Cognitive node topology diagram (Scheduler, Planner, Navigation Controller, Motion Controller, Perception Engine) |
 | Scenarios | `components/ScenarioList.tsx` | 20 benchmark test cases |
 | Visualizations | `components/Visualizations.tsx` | Bar, radar, heatmap, Pareto, and dependency graph charts |
+| Simulator | `app/simulator/` | Interactive runtime simulator with live/replay modes |
 | Footer | `components/Footer.tsx` | Navigation, artifact links |
+
+## Simulator
+
+The simulator (`app/simulator/`) renders a live CORES runtime session in the browser. It has two modes:
+
+| Mode | Path | Description |
+|---|---|---|
+| **Replay** | `/simulator?mode=replay` (default) | Loads a pre-recorded trace and steps through each cycle |
+| **Live** | `/simulator?mode=live` | Connects to a running CORES instance via WebSocket |
+
+### Simulator Components
+
+All live in `components/simulator/`:
+
+| Component | Purpose |
+|---|---|
+| `RuntimeContext.tsx` | Shared state provider for the simulator (mode, cycle, connection) |
+| `MissionStatus.tsx` | Overall mission progress, battery, safety status |
+| `RobotState.tsx` | Robot pose, velocity, sensor health |
+| `RuntimeModules.tsx` | Module registry, execution state, per-module metrics |
+| `SchedulerPanel.tsx` | Selected policy, execution plan, scheduling decisions |
+| `DecisionTimeline.tsx` | Cycle-by-cycle timeline of scheduling decisions |
+| `DecisionExplanation.tsx` | Natural-language explanation of each decision |
+| `ScenarioControls.tsx` | Load/switch benchmark scenarios |
+| `MetricsPanel.tsx` | Aggregate metrics across policies and scenarios |
+| `replay/` | Replay-specific components for trace playback |
 
 ## Charts
 
@@ -51,7 +79,5 @@ npm run start    # serve production build
 
 ## Style Notes
 
-- No em dashes anywhere in the UI.
-- No gradients, no AI-generated filler text.
 - Custom Tailwind color palette defined in `tailwind.config.ts`.
 - All animations use `framer-motion` `whileInView` triggers.

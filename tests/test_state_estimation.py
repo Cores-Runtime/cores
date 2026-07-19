@@ -1,14 +1,14 @@
 import math
 import pytest
 from cores.core import (
-    Physicist, SimpleObjectRegistry, SSKPM, Runtime, Scheduler,
+    StateEstimation, SimpleObjectRegistry, SSKPM, Runtime, Scheduler,
     DefaultSchedulingPolicy, ExecutionLayer, WorldModel, WorldModelStrategy,
     ProbabilisticWorldModel, DynamicTrackingWorldModel, SemanticWorldModel,
 )
-from cores.core.physicist import (
-    PhysicistHeuristics, AssociationParameters, FusionParameters,
+from cores.core.state_estimation import (
+    StateEstimationHeuristics, AssociationParameters, FusionParameters,
     PhysicalReasoningParameters, ConsistencyParameters, ConfidenceParameters,
-    PhysicistObservation, ObservationAssociation, SensorFusion,
+    StateEstimationObservation, ObservationAssociation, SensorFusion,
     PhysicalReasoning, ConsistencyChecker, ConfidenceManager,
     MotionHypothesis, ConsistencyIssue,
 )
@@ -21,9 +21,9 @@ from cores.core.runtime_context import RuntimeContext
 # Data types
 # =========================================================================
 
-class TestPhysicistObservation:
+class TestStateEstimationObservation:
     def test_default_creation(self):
-        obs = PhysicistObservation(
+        obs = StateEstimationObservation(
             source="camera", object_id="obj_1", object_type="obstacle",
             position={"x": 1, "y": 2}, confidence=0.9, cycle=1,
         )
@@ -35,7 +35,7 @@ class TestPhysicistObservation:
         assert obs.sensor_type == "unknown"
 
     def test_with_sensor_type(self):
-        obs = PhysicistObservation(
+        obs = StateEstimationObservation(
             source="lidar", object_id="o1", object_type="obstacle",
             position={"x": 0, "y": 0}, confidence=0.8, cycle=2,
             sensor_type="lidar",
@@ -43,7 +43,7 @@ class TestPhysicistObservation:
         assert obs.sensor_type == "lidar"
 
     def test_with_properties(self):
-        obs = PhysicistObservation(
+        obs = StateEstimationObservation(
             source="depth", object_id="o1", object_type="obstacle",
             position={"x": 5, "y": 5}, confidence=0.7, cycle=3,
             properties={"color": "red"},
@@ -51,7 +51,7 @@ class TestPhysicistObservation:
         assert obs.properties["color"] == "red"
 
     def test_attributes_mutable(self):
-        obs = PhysicistObservation("cam", "o1", "obstacle", {"x": 1, "y": 2}, 0.9, 1)
+        obs = StateEstimationObservation("cam", "o1", "obstacle", {"x": 1, "y": 2}, 0.9, 1)
         assert obs.source == "cam"
         obs.source = "lidar"
         assert obs.source == "lidar"
@@ -104,7 +104,7 @@ class TestObservationAssociation:
     def test_no_existing_tracks(self):
         strategy = SimpleObjectRegistry()
         associator = ObservationAssociation()
-        obs = PhysicistObservation("cam", "new_obj", "obstacle", {"x": 5, "y": 5}, 0.9, 1)
+        obs = StateEstimationObservation("cam", "new_obj", "obstacle", {"x": 5, "y": 5}, 0.9, 1)
         result = associator.associate([obs], strategy)
         assert any(k.startswith("__new__") for k in result.keys())
 
@@ -114,7 +114,7 @@ class TestObservationAssociation:
         strategy.upsert_object("existing_2", "obstacle", {"x": 50, "y": 50}, 0.9, cycle=1)
 
         associator = ObservationAssociation(AssociationParameters(distance=10.0))
-        obs = PhysicistObservation("cam", "new_obs", "obstacle", {"x": 5.5, "y": 5.5}, 0.9, 2)
+        obs = StateEstimationObservation("cam", "new_obs", "obstacle", {"x": 5.5, "y": 5.5}, 0.9, 2)
         result = associator.associate([obs], strategy)
 
         assert "existing_1" in result
@@ -125,7 +125,7 @@ class TestObservationAssociation:
         strategy.upsert_object("far", "obstacle", {"x": 100, "y": 100}, 0.9, cycle=1)
 
         associator = ObservationAssociation(AssociationParameters(distance=5.0))
-        obs = PhysicistObservation("cam", "far_obs", "obstacle", {"x": 0, "y": 0}, 0.9, 2)
+        obs = StateEstimationObservation("cam", "far_obs", "obstacle", {"x": 0, "y": 0}, 0.9, 2)
         result = associator.associate([obs], strategy)
 
         assert "far" not in result
@@ -136,8 +136,8 @@ class TestObservationAssociation:
         strategy.upsert_object("target", "obstacle", {"x": 10, "y": 10}, 0.9, cycle=1)
 
         associator = ObservationAssociation(AssociationParameters(distance=5.0))
-        obs1 = PhysicistObservation("cam", "obs_a", "obstacle", {"x": 11, "y": 10}, 0.8, 2)
-        obs2 = PhysicistObservation("lidar", "obs_b", "obstacle", {"x": 10.5, "y": 9.5}, 0.9, 2)
+        obs1 = StateEstimationObservation("cam", "obs_a", "obstacle", {"x": 11, "y": 10}, 0.8, 2)
+        obs2 = StateEstimationObservation("lidar", "obs_b", "obstacle", {"x": 10.5, "y": 9.5}, 0.9, 2)
         result = associator.associate([obs1, obs2], strategy)
 
         assert "target" in result
@@ -149,8 +149,8 @@ class TestObservationAssociation:
         strategy.upsert_object("b", "obstacle", {"x": 20, "y": 20}, 0.9, cycle=1)
 
         associator = ObservationAssociation(AssociationParameters(distance=5.0))
-        obs_a = PhysicistObservation("cam", "obs_a", "obstacle", {"x": 0.5, "y": 0.5}, 0.8, 2)
-        obs_b = PhysicistObservation("lidar", "obs_b", "obstacle", {"x": 20.5, "y": 19.5}, 0.9, 2)
+        obs_a = StateEstimationObservation("cam", "obs_a", "obstacle", {"x": 0.5, "y": 0.5}, 0.8, 2)
+        obs_b = StateEstimationObservation("lidar", "obs_b", "obstacle", {"x": 20.5, "y": 19.5}, 0.9, 2)
         result = associator.associate([obs_a, obs_b], strategy)
 
         assert "a" in result
@@ -162,7 +162,7 @@ class TestObservationAssociation:
         strategy = SimpleObjectRegistry()
         strategy.upsert_object("far", "obstacle", {"x": 50, "y": 50}, 0.9, cycle=1)
         associator = ObservationAssociation(AssociationParameters(distance=1.0))
-        obs = PhysicistObservation("cam", "new_id", "obstacle", {"x": 100, "y": 100}, 0.9, 2)
+        obs = StateEstimationObservation("cam", "new_id", "obstacle", {"x": 100, "y": 100}, 0.9, 2)
         result = associator.associate([obs], strategy)
         assert "far" not in result
         assert "__new__new_id" in result
@@ -182,7 +182,7 @@ class TestSensorFusion:
 
     def test_single_observation(self):
         fuser = SensorFusion()
-        obs = PhysicistObservation("cam", "o1", "obstacle", {"x": 5, "y": 10}, 0.9, 1)
+        obs = StateEstimationObservation("cam", "o1", "obstacle", {"x": 5, "y": 10}, 0.9, 1)
         pos, conf, props = fuser.fuse([obs])
         assert pos["x"] == 5
         assert pos["y"] == 10
@@ -190,8 +190,8 @@ class TestSensorFusion:
 
     def test_confidence_weighted_average(self):
         fuser = SensorFusion()
-        obs1 = PhysicistObservation("cam", "o1", "obstacle", {"x": 5, "y": 10}, 0.9, 1)
-        obs2 = PhysicistObservation("lidar", "o1", "obstacle", {"x": 6, "y": 11}, 0.5, 1)
+        obs1 = StateEstimationObservation("cam", "o1", "obstacle", {"x": 5, "y": 10}, 0.9, 1)
+        obs2 = StateEstimationObservation("lidar", "o1", "obstacle", {"x": 6, "y": 11}, 0.5, 1)
         pos, conf, props = fuser.fuse([obs1, obs2])
         expected_x = (5 * 0.9 + 6 * 0.5) / 1.4
         expected_y = (10 * 0.9 + 11 * 0.5) / 1.4
@@ -200,16 +200,16 @@ class TestSensorFusion:
 
     def test_fused_confidence_boost(self):
         fuser = SensorFusion()
-        obs1 = PhysicistObservation("cam", "o1", "obstacle", {"x": 0, "y": 0}, 0.7, 1)
-        obs2 = PhysicistObservation("lidar", "o1", "obstacle", {"x": 0, "y": 0}, 0.7, 1)
+        obs1 = StateEstimationObservation("cam", "o1", "obstacle", {"x": 0, "y": 0}, 0.7, 1)
+        obs2 = StateEstimationObservation("lidar", "o1", "obstacle", {"x": 0, "y": 0}, 0.7, 1)
         _, conf, _ = fuser.fuse([obs1, obs2])
         assert conf > 0.7
         assert conf <= 1.0
 
     def test_fused_sources_tracked(self):
         fuser = SensorFusion()
-        obs1 = PhysicistObservation("camera", "o1", "obstacle", {"x": 1, "y": 1}, 0.8, 1)
-        obs2 = PhysicistObservation("lidar", "o1", "obstacle", {"x": 1, "y": 1}, 0.9, 1)
+        obs1 = StateEstimationObservation("camera", "o1", "obstacle", {"x": 1, "y": 1}, 0.8, 1)
+        obs2 = StateEstimationObservation("lidar", "o1", "obstacle", {"x": 1, "y": 1}, 0.9, 1)
         _, _, props = fuser.fuse([obs1, obs2])
         assert "camera" in props["fused_sources"]
         assert "lidar" in props["fused_sources"]
@@ -218,9 +218,9 @@ class TestSensorFusion:
     def test_three_observations_fusion(self):
         fuser = SensorFusion()
         obs = [
-            PhysicistObservation("a", "o1", "obstacle", {"x": 10, "y": 20}, 0.8, 1),
-            PhysicistObservation("b", "o1", "obstacle", {"x": 11, "y": 19}, 0.7, 1),
-            PhysicistObservation("c", "o1", "obstacle", {"x": 10.5, "y": 20.5}, 0.9, 1),
+            StateEstimationObservation("a", "o1", "obstacle", {"x": 10, "y": 20}, 0.8, 1),
+            StateEstimationObservation("b", "o1", "obstacle", {"x": 11, "y": 19}, 0.7, 1),
+            StateEstimationObservation("c", "o1", "obstacle", {"x": 10.5, "y": 20.5}, 0.9, 1),
         ]
         pos, conf, props = fuser.fuse(obs)
         assert "x" in pos
@@ -230,8 +230,8 @@ class TestSensorFusion:
 
     def test_different_keys_across_observations(self):
         fuser = SensorFusion()
-        obs1 = PhysicistObservation("a", "o1", "obstacle", {"x": 1, "y": 2}, 0.8, 1)
-        obs2 = PhysicistObservation("b", "o1", "obstacle", {"x": 3, "z": 4}, 0.8, 1)
+        obs1 = StateEstimationObservation("a", "o1", "obstacle", {"x": 1, "y": 2}, 0.8, 1)
+        obs2 = StateEstimationObservation("b", "o1", "obstacle", {"x": 3, "z": 4}, 0.8, 1)
         pos, _, _ = fuser.fuse([obs1, obs2])
         assert "x" in pos
         assert "y" in pos
@@ -368,25 +368,25 @@ class TestConfidenceManager:
 
 
 # =========================================================================
-# Physicist — main cognitive node
+# StateEstimation — main cognitive node
 # =========================================================================
 
-class TestPhysicistCreation:
+class TestStateEstimationCreation:
     def test_default_creation(self):
-        p = Physicist()
-        assert p.name == "physicist"
+        p = StateEstimation()
+        assert p.name == "state_estimation"
         assert isinstance(p.strategy, SimpleObjectRegistry)
 
     def test_custom_strategy(self):
-        p = Physicist(strategy=SSKPM())
+        p = StateEstimation(strategy=SSKPM())
         assert isinstance(p.strategy, SSKPM)
 
     def test_custom_name(self):
-        p = Physicist(name="my_physicist")
+        p = StateEstimation(name="my_physicist")
         assert p.name == "my_physicist"
 
     def test_sub_components_created(self):
-        p = Physicist()
+        p = StateEstimation()
         assert hasattr(p, "_associator")
         assert hasattr(p, "_fuser")
         assert hasattr(p, "_reasoner")
@@ -394,10 +394,10 @@ class TestPhysicistCreation:
         assert hasattr(p, "_confidence_mgr")
 
 
-class TestPhysicistObservationPipeline:
+class TestStateEstimationObservationPipeline:
     def test_ingest_single_observation(self):
-        p = Physicist()
-        obs = PhysicistObservation("camera", "test_obj", "obstacle", {"x": 5, "y": 5}, 0.9, 1)
+        p = StateEstimation()
+        obs = StateEstimationObservation("camera", "test_obj", "obstacle", {"x": 5, "y": 5}, 0.9, 1)
         p.ingest_observation(obs)
         state = RobotState()
         context = RuntimeContext()
@@ -405,10 +405,10 @@ class TestPhysicistObservationPipeline:
         assert result.metrics["observations_received"] == 1
 
     def test_ingest_multiple_observations(self):
-        p = Physicist()
+        p = StateEstimation()
         obs = [
-            PhysicistObservation("cam", "o1", "obstacle", {"x": 1, "y": 1}, 0.8, 1),
-            PhysicistObservation("lidar", "o2", "obstacle", {"x": 2, "y": 2}, 0.9, 1),
+            StateEstimationObservation("cam", "o1", "obstacle", {"x": 1, "y": 1}, 0.8, 1),
+            StateEstimationObservation("lidar", "o2", "obstacle", {"x": 2, "y": 2}, 0.9, 1),
         ]
         p.ingest_observations(obs)
         state = RobotState()
@@ -417,8 +417,8 @@ class TestPhysicistObservationPipeline:
         assert result.metrics["observations_received"] == 2
 
     def test_observation_buffer_cleared_after_execute(self):
-        p = Physicist()
-        obs = PhysicistObservation("cam", "o1", "obstacle", {"x": 1, "y": 1}, 0.8, 1)
+        p = StateEstimation()
+        obs = StateEstimationObservation("cam", "o1", "obstacle", {"x": 1, "y": 1}, 0.8, 1)
         p.ingest_observation(obs)
         state = RobotState()
         context = RuntimeContext()
@@ -426,8 +426,8 @@ class TestPhysicistObservationPipeline:
         assert len(p._observation_buffer) == 0
 
     def test_observation_results_in_obstacle(self):
-        p = Physicist()
-        obs = PhysicistObservation("cam", "obs_1", "obstacle", {"x": 10, "y": 20}, 0.9, 1)
+        p = StateEstimation()
+        obs = StateEstimationObservation("cam", "obs_1", "obstacle", {"x": 10, "y": 20}, 0.9, 1)
         p.ingest_observation(obs)
         state = RobotState()
         context = RuntimeContext()
@@ -436,10 +436,10 @@ class TestPhysicistObservationPipeline:
         assert p.strategy.get_object("obs_1") is not None
 
     def test_fused_observations_create_single_track(self):
-        p = Physicist()
+        p = StateEstimation()
         p.ingest_observations([
-            PhysicistObservation("cam", "target", "obstacle", {"x": 5, "y": 5}, 0.8, 1),
-            PhysicistObservation("lidar", "target", "obstacle", {"x": 5.5, "y": 4.5}, 0.9, 1),
+            StateEstimationObservation("cam", "target", "obstacle", {"x": 5, "y": 5}, 0.8, 1),
+            StateEstimationObservation("lidar", "target", "obstacle", {"x": 5.5, "y": 4.5}, 0.9, 1),
         ])
         state = RobotState()
         context = RuntimeContext()
@@ -447,23 +447,23 @@ class TestPhysicistObservationPipeline:
         assert result.metrics["obstacle_count"] == 1
 
     def test_clear_observation_buffer(self):
-        p = Physicist()
-        p.ingest_observation(PhysicistObservation("cam", "o1", "obstacle", {"x": 0, "y": 0}, 0.8, 1))
+        p = StateEstimation()
+        p.ingest_observation(StateEstimationObservation("cam", "o1", "obstacle", {"x": 0, "y": 0}, 0.8, 1))
         p.clear_observation_buffer()
         assert len(p._observation_buffer) == 0
 
 
-class TestPhysicistCognitiveLoop:
+class TestStateEstimationCognitiveLoop:
     def test_execute_returns_module_result(self):
-        p = Physicist()
+        p = StateEstimation()
         state = RobotState()
         context = RuntimeContext()
         result = p.execute(state, context)
-        assert result.module_name == "physicist"
+        assert result.module_name == "state_estimation"
         assert result.status == "SUCCESS"
 
     def test_execute_contains_all_metrics(self):
-        p = Physicist()
+        p = StateEstimation()
         state = RobotState()
         context = RuntimeContext()
         result = p.execute(state, context)
@@ -478,14 +478,14 @@ class TestPhysicistCognitiveLoop:
         assert "strategy_type" in result.metrics
 
     def test_prediction_cache_populated(self):
-        p = Physicist()
+        p = StateEstimation()
         state = RobotState()
         context = RuntimeContext()
         p.execute(state, context)
         assert "method" in p._prediction_cache
 
     def test_motion_hypotheses_populated(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("test", "obstacle", {"x": 1, "y": 1}, 0.9, cycle=1)
         state = RobotState()
         context = RuntimeContext()
@@ -493,7 +493,7 @@ class TestPhysicistCognitiveLoop:
         assert "test" in p.motion_hypotheses
 
     def test_consistency_issues_property(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("at_origin", "obstacle", {"x": 0, "y": 0}, 0.9, cycle=1)
         state = RobotState()
         context = RuntimeContext()
@@ -501,15 +501,15 @@ class TestPhysicistCognitiveLoop:
         assert len(p.consistency_issues) > 0
 
     def test_explanation_generated(self):
-        p = Physicist()
+        p = StateEstimation()
         state = RobotState()
         context = RuntimeContext()
         p.execute(state, context)
-        assert "Physicist" in p.last_explanation
+        assert "StateEstimation" in p.last_explanation
         assert len(p.last_explanation) > 10
 
     def test_explanation_includes_observations(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("shown", "obstacle", {"x": 5, "y": 5}, 0.9, cycle=1)
         p.strategy.upsert_object("moving_target", "obstacle", {"x": 10, "y": 10}, 0.9,
                                   cycle=1, properties={"vx": 2, "vy": 3})
@@ -520,13 +520,13 @@ class TestPhysicistCognitiveLoop:
         assert "2 obstacle(s)" in expl or "obstacle" in expl
 
 
-class TestPhysicistRuntimeIntegration:
-    def test_runtime_has_physicist(self):
+class TestStateEstimationRuntimeIntegration:
+    def test_runtime_has_state_estimation(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
         execution_layer = ExecutionLayer()
         runtime = Runtime(scheduler, execution_layer)
-        assert hasattr(runtime, "physicist")
-        assert runtime.physicist is not None
+        assert hasattr(runtime, "state_estimation")
+        assert runtime.state_estimation is not None
 
     def test_runtime_wires_strategy_to_context(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
@@ -534,9 +534,9 @@ class TestPhysicistRuntimeIntegration:
         runtime = Runtime(scheduler, execution_layer)
         assert runtime.context.world_model is None
         runtime.step()
-        assert runtime.context.world_model is runtime.physicist.strategy
+        assert runtime.context.world_model is runtime.state_estimation.strategy
 
-    def test_physicist_runs_after_modules(self):
+    def test_state_estimation_runs_after_modules(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
         execution_layer = ExecutionLayer()
         runtime = Runtime(scheduler, execution_layer)
@@ -549,16 +549,16 @@ class TestPhysicistRuntimeIntegration:
 
         runtime.register_module(Observer("observer"))
         runtime.step()
-        assert runtime.physicist.strategy.obstacle_count == 1
-        obj = runtime.physicist.strategy.get_object("obs_result")
+        assert runtime.state_estimation.strategy.obstacle_count == 1
+        obj = runtime.state_estimation.strategy.get_object("obs_result")
         assert obj is not None
         assert obj.confidence == 0.95
 
-    def test_physicist_strategy_swappable(self):
+    def test_state_estimation_strategy_swappable(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
         execution_layer = ExecutionLayer()
         runtime = Runtime(scheduler, execution_layer, world_model=SSKPM())
-        assert isinstance(runtime.physicist.strategy, SSKPM)
+        assert isinstance(runtime.state_estimation.strategy, SSKPM)
 
     def test_multiple_steps_persistent_understanding(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
@@ -574,9 +574,9 @@ class TestPhysicistRuntimeIntegration:
         runtime.register_module(Writer("writer"))
         for _ in range(5):
             runtime.step()
-        assert runtime.physicist.strategy.obstacle_count >= 1
+        assert runtime.state_estimation.strategy.obstacle_count >= 1
 
-    def test_physicist_explanation_in_snapshot(self):
+    def test_state_estimation_explanation_in_snapshot(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
         execution_layer = ExecutionLayer()
         runtime = Runtime(scheduler, execution_layer)
@@ -585,7 +585,7 @@ class TestPhysicistRuntimeIntegration:
         assert snapshot is not None
         assert len(snapshot.explainability.module_changes) > 0
 
-    def test_physicist_understanding_in_snapshot(self):
+    def test_state_estimation_understanding_in_snapshot(self):
         scheduler = Scheduler(DefaultSchedulingPolicy())
         execution_layer = ExecutionLayer()
         runtime = Runtime(scheduler, execution_layer)
@@ -603,38 +603,38 @@ class TestPhysicistRuntimeIntegration:
         assert snapshot.world_model.obstacle_count >= 1
 
 
-class TestPhysicistForwardedMethods:
+class TestStateEstimationForwardedMethods:
     def test_upsert_forwarded(self):
-        p = Physicist()
+        p = StateEstimation()
         obj = p.upsert_object("fwd_1", "obstacle", {"x": 3, "y": 4}, 0.9, cycle=1)
         assert obj.id == "fwd_1"
         assert p.strategy.get_object("fwd_1") is not None
 
     def test_get_object_forwarded(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("fwd_2", "obstacle", {"x": 1, "y": 2}, 0.9, cycle=1)
         obj = p.get_object("fwd_2")
         assert obj is not None
         assert obj.id == "fwd_2"
 
     def test_get_objects_by_type_forwarded(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("fwd_3", "waypoint", {"x": 10, "y": 10}, 1.0, cycle=1)
         results = p.get_objects_by_type("waypoint")
         assert len(results) == 1
         assert results[0].id == "fwd_3"
 
     def test_get_nonexistent_forwarded(self):
-        p = Physicist()
+        p = StateEstimation()
         assert p.get_object("nonexistent") is None
 
     def test_update_environment_forwarded(self):
-        p = Physicist()
+        p = StateEstimation()
         p.update_environment(terrain="mars")
         assert p.strategy.environment.terrain == "mars"
 
     def test_remove_stale_forwarded(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("stale", "obstacle", {"x": 0, "y": 0}, 0.5, cycle=1)
         p.strategy.upsert_object("fresh", "obstacle", {"x": 1, "y": 1}, 0.9, cycle=10)
         removed = p.remove_stale_objects(current_cycle=10, max_age=5)
@@ -643,9 +643,9 @@ class TestPhysicistForwardedMethods:
         assert p.strategy.get_object("fresh") is not None
 
 
-class TestPhysicistEdgeCases:
+class TestStateEstimationEdgeCases:
     def test_empty_strategy(self):
-        p = Physicist()
+        p = StateEstimation()
         state = RobotState()
         context = RuntimeContext()
         result = p.execute(state, context)
@@ -653,22 +653,22 @@ class TestPhysicistEdgeCases:
         assert result.metrics["objects_tracked"] == 0
 
     def test_strategy_switch(self):
-        p = Physicist()
+        p = StateEstimation()
         assert isinstance(p.strategy, SimpleObjectRegistry)
         p.strategy = SSKPM()
         assert isinstance(p.strategy, SSKPM)
 
     def test_physical_understanding_serializable(self):
-        p = Physicist()
+        p = StateEstimation()
         p.strategy.upsert_object("ser_test", "obstacle", {"x": 1, "y": 2}, 0.9, cycle=1)
         understanding = p.physical_understanding
         assert "objects" in understanding
         assert understanding["obstacle_count"] == 1
 
     def test_lots_of_observations(self):
-        p = Physicist()
+        p = StateEstimation()
         obs_list = [
-            PhysicistObservation(f"cam_{i}", f"obj_{i}", "obstacle",
+            StateEstimationObservation(f"cam_{i}", f"obj_{i}", "obstacle",
                                  {"x": float(i), "y": float(i * 2)}, 0.8, 1)
             for i in range(50)
         ]
@@ -680,7 +680,7 @@ class TestPhysicistEdgeCases:
         assert result.metrics["obstacle_count"] == 50
 
     def test_prediction_cache_accessible(self):
-        p = Physicist()
+        p = StateEstimation()
         state = RobotState()
         context = RuntimeContext()
         p.execute(state, context)

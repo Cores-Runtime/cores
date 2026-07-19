@@ -83,7 +83,7 @@ class RuntimeStateBuilder:
         module_results: List[ModuleResult],
         cycle_events: List[Event],
         decision_time_ms: float,
-        physicist: Any = None,
+        state_estimation: Any = None,
     ) -> RuntimeState:
         active = []
         sleeping = []
@@ -163,7 +163,7 @@ class RuntimeStateBuilder:
 
         flags = state.flags if hasattr(state, "flags") else {}
 
-        understanding = physicist.strategy if physicist is not None else context.world_model
+        understanding = state_estimation.strategy if state_estimation is not None else context.world_model
         if understanding is not None:
             world_snapshot = WorldModelSnapshot(
                 environment=EnvironmentSnapshot(
@@ -228,7 +228,7 @@ class RuntimeStateBuilder:
                 scheduler_rationale=self._build_rationale(
                     scheduler_state, context, module_states
                 ),
-                module_changes=[physicist.last_explanation] if physicist is not None and physicist.last_explanation else [],
+                module_changes=[state_estimation.last_explanation] if state_estimation is not None and state_estimation.last_explanation else [],
             ),
             world_model=world_snapshot,
         )

@@ -6,7 +6,7 @@ from cores.core.scheduler import Scheduler
 from cores.core.state_estimator import StateEstimator
 from cores.core.module_registry import ModuleRegistry
 from cores.core.world_model import WorldModelStrategy, SimpleObjectRegistry
-from cores.core.physicist import Physicist
+from cores.core.state_estimation import StateEstimation
 from cores.events.event_bus import EventBus
 from cores.events.event import Event
 from cores.events.event_type import EventType
@@ -41,7 +41,7 @@ class Runtime:
 
         self.module_registry = ModuleRegistry()
         strategy = world_model or SimpleObjectRegistry()
-        self.physicist = Physicist(strategy=strategy)
+        self.state_estimation = StateEstimation(strategy=strategy)
         self.world_model = strategy
         self._buffered_events: List[Event] = []
         self._last_module_results: List[ModuleResult] = []
@@ -77,12 +77,12 @@ class Runtime:
         2. Estimate robot state.
         3. Collect events from the previous cycle.
         4. Schedule and execute all registered modules.
-        5. Run the Physicist's cognitive loop (predict, check, explain).
+        5. Run the StateEstimation's cognitive loop (predict, check, explain).
         6. Publish runtime state snapshot through the bridge.
         7. Advance runtime context metadata.
         """
-        # 1. Wire the Physicist's reasoning strategy into context
-        self.context.world_model = self.physicist.strategy
+        # 1. Wire the StateEstimation's reasoning strategy into context
+        self.context.world_model = self.state_estimation.strategy
 
         # 2. State estimation
         if self.state_estimator is not None:
@@ -102,9 +102,9 @@ class Runtime:
             for event in result.events:
                 self.event_bus.publish(event)
 
-        # 5. Physicist cognitive loop — runs after all observation modules
-        physicist_result = self.physicist.execute(self.state, self.context)
-        self._last_module_results.append(physicist_result)
+        # 5. StateEstimation cognitive loop — runs after all observation modules
+        state_estimation_result = self.state_estimation.execute(self.state, self.context)
+        self._last_module_results.append(state_estimation_result)
 
         # 6. Capture decision time from context metrics
         self._last_decision_time_ms = float(
@@ -122,7 +122,7 @@ class Runtime:
             module_results=self._last_module_results,
             cycle_events=list(events_to_process),
             decision_time_ms=self._last_decision_time_ms,
-            physicist=self.physicist,
+            state_estimation=self.state_estimation,
         )
         self.bridge.publish(runtime_state)
 
