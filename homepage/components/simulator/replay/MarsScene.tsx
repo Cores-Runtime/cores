@@ -4,7 +4,7 @@ import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Line } from "@react-three/drei";
 import * as THREE from "three";
-import type { RuntimeState } from "@/lib/runtime-types";
+import type { SimulatorState } from "@/lib/runtime-types";
 
 const WAYPOINTS = [
   new THREE.Vector3(0, 0, 5),
@@ -56,7 +56,7 @@ const PATH_SAMPLE_COUNT = 200;
 
 export type CameraPreset = "free" | "cinematic" | "topdown" | "thirdperson";
 
-function Rover({ state }: { state: RuntimeState }) {
+function Rover({ state }: { state: SimulatorState }) {
   const groupRef = useRef<THREE.Group>(null);
   const wheelsRef = useRef<(THREE.Mesh | null)[]>([]);
   const suspRef = useRef<(THREE.Group | null)[]>([]);
@@ -374,7 +374,7 @@ function getObstaclePathPosition(): { pos: THREE.Vector3; tangent: THREE.Vector3
 
 const ROCK_SCALES = ROCKS_DATA.map(r => r.size * (0.4 + ((r.x * 7.1 + r.z * 3.7) % 1) * 0.4));
 
-function Rocks({ state }: { state: RuntimeState }) {
+function Rocks({ state }: { state: SimulatorState }) {
   const obstacleNear = state.world.obstacleDistance < 1;
   const { pos: roverPos } = getRobotPosition(state.robot.missionProgress);
 
@@ -394,7 +394,7 @@ function Rocks({ state }: { state: RuntimeState }) {
   });
 }
 
-function RockSlide({ state }: { state: RuntimeState }) {
+function RockSlide({ state }: { state: SimulatorState }) {
   const rockGroupRef = useRef<THREE.Group>(null);
   const rockScales = useRef<number[]>([]);
   const prevObstacleNear = useRef(false);
@@ -566,7 +566,7 @@ function ExecutedPath({ progress }: { progress: number }) {
   );
 }
 
-function GhostPaths({ state }: { state: RuntimeState }) {
+function GhostPaths({ state }: { state: SimulatorState }) {
   const progress = state.robot.missionProgress;
   const obstacleNear = state.world.obstacleDistance < 1;
 
@@ -658,7 +658,7 @@ function WheelTracks({ progress }: { progress: number }) {
   );
 }
 
-function WheelDust({ state }: { state: RuntimeState }) {
+function WheelDust({ state }: { state: SimulatorState }) {
   const wheelDustRef = useRef<THREE.Points>(null);
   const roverPos = getRobotPosition(state.robot.missionProgress).pos;
   const wheelsMoving = state.robot.missionProgress > 0 && state.robot.missionProgress < 100;
@@ -715,7 +715,7 @@ function WheelDust({ state }: { state: RuntimeState }) {
   );
 }
 
-function DustStorm({ active, state }: { active: boolean; state: RuntimeState }) {
+function DustStorm({ active, state }: { active: boolean; state: SimulatorState }) {
   const pointsRef = useRef<THREE.Points>(null);
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -753,7 +753,7 @@ function DustStorm({ active, state }: { active: boolean; state: RuntimeState }) 
   );
 }
 
-function SceneLighting({ state }: { state: RuntimeState }) {
+function SceneLighting({ state }: { state: SimulatorState }) {
   const stormActive = state.world.weather === "Dust Storm";
   const lowBattery = state.robot.battery < 25;
   const criticalBattery = state.robot.battery < 10;
@@ -785,7 +785,7 @@ function SceneLighting({ state }: { state: RuntimeState }) {
   );
 }
 
-function CameraController({ state, preset: currentPreset }: { state: RuntimeState; preset: CameraPreset }) {
+function CameraController({ state, preset: currentPreset }: { state: SimulatorState; preset: CameraPreset }) {
   const { camera } = useThree();
   const targetRef = useRef(new THREE.Vector3());
   const shakeRef = useRef(0);
@@ -846,7 +846,7 @@ function CameraController({ state, preset: currentPreset }: { state: RuntimeStat
   return null;
 }
 
-export function MarsScene({ state, cameraPreset = "free" }: { state: RuntimeState; cameraPreset?: CameraPreset }) {
+export function MarsScene({ state, cameraPreset = "free" }: { state: SimulatorState; cameraPreset?: CameraPreset }) {
   const lowBattery = state.robot.battery < 25;
   const criticalBattery = state.robot.battery < 10;
   const bgColor = criticalBattery

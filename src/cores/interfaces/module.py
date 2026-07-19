@@ -1,25 +1,26 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import StrEnum
-from typing import Any, Dict, FrozenSet, List, Optional
+from typing import Any, Dict, FrozenSet, List, Optional, Set, TYPE_CHECKING
+
 from pydantic import BaseModel, Field
-from cores.core import RobotState, RuntimeContext
 from cores.events import Event
+
+if TYPE_CHECKING:
+    from cores.core.robot_state import RobotState
+    from cores.core.runtime_context import RuntimeContext
 
 
 class ModuleStatus(StrEnum):
-    """
-    Represents the execution status of a module.
-    """
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
     SKIPPED = "SKIPPED"
 
 
 class ModuleResult(BaseModel):
-    """
-    ModuleResult represents the complete boundary output of a module's execution cycle.
-    """
     module_name: str
     status: ModuleStatus = ModuleStatus.SUCCESS
     events: List[Event] = Field(default_factory=list)
@@ -28,12 +29,15 @@ class ModuleResult(BaseModel):
     error_message: Optional[str] = None
 
 
+class ModuleLifecycleStage(StrEnum):
+    CREATED = "created"
+    REGISTERED = "registered"
+    STARTED = "started"
+    STOPPED = "stopped"
+
+
 @dataclass(frozen=True)
 class ModuleProfile:
-    """
-    Static scheduling metadata used by adaptive policies.
-    """
-
     safety_weight: float = 0.0
     mission_weight: float = 0.0
     urgency_weight: float = 0.0
@@ -45,13 +49,14 @@ class ModuleProfile:
     is_diagnostic: bool = False
     is_recovery: bool = False
     is_localization: bool = False
+    version: str = "0.1.0"
+    description: str = ""
+    author: str = ""
+    tags: FrozenSet[str] = field(default_factory=frozenset)
+    dependencies: FrozenSet[str] = field(default_factory=frozenset)
 
 
 class Module(ABC):
-    """
-    Abstract base class for all cognitive modules.
-    """
-
     def __init__(
         self,
         name: str,
@@ -61,10 +66,33 @@ class Module(ABC):
         self.name = name
         self.priority = priority
         self.profile = profile or ModuleProfile()
+        self._lifecycle_stage: ModuleLifecycleStage = ModuleLifecycleStage.CREATED
 
     @abstractmethod
-    def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
-        """
-        Perform computation based on the current state and context.
-        """
+    def execute(self, state: "RobotState", context: "RuntimeContext") -> ModuleResult:
         pass
+
+    @property
+    def lifecycle_stage(self) -> ModuleLifecycleStage:
+        return self._lifecycle_stage
+
+    def on_register(self, runtime: Any) -> None:
+        self._lifecycle_stage = ModuleLifecycleStage.REGISTERED
+
+    def on_startup(self) -> None:
+        self._lifecycle_stage = ModuleLifecycleStage.STARTED
+
+    def on_shutdown(self) -> None:
+        self._lifecycle_stage = ModuleLifecycleStage.STOPPED
+
+    @property
+    def dependencies(self) -> FrozenSet[str]:
+        return self.profile.dependencies
+
+    @property
+    def description(self) -> str:
+        return self.profile.description
+
+    @property
+    def display_name(self) -> str:
+        return self.name.replace("_", " ").title()

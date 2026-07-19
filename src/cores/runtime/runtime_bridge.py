@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from cores.core.robot_state import RobotState
 from cores.core.runtime_context import RuntimeContext
@@ -17,6 +17,10 @@ from cores.runtime.runtime_state import (
     RobotSnapshot,
     EventsSnapshot,
     ExplainabilityState,
+    WorldModelSnapshot,
+    EnvironmentSnapshot,
+    DetectedObjectSnapshot,
+    UncertaintySnapshot,
 )
 
 
@@ -79,6 +83,7 @@ class RuntimeStateBuilder:
         module_results: List[ModuleResult],
         cycle_events: List[Event],
         decision_time_ms: float,
+        physicist: Any = None,
     ) -> RuntimeState:
         active = []
         sleeping = []
@@ -158,6 +163,39 @@ class RuntimeStateBuilder:
 
         flags = state.flags if hasattr(state, "flags") else {}
 
+        understanding = physicist.strategy if physicist is not None else context.world_model
+        if understanding is not None:
+            world_snapshot = WorldModelSnapshot(
+                environment=EnvironmentSnapshot(
+                    terrain=understanding.environment.terrain,
+                    weather=understanding.environment.weather,
+                    temperature=understanding.environment.temperature,
+                    lighting=understanding.environment.lighting,
+                    hazard_count=len(understanding.environment.hazards),
+                    obstacle_distance=understanding.environment.obstacle_distance,
+                ),
+                objects=[
+                    DetectedObjectSnapshot(
+                        id=o.id,
+                        object_type=o.object_type,
+                        position=dict(o.position),
+                        confidence=o.confidence,
+                        last_seen_cycle=o.last_seen_cycle,
+                    )
+                    for o in understanding.objects
+                ],
+                uncertainty=UncertaintySnapshot(
+                    localization=understanding.uncertainty.localization,
+                    mapping=understanding.uncertainty.mapping,
+                    perception=understanding.uncertainty.perception,
+                    sensor_health=dict(understanding.uncertainty.sensor_health),
+                ),
+                obstacle_count=understanding.obstacle_count,
+                last_update_cycle=understanding.last_update_cycle,
+            )
+        else:
+            world_snapshot = WorldModelSnapshot()
+
         return RuntimeState(
             timestamp=datetime.now(),
             mission=MissionState(
@@ -190,7 +228,9 @@ class RuntimeStateBuilder:
                 scheduler_rationale=self._build_rationale(
                     scheduler_state, context, module_states
                 ),
+                module_changes=[physicist.last_explanation] if physicist is not None and physicist.last_explanation else [],
             ),
+            world_model=world_snapshot,
         )
 
     @staticmethod

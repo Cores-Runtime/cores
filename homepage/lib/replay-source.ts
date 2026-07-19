@@ -1,5 +1,5 @@
 import type { RuntimeSource, EventInfo } from "./runtime-source";
-import type { RuntimeState, TraceSnapshot } from "./runtime-types";
+import type { SimulatorState, TraceSnapshot } from "./runtime-types";
 import type { TraceLoader } from "./trace-loader";
 
 export class ReplayRuntimeSource implements RuntimeSource {
@@ -7,7 +7,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
   private index = 0;
   private listeners = new Set<() => void>();
   private timer: ReturnType<typeof setInterval> | null = null;
-  private idleState: RuntimeState;
+  private idleState: SimulatorState;
   private tickToSnapshot: Map<number, TraceSnapshot> = new Map();
   private eventTicks: Record<string, number> = {};
   private _paused = false;
@@ -45,7 +45,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
     }
   }
 
-  private buildIdleState(): RuntimeState {
+  private buildIdleState(): SimulatorState {
     return {
       tick: 0,
       timestamp: 0,
@@ -74,14 +74,14 @@ export class ReplayRuntimeSource implements RuntimeSource {
     };
   }
 
-  getState(): RuntimeState {
+  getState(): SimulatorState {
     if (this.snapshots.length === 0 || this.index >= this.snapshots.length) {
       return this.idleState;
     }
     if (this._paused) {
-      return { ...this.snapshots[this.index], status: "paused" } as unknown as RuntimeState;
+      return { ...this.snapshots[this.index], status: "paused" } as unknown as SimulatorState;
     }
-    return this.snapshots[this.index] as unknown as RuntimeState;
+    return this.snapshots[this.index] as unknown as SimulatorState;
   }
 
   subscribe(callback: () => void): () => void {
@@ -113,7 +113,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
     }
   }
 
-  setStatus(s: RuntimeState["status"]) {
+  setStatus(s: SimulatorState["status"]) {
     if (s === "running") {
       this._paused = false;
       this.start();

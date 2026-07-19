@@ -6,6 +6,10 @@ from cores.runtime.runtime_state import (
     RobotSnapshot,
     EventsSnapshot,
     ExplainabilityState,
+    WorldModelSnapshot,
+    EnvironmentSnapshot,
+    DetectedObjectSnapshot,
+    UncertaintySnapshot,
 )
 from cores.runtime.runtime_bridge import (
     RuntimeBridge,
@@ -24,6 +28,10 @@ __all__ = [
     "RobotSnapshot",
     "EventsSnapshot",
     "ExplainabilityState",
+    "WorldModelSnapshot",
+    "EnvironmentSnapshot",
+    "DetectedObjectSnapshot",
+    "UncertaintySnapshot",
     "RuntimeBridge",
     "InMemoryRuntimeBridge",
     "RuntimeStateBuilder",

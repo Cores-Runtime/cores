@@ -86,9 +86,9 @@ function ReplayControls() {
   );
 }
 
-import type { RuntimeState } from "@/lib/runtime-types";
+import type { SimulatorState } from "@/lib/runtime-types";
 
-function computeMissionStats(state: RuntimeState): {
+function computeMissionStats(state: SimulatorState): {
   distance: string; energyUsed: string; modulesActivated: number;
   safetyEvents: number; decisions: number; missionTime: string;
 } {
@@ -130,7 +130,7 @@ function StatCard({ icon, label, value, delay }: { icon: string; label: string; 
   );
 }
 
-function MissionCompleteOverlay({ state, onOpenDashboard, onReplay }: { state: RuntimeState; onOpenDashboard: () => void; onReplay: () => void }) {
+function MissionCompleteOverlay({ state, onOpenDashboard, onReplay }: { state: SimulatorState; onOpenDashboard: () => void; onReplay: () => void }) {
   const stats = useMemo(() => computeMissionStats(state), [state.tick]);
 
   return (
@@ -227,7 +227,7 @@ function MissionCompleteOverlay({ state, onOpenDashboard, onReplay }: { state: R
   );
 }
 
-function CognitionStream({ state }: { state: RuntimeState }) {
+function CognitionStream({ state }: { state: SimulatorState }) {
   const [steps, setSteps] = useState<{ id: number; text: string; icon: string; color: string }[]>([]);
   const processedTickRef = useRef(-1);
   const processedEventsLen = useRef(0);
@@ -327,7 +327,7 @@ function CognitionStream({ state }: { state: RuntimeState }) {
   );
 }
 
-function ModuleActivityFeed({ state }: { state: RuntimeState }) {
+function ModuleActivityFeed({ state }: { state: SimulatorState }) {
   const [cards, setCards] = useState<{ id: number; name: string; text: string; color: string }[]>([]);
   const prevModulesRef = useRef(state.modules);
   const processedTickRef = useRef(-1);
@@ -386,7 +386,7 @@ function ModuleActivityFeed({ state }: { state: RuntimeState }) {
   );
 }
 
-function RuntimeHUD({ state }: { state: RuntimeState }) {
+function RuntimeHUD({ state }: { state: SimulatorState }) {
   const w = state.world;
   const r = state.robot;
   const navActive = state.modules["navigation-controller"]?.status === "running";
@@ -428,7 +428,7 @@ function RuntimeHUD({ state }: { state: RuntimeState }) {
   );
 }
 
-function MissionPanel({ state }: { state: RuntimeState }) {
+function MissionPanel({ state }: { state: SimulatorState }) {
   const r = state.robot;
   const lowBattery = r.battery < 25;
   return (

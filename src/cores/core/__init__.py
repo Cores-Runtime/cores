@@ -1,6 +1,6 @@
 from cores.core.robot_state import RobotState
 from cores.core.runtime_context import RuntimeContext
-from cores.core.execution_layer import ExecutionLayer
+from cores.core.execution_layer import ExecutionLayer, TraceEntry
 from cores.core.execution_plan import ExecutionPlan
 from cores.core.scheduler import (
     CriticalitySchedulingPolicy,
@@ -35,6 +35,29 @@ from cores.core.lexicographic_scheduler import (
 )
 from cores.core.runtime import Runtime
 from cores.core.state_estimator import StateEstimator, SimulatedStateEstimator
+from cores.core.physicist import (
+    Physicist,
+    PhysicistConfig,
+    PhysicistHeuristics,
+    AssociationParameters,
+    FusionParameters,
+    PhysicalReasoningParameters,
+    ConsistencyParameters,
+    ConfidenceParameters,
+)
+from cores.core.world_model import (
+    WorldModelStrategy,
+    WorldModel,
+    SimpleObjectRegistry,
+    OccupancyGrid,
+    SemanticWorldModel,
+    ProbabilisticWorldModel,
+    DynamicTrackingWorldModel,
+    SSKPM,
+    EnvironmentState,
+    DetectedObject,
+    UncertaintyState,
+)
 
 __all__ = [
     "RobotState",
@@ -67,4 +90,23 @@ __all__ = [
     "LexicographicSelectionStrategy",
     "LexicographicKnapsackSolver",
     "LexicographicValue",
+    "Physicist",
+    "PhysicistConfig",
+    "PhysicistHeuristics",
+    "AssociationParameters",
+    "FusionParameters",
+    "PhysicalReasoningParameters",
+    "ConsistencyParameters",
+    "ConfidenceParameters",
+    "WorldModelStrategy",
+    "WorldModel",
+    "SimpleObjectRegistry",
+    "OccupancyGrid",
+    "SemanticWorldModel",
+    "ProbabilisticWorldModel",
+    "DynamicTrackingWorldModel",
+    "SSKPM",
+    "EnvironmentState",
+    "DetectedObject",
+    "UncertaintyState",
 ]

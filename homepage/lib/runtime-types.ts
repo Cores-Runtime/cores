@@ -93,7 +93,7 @@ export interface TraceMetadata {
   };
 }
 
-export interface RuntimeState {
+export interface SimulatorState {
   readonly tick: number;
   readonly timestamp: number;
   readonly status: "idle" | "running" | "paused";

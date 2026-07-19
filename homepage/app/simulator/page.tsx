@@ -1,7 +1,8 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { RuntimeProvider } from "@/components/simulator/RuntimeContext";
+import { RuntimeProvider, type SimulatorMode } from "@/components/simulator/RuntimeContext";
 import { MissionStatus } from "@/components/simulator/MissionStatus";
 import { RobotState } from "@/components/simulator/RobotState";
 import { RuntimeModules } from "@/components/simulator/RuntimeModules";
@@ -12,8 +13,12 @@ import { MetricsPanel } from "@/components/simulator/MetricsPanel";
 import { DecisionExplanation } from "@/components/simulator/DecisionExplanation";
 
 export default function SimulatorPage() {
+  const searchParams = useSearchParams();
+  const modeParam = searchParams.get("mode");
+  const initialMode: SimulatorMode = modeParam === "live" ? "live" : "replay";
+
   return (
-    <RuntimeProvider>
+    <RuntimeProvider initialMode={initialMode}>
       <div className="min-h-screen bg-paper">
         <nav className="fixed top-0 left-0 right-0 z-50 bg-paper/80 backdrop-blur-md border-b border-border">
           <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">

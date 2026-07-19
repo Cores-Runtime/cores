@@ -5,6 +5,38 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 
 
+class EnvironmentSnapshot(BaseModel):
+    terrain: str = Field(default="unknown")
+    weather: str = Field(default="clear")
+    temperature: float = Field(default=20.0)
+    lighting: str = Field(default="day")
+    hazard_count: int = Field(default=0)
+    obstacle_distance: float = Field(default=10.0)
+
+
+class DetectedObjectSnapshot(BaseModel):
+    id: str
+    object_type: str
+    position: Dict[str, float] = Field(default_factory=dict)
+    confidence: float = Field(default=0.0)
+    last_seen_cycle: int = Field(default=0)
+
+
+class UncertaintySnapshot(BaseModel):
+    localization: float = Field(default=0.0)
+    mapping: float = Field(default=0.0)
+    perception: float = Field(default=0.0)
+    sensor_health: Dict[str, float] = Field(default_factory=dict)
+
+
+class WorldModelSnapshot(BaseModel):
+    environment: EnvironmentSnapshot = Field(default_factory=EnvironmentSnapshot)
+    objects: List[DetectedObjectSnapshot] = Field(default_factory=list)
+    uncertainty: UncertaintySnapshot = Field(default_factory=UncertaintySnapshot)
+    obstacle_count: int = Field(default=0)
+    last_update_cycle: int = Field(default=0)
+
+
 class MissionState(BaseModel):
     mission_id: str = Field(default="")
     state: str = Field(default="idle")
@@ -71,3 +103,4 @@ class RuntimeState(BaseModel):
     robot: RobotSnapshot = Field(default_factory=RobotSnapshot)
     events: EventsSnapshot = Field(default_factory=EventsSnapshot)
     explainability: ExplainabilityState = Field(default_factory=ExplainabilityState)
+    world_model: WorldModelSnapshot = Field(default_factory=WorldModelSnapshot)
