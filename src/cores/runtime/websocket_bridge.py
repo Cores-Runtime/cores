@@ -28,6 +28,36 @@ def _wrap_snapshot(snapshot: RuntimeState) -> str:
 
 
 class WebSocketRuntimeBridge(RuntimeBridge):
+    """
+    WebSocket transport for RuntimeBridge.
+
+    Streams RuntimeState snapshots to connected WebSocket clients in real time.
+
+    Queue behavior (maxsize=1, drop-stale):
+    ---------------------------------------
+    The bridge uses a thread-safe queue.Queue with maxsize=1 between the
+    runtime thread and the networking thread. When the runtime produces
+    snapshots faster than the network can send them, the queue drops the
+    oldest snapshot and keeps only the latest. This means the bridge only
+    guarantees eventual delivery of the *most recent* state, not every
+    intermediate state. This is intentional: for real-time simulator
+    visualization, stale snapshots are worse than skipping frames. The
+    networking thread is never backlogged.
+
+    Lifecycle:
+    ----------
+        bridge = WebSocketRuntimeBridge(host, port)
+        bridge.start()       # spawns daemon thread with asyncio loop
+        ...
+        bridge.close()       # stops server, joins thread, cleans up
+
+    Thread safety:
+    --------------
+    publish() is called from the runtime thread and never blocks.
+    The networking thread owns the asyncio event loop and dequeue logic.
+    A threading.Lock protects the client set.
+    """
+
     def __init__(
         self,
         host: str = "127.0.0.1",
@@ -62,6 +92,13 @@ class WebSocketRuntimeBridge(RuntimeBridge):
         self._thread.start()
 
     def publish(self, state: RuntimeState) -> None:
+        """
+        Publish a RuntimeState snapshot to all connected clients.
+
+        Called from the runtime thread. Never blocks. If the queue is full
+        (maxsize=1), the oldest snapshot is dropped to make room for the
+        latest — see class docstring for the rationale.
+        """
         self._latest_snapshot = state
         try:
             self._queue.put_nowait(state)
