@@ -12,7 +12,6 @@ The current repository contains:
 - unit tests in `tests/`
 - microbenchmarks and validation tooling in `benchmarks/`
 - research design and discussion documents in `research/`
-- project rules and architecture guidance in `AI-Instructions/`
 
 ## Current State
 
@@ -43,8 +42,6 @@ See [docs/commands.md](docs/commands.md) for the full command reference.
 ## Key Documents
 
 - [docs/README.md](docs/README.md)
-- [AI-Instructions/ARCHITECTURE.md](AI-Instructions/ARCHITECTURE.md)
-- [AI-Instructions/ADR/README.md](AI-Instructions/ADR/README.md)
 - [research/adaptive_scheduler_design.md](research/adaptive_scheduler_design.md)
 - [research/phase_2a5_validation.md](research/phase_2a5_validation.md)
 - [research/phase_2a5_discussion.md](research/phase_2a5_discussion.md)

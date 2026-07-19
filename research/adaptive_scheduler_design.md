@@ -602,12 +602,7 @@ The Adaptive Cognitive Scheduler research program succeeds when:
 
 | Document | Relevance |
 |---|---|
-| `AI-Instructions/what-to-do-next` | Research roadmap and scenario definitions |
-| `AI-Instructions/SCHEDULER_DESIGN.md` | Scheduler responsibilities and modes |
-| `AI-Instructions/TERMINOLOGY.md` | Adaptive Cognitive Scheduling definition |
-| `AI-Instructions/BENCHMARKS.md` | Evaluation philosophy and metrics |
-| `AI-Instructions/FUTURE_MODULE_ALGOS.md` | Operator → Knapsack algorithm vision |
-| `AI-Instructions/ADR/0005-scheduling-policy.md` | Policy abstraction constraint |
+ Policy abstraction constraint |
 | `src/cores/core/scheduler.py` | Existing `OperatorSchedulingPolicy` baseline |
 
 ---

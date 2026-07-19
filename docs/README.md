@@ -16,8 +16,6 @@ This directory contains the repo-level developer documentation for the current r
 
 | Location | Purpose |
 |---|---|
-| [../AI-Instructions/ARCHITECTURE.md](../AI-Instructions/ARCHITECTURE.md) | Project architectural source of truth |
-| [../AI-Instructions/ADR/README.md](../AI-Instructions/ADR/README.md) | Architecture Decision Record index |
 | [../research/adaptive_scheduler_design.md](../research/adaptive_scheduler_design.md) | Adaptive scheduler research design |
 | [../research/phase_2a5_validation.md](../research/phase_2a5_validation.md) | Validation milestone definition |
 | [../research/phase_2a5_discussion.md](../research/phase_2a5_discussion.md) | Validation findings and hypothesis discussion |
