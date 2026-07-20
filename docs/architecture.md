@@ -1,4 +1,4 @@
-# CORES Runtime — Architecture
+# CORES Runtime - Architecture
 
 ## System Overview
 
@@ -43,7 +43,7 @@ One call to `Runtime.step()` executes this exact sequence:
         ↓
 2. Schedule           scheduler.schedule(modules, state, context, events)
         ↓
-3. ExecutionPlan      Ordered List[Module] — immutable contract
+3. ExecutionPlan      Ordered List[Module] - immutable contract
         ↓
 4. Execute            execution_layer.execute(plan, state, context)
         ↓

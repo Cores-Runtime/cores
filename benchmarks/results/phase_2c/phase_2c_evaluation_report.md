@@ -36,13 +36,13 @@
 
 ## Artifacts Generated
 
-- `scenario_results.csv` — per-scenario per-policy metrics
-- `aggregate_stats.csv` — summary statistics
-- `ablation_results.csv` — per-ablation per-scenario results
-- `ablation_summary.csv` — ablation aggregates
-- `ablation_impact.csv` — delta vs full system
-- `mission_utility.svg`, `safety_coverage.svg`, `energy_headroom.svg`, `decision_time_ms.svg` — bar charts
-- `radar_mission_utility.svg`, `radar_safety_coverage.svg` — radar plots
-- `heatmap_mission_utility.svg`, `heatmap_safety_coverage.svg`, ... — heatmaps
-- `ablation_safety_coverage.svg`, `ablation_mission_utility.svg`, ... — ablation charts
-- `ablation_impact.svg` — impact comparison
+- `scenario_results.csv` - per-scenario per-policy metrics
+- `aggregate_stats.csv` - summary statistics
+- `ablation_results.csv` - per-ablation per-scenario results
+- `ablation_summary.csv` - ablation aggregates
+- `ablation_impact.csv` - delta vs full system
+- `mission_utility.svg`, `safety_coverage.svg`, `energy_headroom.svg`, `decision_time_ms.svg` - bar charts
+- `radar_mission_utility.svg`, `radar_safety_coverage.svg` - radar plots
+- `heatmap_mission_utility.svg`, `heatmap_safety_coverage.svg`, ... - heatmaps
+- `ablation_safety_coverage.svg`, `ablation_mission_utility.svg`, ... - ablation charts
+- `ablation_impact.svg` - impact comparison

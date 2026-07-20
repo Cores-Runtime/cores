@@ -46,7 +46,7 @@ Each sub-component has its own parameter dataclass (e.g.
 single `StateEstimationHeuristics` object. This makes every heuristic a candidate
 
 model that can be tuned per deployment. When a heuristic is replaced by a
-learned strategy, its parameter group is deleted — no thresholds, no config.
+learned strategy, its parameter group is deleted - no thresholds, no config.
 ---
 
 ## Research Question
@@ -77,8 +77,8 @@ Publish understanding → Repeat
 | Physical state estimation | Strategy tracks position, velocity, acceleration per object |
 | Prediction | Strategy's `predict()` method |
 | Uncertainty management | Strategy's confidence and uncertainty state |
-| Physical consistency | `_check_consistency()` — detects self-detections, impossible velocities |
-| Explanation generation | `_generate_explanation()` — produces human-readable summary |
+| Physical consistency | `_check_consistency()` - detects self-detections, impossible velocities |
+| Explanation generation | `_generate_explanation()` - produces human-readable summary |
 
 ### Integration
 
@@ -301,11 +301,11 @@ runtime = Runtime(scheduler, execution_layer, world_model=SSKPM())
 ```
 
 SSKPM is recommended because:
-1. **Best tracking accuracy** — critical for planning and navigation
-2. **Kinematic prediction** — velocity + acceleration model enables future state estimation
-3. **Spatial indexing** — chunks enable efficient region queries
-4. **Explainable** — operation log enables the Scientist node to audit understanding
-5. **3D position support** — essential for aerial or underwater operations
+1. **Best tracking accuracy** - critical for planning and navigation
+2. **Kinematic prediction** - velocity + acceleration model enables future state estimation
+3. **Spatial indexing** - chunks enable efficient region queries
+4. **Explainable** - operation log enables the Scientist node to audit understanding
+5. **3D position support** - essential for aerial or underwater operations
 
 If latency becomes a bottleneck, **SemanticWorldModel** provides the
 best update performance and is the recommended fallback.
@@ -346,6 +346,6 @@ so the Runtime can switch between them without any code changes.
 - Add Particle Filter as an additional strategy
 - Implement the State Estimation's observation ingestion via EventBus
 - **Replace heuristics with learned strategies**: association distance,
-  physical reasoning rules, confidence dynamics — all currently configurable
-  via `StateEstimationConfig` — should eventually be inferred from evidence
+  physical reasoning rules, confidence dynamics - all currently configurable
+  via `StateEstimationConfig` - should eventually be inferred from evidence
   (Bayesian programme induction, online parameter optimisation, etc.)

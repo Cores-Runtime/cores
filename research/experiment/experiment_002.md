@@ -8,10 +8,10 @@
 
 A lexicographic optimization scheduler with structured module relationships can guarantee safety coverage while improving mission utility over greedy and single-objective knapsack approaches, by enforcing a strict priority hierarchy:
 
-1. **Safety Coverage** (maximize) — All safety-critical modules must run
-2. **Mission Utility** (maximize) — Mission-weighted completion
-3. **Energy Preservation** (maximize) — Headroom
-4. **Execution Time** (minimize) — Latency
+1. **Safety Coverage** (maximize) - All safety-critical modules must run
+2. **Mission Utility** (maximize) - Mission-weighted completion
+3. **Energy Preservation** (maximize) - Headroom
+4. **Execution Time** (minimize) - Latency
 
 ## Module Graph & Classifier
 
@@ -119,7 +119,7 @@ Lexicographic max:
 | E: Budget Exhaustion | 100% | 100% | = |
 | All others | 100% | 100% | = |
 
-**Lexicographic scheduler achieves 100% safety coverage in ALL scenarios** — the critical regression in Scenario G is fixed.
+**Lexicographic scheduler achieves 100% safety coverage in ALL scenarios** - the critical regression in Scenario G is fixed.
 
 ### Mission Utility Gains
 
@@ -135,7 +135,7 @@ Lexicographic improves mission utility in 4/5 constrained scenarios while mainta
 
 ### Trade-offs
 
-- **Latency**: 0.36ms mean vs 0.13ms (Criticality) — 2.7× slower but still well under 1ms real-time budget
+- **Latency**: 0.36ms mean vs 0.13ms (Criticality) - 2.7× slower but still well under 1ms real-time budget
 - **Energy**: Slightly lower headroom than Knapsack in some cases (Level 3 objective)
 - **Complexity**: 3D Pareto DP with lexicographic comparison
 
@@ -152,13 +152,13 @@ The LexicographicRiskAwareSchedulingPolicy:
 
 ## Artifacts
 
-- `benchmarks/results/phase_2a5/policy_comparison.csv` — Full scenario × policy table
-- `benchmarks/results/phase_2a5/policy_mission_utility.svg` — Mission utility bars
-- `benchmarks/results/phase_2a5/policy_energy_headroom.svg` — Energy headroom bars
-- `benchmarks/results/phase_2a5/policy_decision_time.svg` — Decision time bars
-- `tests/test_lexicographic_scheduler.py` — 20 passing tests
-- `src/cores/core/module_graph.py` — Module graph & classifier
-- `src/cores/core/lexicographic_scheduler.py` — Policy implementation
+- `benchmarks/results/phase_2a5/policy_comparison.csv` - Full scenario × policy table
+- `benchmarks/results/phase_2a5/policy_mission_utility.svg` - Mission utility bars
+- `benchmarks/results/phase_2a5/policy_energy_headroom.svg` - Energy headroom bars
+- `benchmarks/results/phase_2a5/policy_decision_time.svg` - Decision time bars
+- `tests/test_lexicographic_scheduler.py` - 20 passing tests
+- `src/cores/core/module_graph.py` - Module graph & classifier
+- `src/cores/core/lexicographic_scheduler.py` - Policy implementation
 
 ---
 

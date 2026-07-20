@@ -1,7 +1,7 @@
-# Adaptive Cognitive Scheduler — Research Design
+# Adaptive Cognitive Scheduler - Research Design
 
 **Document status:** Draft  
-**Phase:** Research (post Phase 1 — Runtime Foundation)  
+**Phase:** Research (post Phase 1 - Runtime Foundation)  
 **Date:** 2026-07-15  
 **Baseline comparator:** `OperatorSchedulingPolicy` (Priority Scheduler)
 
@@ -9,7 +9,7 @@
 
 ## 1. Research Question
 
-> Given finite compute, memory, and battery; a changing mission state; and evolving environmental hazards — how should CORES allocate cognitive execution resources across modules each runtime cycle to maximize mission success while respecting safety and resource constraints?
+> Given finite compute, memory, and battery; a changing mission state; and evolving environmental hazards - how should CORES allocate cognitive execution resources across modules each runtime cycle to maximize mission success while respecting safety and resource constraints?
 
 This is not a question of static priority ordering. It is a **resource allocation problem under uncertainty and constraint**, solved deterministically at each runtime cycle using observable state.
 
@@ -21,11 +21,11 @@ This is not a question of static priority ordering. It is a **resource allocatio
 
 CORES coordinates cognitive modules (planning, safety, mapping, diagnostics, etc.) on an autonomous robot. Each module consumes computational resources and may contribute to mission progress, safety, or system health. The robot operates under hard and soft limits:
 
-- **Compute budget** — normalized CPU capacity per cycle (`RuntimeContext.compute_budget`)
-- **Time budget** — maximum wall-clock duration per cycle (`RuntimeContext.time_budget_ms`)
-- **Battery** — energy reserve affecting allowable workload (`RobotState.battery_level`)
-- **Mission phase** — task relevance changes over time (`RobotState.mission_status`)
-- **Environmental hazards** — safety-critical conditions (`RobotState.flags`, buffered `Event`s)
+- **Compute budget** - normalized CPU capacity per cycle (`RuntimeContext.compute_budget`)
+- **Time budget** - maximum wall-clock duration per cycle (`RuntimeContext.time_budget_ms`)
+- **Battery** - energy reserve affecting allowable workload (`RobotState.battery_level`)
+- **Mission phase** - task relevance changes over time (`RobotState.mission_status`)
+- **Environmental hazards** - safety-critical conditions (`RobotState.flags`, buffered `Event`s)
 
 The Phase 1 **Priority Scheduler** (`OperatorSchedulingPolicy`) orders all registered modules by a fixed integer priority. It ignores resource budgets, mission phase, battery, and events. It schedules every module every cycle regardless of feasibility.
 
@@ -45,8 +45,8 @@ The Adaptive Cognitive Scheduler (ACS) is a scheduling research program implemen
 
 - Not a replacement for ROS2, motion planning, or perception pipelines.
 - Not a learning system in its initial formulation (weights are configurable constants, not trained parameters).
-- Not non-deterministic — identical inputs must produce identical schedules (CORES Rule 5).
-- Not a new runtime component — ACS is implemented as a `SchedulingPolicy` within the existing `Scheduler` abstraction.
+- Not non-deterministic - identical inputs must produce identical schedules (CORES Rule 5).
+- Not a new runtime component - ACS is implemented as a `SchedulingPolicy` within the existing `Scheduler` abstraction.
 
 ---
 
@@ -81,21 +81,21 @@ At cycle \( t \), define the observable state:
 
 where:
 
-- \( \mathbf{r}_t \) — `RobotState` fields: battery \( b_t \), mission status \( \mu_t \), flags \( \mathbf{f}_t \), sensor summaries
-- \( \mathbf{c}_t \) — `RuntimeContext` fields: compute budget \( C_t \), time budget \( T_t \), scheduler mode, emergency flag
-- \( \mathbf{e}_t = (e_1, \ldots, e_k) \) — buffered events since cycle \( t-1 \)
+- \( \mathbf{r}_t \) - `RobotState` fields: battery \( b_t \), mission status \( \mu_t \), flags \( \mathbf{f}_t \), sensor summaries
+- \( \mathbf{c}_t \) - `RuntimeContext` fields: compute budget \( C_t \), time budget \( T_t \), scheduler mode, emergency flag
+- \( \mathbf{e}_t = (e_1, \ldots, e_k) \) - buffered events since cycle \( t-1 \)
 
 ### 3.3 Dynamic Factor Functions
 
 Define normalized dynamic multipliers in \( [0, 1] \):
 
-**Safety factor** — elevated when hazards or emergency events are present:
+**Safety factor** - elevated when hazards or emergency events are present:
 
 \[
 \phi_i^{S}(\mathbf{x}_t) = \mathrm{clip}\Big(w_i^{S} + \sum_{e \in \mathbf{e}_t} \delta_S(e, m_i) + \sum_{f \in \mathbf{f}_t} \delta_f(f, m_i),\ 0,\ 1\Big)
 \]
 
-**Mission factor** — elevated when module is relevant to current mission phase:
+**Mission factor** - elevated when module is relevant to current mission phase:
 
 \[
 \phi_i^{M}(\mathbf{x}_t) = \mathrm{clip}\big(w_i^{M} \cdot \rho(\mu_t, m_i),\ 0,\ 1\big)
@@ -103,13 +103,13 @@ Define normalized dynamic multipliers in \( [0, 1] \):
 
 where \( \rho(\mu_t, m_i) \in \{0, 0.5, 1.0\} \) is a deterministic mission–module relevance lookup table.
 
-**Urgency factor** — elevated by time-sensitive events and deadlines:
+**Urgency factor** - elevated by time-sensitive events and deadlines:
 
 \[
 \phi_i^{U}(\mathbf{x}_t) = \mathrm{clip}\Big(w_i^{U} + \sum_{e \in \mathbf{e}_t} \delta_U(e, m_i),\ 0,\ 1\Big)
 \]
 
-**Resource penalty** — cost relative to available budgets:
+**Resource penalty** - cost relative to available budgets:
 
 \[
 \psi_i(\mathbf{x}_t) = \alpha_{cpu} \frac{c_i^{cpu}}{C_t} + \alpha_{time} \frac{c_i^{time}}{T_t} + \alpha_{energy} \frac{c_i^{energy}}{b_t + \epsilon}
@@ -131,7 +131,7 @@ The weights \( w_S, w_M, w_U, w_R \) are explicit policy parameters. Phase A use
 
 | Coefficient | Value | Rationale |
 |---|---|---|
-| \( w_S \) | 0.35 | Safety dominates — violations are irreversible |
+| \( w_S \) | 0.35 | Safety dominates - violations are irreversible |
 | \( w_M \) | 0.30 | Mission progress is primary objective |
 | \( w_U \) | 0.20 | Responsiveness to time-sensitive conditions |
 | \( w_R \) | 0.15 | Penalize expensive modules under constraint |
@@ -144,14 +144,14 @@ Modules with \( K_i(\mathbf{x}_t) \leq 0 \) are candidates for deferral unless m
 
 ### 3.5 Scheduling as Constrained Selection
 
-**Phase A — Criticality Scheduler (first implementation target):**
+**Phase A - Criticality Scheduler (first implementation target):**
 
 1. Compute \( K_i(\mathbf{x}_t) \) for all \( m_i \in \mathcal{M}_t \).
 2. Sort modules by \( K_i \) descending; break ties by registration order (stable sort).
 3. Greedily include modules in sorted order while constraints (§5) remain satisfied.
 4. Output the feasible ordered subset as `ExecutionPlan`.
 
-**Phase B — Risk-Aware Criticality Knapsack (future):**
+**Phase B - Risk-Aware Criticality Knapsack (future):**
 
 Formulate module selection as a 0–1 knapsack variant:
 
@@ -268,7 +268,7 @@ E_t = \begin{cases}
 
 ### 5.3 Mandatory Module Set
 
-Define \( \mathcal{M}^{mandatory}(\mathbf{x}_t) \subseteq \mathcal{M}_t \) — modules that must execute regardless of score:
+Define \( \mathcal{M}^{mandatory}(\mathbf{x}_t) \subseteq \mathcal{M}_t \) - modules that must execute regardless of score:
 
 \[
 \mathcal{M}^{mandatory}(\mathbf{x}_t) = \{ m_i \mid \phi_i^{S}(\mathbf{x}_t) = 1.0 \} \cup \{ m_i \mid \text{is\_emergency} \land m_i \in \text{Diagnostics} \}
@@ -299,14 +299,14 @@ The baseline Priority Scheduler uses only \( p_i^{fixed} \):
 K_i^{baseline} = p_i^{fixed}
 \]
 
-ACS generalizes this: \( p_i^{fixed} \) becomes one input to the descriptor, but dynamic factors can override static ordering when runtime conditions change. This enables direct comparison — same modules, same runtime, different policy.
+ACS generalizes this: \( p_i^{fixed} \) becomes one input to the descriptor, but dynamic factors can override static ordering when runtime conditions change. This enables direct comparison - same modules, same runtime, different policy.
 
 ### 6.3 Score Properties (Required)
 
-1. **Deterministic** — \( K_i(\mathbf{x}_t) \) is a pure function of observable inputs.
-2. **Bounded** — \( K_i \in [-1, 1] \) after normalization (clip final score).
-3. **Monotonic in safety** — increasing hazard level never decreases \( \phi_i^{S} \) for safety modules.
-4. **Explainable** — every score decomposes into named components for logging and debugging.
+1. **Deterministic** - \( K_i(\mathbf{x}_t) \) is a pure function of observable inputs.
+2. **Bounded** - \( K_i \in [-1, 1] \) after normalization (clip final score).
+3. **Monotonic in safety** - increasing hazard level never decreases \( \phi_i^{S} \) for safety modules.
+4. **Explainable** - every score decomposes into named components for logging and debugging.
 
 ---
 
@@ -341,7 +341,7 @@ For each benchmark scenario (§8), run identical module sets through all policie
 
 All scenarios use simulated `RobotState` via `SimulatedStateEstimator`. No hardware or ROS2.
 
-### Scenario A — Nominal Exploration
+### Scenario A - Nominal Exploration
 
 | Parameter | Value |
 |---|---|
@@ -360,7 +360,7 @@ All scenarios use simulated `RobotState` via `SimulatedStateEstimator`. No hardw
 
 ---
 
-### Scenario B — Low Battery
+### Scenario B - Low Battery
 
 | Parameter | Value |
 |---|---|
@@ -373,13 +373,13 @@ All scenarios use simulated `RobotState` via `SimulatedStateEstimator`. No hardw
 
 **Expected ACS behavior:** Schedule BatteryMonitor, Safety, Navigation. **Defer** Explorer and other high-energy modules.
 
-**Expected Priority behavior:** All modules scheduled regardless of battery — including Explorer.
+**Expected Priority behavior:** All modules scheduled regardless of battery - including Explorer.
 
 **Pass criterion:** ACS defers ≥ 1 non-mandatory high-energy module; all mandatory safety modules retained.
 
 ---
 
-### Scenario C — Obstacle Detected
+### Scenario C - Obstacle Detected
 
 | Parameter | Value |
 |---|---|
@@ -398,7 +398,7 @@ All scenarios use simulated `RobotState` via `SimulatedStateEstimator`. No hardw
 
 ---
 
-### Scenario D — Emergency Event
+### Scenario D - Emergency Event
 
 | Parameter | Value |
 |---|---|
@@ -414,7 +414,7 @@ All scenarios use simulated `RobotState` via `SimulatedStateEstimator`. No hardw
 
 ---
 
-### Scenario E — Budget Exhaustion
+### Scenario E - Budget Exhaustion
 
 | Parameter | Value |
 |---|---|
@@ -429,7 +429,7 @@ All scenarios use simulated `RobotState` via `SimulatedStateEstimator`. No hardw
 
 ---
 
-### Scenario F — Determinism Verification
+### Scenario F - Determinism Verification
 
 Run Scenarios A–E twice with identical inputs.
 
@@ -517,7 +517,7 @@ For \( n \leq 20 \) modules, this is negligible relative to module execution tim
 | Multi-constraint knapsack | NP-hard; pseudo-polynomial via DP |
 | Proposed approach | DP with discretized \( C_t \) into 100 units |
 
-For \( n \leq 20, B = 100 \): 2,000 DP cells per cycle — acceptable for research validation.
+For \( n \leq 20, B = 100 \): 2,000 DP cells per cycle - acceptable for research validation.
 
 ### 10.3 Scalability Limit
 
@@ -537,7 +537,7 @@ Following the incremental research path defined in project guidance:
 Phase 1 (Complete)
   └── Priority Scheduler (OperatorSchedulingPolicy)
         │
-Step 1 (Research — this document)
+Step 1 (Research - this document)
   └── Formalize criticality model and benchmarks
         │
 Step 2 (Implementation)
@@ -569,7 +569,7 @@ Step 6 (Future)
         • Module proposes schedule; Scheduler validates constraints
 ```
 
-Each step requires benchmarks before proceeding to the next. No step introduces new runtime infrastructure — only new `SchedulingPolicy` implementations and module descriptors.
+Each step requires benchmarks before proceeding to the next. No step introduces new runtime infrastructure - only new `SchedulingPolicy` implementations and module descriptors.
 
 ---
 
@@ -577,12 +577,12 @@ Each step requires benchmarks before proceeding to the next. No step introduces 
 
 The Adaptive Cognitive Scheduler research program succeeds when:
 
-1. **Formalization complete** — criticality score, constraints, and selection algorithm are fully specified (this document).
-2. **Baseline established** — Priority Scheduler benchmark results recorded for Scenarios A–G.
-3. **Phase A validated** — Criticality Scheduler outperforms Priority on \( U \), \( R \), or \( D \) in ≥ 2 of 6 conditional scenarios (B–G) without violating \( S = 1.0 \).
-4. **Latency acceptable** — ACS decision latency < 1 ms for \( n = 20 \) modules.
-5. **Determinism preserved** — Scenario F passes for all policies.
-6. **Phase B justified** — Knapsack implementation proceeds only if Phase A greedy selection shows suboptimal resource utilization in Scenario E.
+1. **Formalization complete** - criticality score, constraints, and selection algorithm are fully specified (this document).
+2. **Baseline established** - Priority Scheduler benchmark results recorded for Scenarios A–G.
+3. **Phase A validated** - Criticality Scheduler outperforms Priority on \( U \), \( R \), or \( D \) in ≥ 2 of 6 conditional scenarios (B–G) without violating \( S = 1.0 \).
+4. **Latency acceptable** - ACS decision latency < 1 ms for \( n = 20 \) modules.
+5. **Determinism preserved** - Scenario F passes for all policies.
+6. **Phase B justified** - Knapsack implementation proceeds only if Phase A greedy selection shows suboptimal resource utilization in Scenario E.
 
 ---
 

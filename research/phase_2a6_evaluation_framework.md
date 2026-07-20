@@ -1,4 +1,4 @@
-# Phase 2A.6 — Evaluation Framework
+# Phase 2A.6 - Evaluation Framework
 
 ## Objective
 

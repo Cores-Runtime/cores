@@ -1,4 +1,4 @@
-# Phase 2A.5 — Validation
+# Phase 2A.5 - Validation
 
 ## Purpose
 

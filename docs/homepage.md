@@ -8,9 +8,9 @@ A static documentation and demo site for the CORES robotics runtime, built with 
 
 ## Stack
 
-- **Next.js 14** (App Router) — static generation
-- **Tailwind CSS** — custom design tokens (`ink`, `paper`, `accent`, `muted`, `card`, `border`, `code`)
-- **Framer Motion** — scroll-triggered section animations
+- **Next.js 14** (App Router) - static generation
+- **Tailwind CSS** - custom design tokens (`ink`, `paper`, `accent`, `muted`, `card`, `border`, `code`)
+- **Framer Motion** - scroll-triggered section animations
 - All charts render as **inline SVG** (no charting library)
 
 ## Sections
@@ -58,7 +58,7 @@ All chart components live in `components/charts/`:
 
 | Component | What it shows |
 |---|---|
-| `BarChart.tsx` | Grouped bars — one policy per group, all 20 scenarios |
+| `BarChart.tsx` | Grouped bars - one policy per group, all 20 scenarios |
 | `RadarChart.tsx` | Multi-axis polygon for 5 metrics across 4 policies |
 | `HeatmapChart.tsx` | Policy x scenario matrix with color scale (4 metrics available) |
 | `ParetoChart.tsx` | Safety vs Mission Utility scatter with frontier line |
