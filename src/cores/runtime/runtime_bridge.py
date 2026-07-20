@@ -21,6 +21,8 @@ from cores.runtime.runtime_state import (
     EnvironmentSnapshot,
     DetectedObjectSnapshot,
     UncertaintySnapshot,
+    PlanningSnapshot,
+    PlanCandidateSnapshot,
 )
 
 
@@ -84,6 +86,7 @@ class RuntimeStateBuilder:
         cycle_events: List[Event],
         decision_time_ms: float,
         state_estimation: Any = None,
+        planning_result: Any = None,
     ) -> RuntimeState:
         active = []
         sleeping = []
@@ -196,6 +199,28 @@ class RuntimeStateBuilder:
         else:
             world_snapshot = WorldModelSnapshot()
 
+        if planning_result is not None and planning_result.selected is not None:
+            selected = planning_result.selected
+            plan_snapshot = PlanCandidateSnapshot(
+                plan_id=selected.plan_id,
+                goal_id=selected.goal_id,
+                action_names=[a.name for a in selected.actions],
+                confidence=selected.confidence,
+                estimated_cost=selected.estimated_cost,
+                utility=selected.utility,
+                plan_length=len(selected.actions),
+            )
+        else:
+            plan_snapshot = None
+
+        planning_snapshot = PlanningSnapshot(
+            strategy=planning_result.metrics.strategy_name if planning_result is not None else "",
+            candidates_generated=planning_result.metrics.candidates_generated if planning_result is not None else 0,
+            goals_considered=planning_result.metrics.goals_considered if planning_result is not None else 0,
+            selected_plan=plan_snapshot,
+            planning_latency_ms=planning_result.metrics.planning_latency_ms if planning_result is not None else 0.0,
+        )
+
         return RuntimeState(
             timestamp=datetime.now(),
             mission=MissionState(
@@ -231,6 +256,7 @@ class RuntimeStateBuilder:
                 module_changes=[state_estimation.last_explanation] if state_estimation is not None and state_estimation.last_explanation else [],
             ),
             world_model=world_snapshot,
+            planning=planning_snapshot,
         )
 
     @staticmethod

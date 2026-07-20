@@ -7,6 +7,8 @@ from cores.core.state_estimator import StateEstimator
 from cores.core.module_registry import ModuleRegistry
 from cores.core.world_model import WorldModelStrategy, SimpleObjectRegistry
 from cores.core.state_estimation import StateEstimation
+from cores.core.planning.interface import Planner, PlanningContext
+from cores.core.planning.mission import Mission
 from cores.events.event_bus import EventBus
 from cores.events.event import Event
 from cores.events.event_type import EventType
@@ -29,6 +31,8 @@ class Runtime:
         state_estimator: Optional[StateEstimator] = None,
         bridge: Optional[RuntimeBridge] = None,
         world_model: Optional[WorldModelStrategy] = None,
+        planner: Optional[Planner] = None,
+        mission: Optional[Mission] = None,
     ) -> None:
         self.state_estimator = state_estimator
         self.state = RobotState()
@@ -46,6 +50,10 @@ class Runtime:
         self._buffered_events: List[Event] = []
         self._last_module_results: List[ModuleResult] = []
         self._last_decision_time_ms: float = 0.0
+
+        self.planner = planner
+        self.mission = mission or Mission(mission_id="default", goals=[])
+        self._last_planning_result = None
 
         for event_type in EventType:
             self.event_bus.subscribe(event_type, self._on_event)
@@ -75,11 +83,12 @@ class Runtime:
         Execute one complete, sequential runtime cycle:
         1. Wire shared strategy into context for observation modules.
         2. Estimate robot state.
-        3. Collect events from the previous cycle.
-        4. Schedule and execute all registered modules.
-        5. Run the StateEstimation's cognitive loop (predict, check, explain).
-        6. Publish runtime state snapshot through the bridge.
-        7. Advance runtime context metadata.
+        3. Run the Planner (propose candidate plans).
+        4. Collect events from the previous cycle.
+        5. Schedule and execute all registered modules.
+        6. Run the StateEstimation's cognitive loop (predict, check, explain).
+        7. Publish runtime state snapshot through the bridge.
+        8. Advance runtime context metadata.
         """
         # 1. Wire the StateEstimation's reasoning strategy into context
         self.context.world_model = self.state_estimation.strategy
@@ -88,11 +97,26 @@ class Runtime:
         if self.state_estimator is not None:
             self.state = self.state_estimator.estimate(self.context.cycle_count)
 
-        # 3. Collect and flush buffered events
+        # 3. Planning — run the cognitive planner if configured
+        if self.planner is not None:
+            pctx = PlanningContext(
+                cycle_count=self.context.cycle_count,
+                compute_budget=self.context.compute_budget,
+                time_budget_ms=self.context.time_budget_ms,
+                world_state={"obstacle_count": self.state_estimation.strategy.obstacle_count},
+            )
+            self._last_planning_result = self.planner.plan(
+                self.state, self.mission, pctx
+            )
+            self.context.metrics["planning_result"] = self._last_planning_result
+        else:
+            self._last_planning_result = None
+
+        # 4. Collect and flush buffered events
         events_to_process = self._buffered_events.copy()
         self._buffered_events.clear()
 
-        # 4. Planning and execution of all modules (observation, planning, etc.)
+        # 5. Planning and execution of all modules (observation, planning, etc.)
         plan = self.scheduler.schedule(
             self.modules, self.state, self.context, events_to_process
         )
@@ -102,19 +126,19 @@ class Runtime:
             for event in result.events:
                 self.event_bus.publish(event)
 
-        # 5. StateEstimation cognitive loop — runs after all observation modules
+        # 6. StateEstimation cognitive loop — runs after all observation modules
         state_estimation_result = self.state_estimation.execute(self.state, self.context)
         self._last_module_results.append(state_estimation_result)
 
-        # 6. Capture decision time from context metrics
+        # 7. Capture decision time from context metrics
         self._last_decision_time_ms = float(
             self.context.metrics.get("decision_time_ms", 0.0)
         )
 
-        # 7. Post-execution cycle maintenance
+        # 8. Post-execution cycle maintenance
         self.context.cycle_count += 1
 
-        # 8. Build runtime state snapshot and publish through bridge
+        # 9. Build runtime state snapshot and publish through bridge
         runtime_state = self._state_builder.build(
             state=self.state,
             context=self.context,
@@ -123,6 +147,7 @@ class Runtime:
             cycle_events=list(events_to_process),
             decision_time_ms=self._last_decision_time_ms,
             state_estimation=self.state_estimation,
+            planning_result=self._last_planning_result,
         )
         self.bridge.publish(runtime_state)
 

@@ -87,6 +87,24 @@ class EventsSnapshot(BaseModel):
     recoveries: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class PlanCandidateSnapshot(BaseModel):
+    plan_id: str = Field(default="")
+    goal_id: str = Field(default="")
+    action_names: List[str] = Field(default_factory=list)
+    confidence: float = Field(default=0.0)
+    estimated_cost: float = Field(default=0.0)
+    utility: float = Field(default=0.0)
+    plan_length: int = Field(default=0)
+
+
+class PlanningSnapshot(BaseModel):
+    strategy: str = Field(default="")
+    candidates_generated: int = Field(default=0)
+    goals_considered: int = Field(default=0)
+    selected_plan: Optional[PlanCandidateSnapshot] = None
+    planning_latency_ms: float = Field(default=0.0)
+
+
 class ExplainabilityState(BaseModel):
     module_changes: List[str] = Field(default_factory=list)
     scheduler_rationale: str = Field(default="")
@@ -104,3 +122,4 @@ class RuntimeState(BaseModel):
     events: EventsSnapshot = Field(default_factory=EventsSnapshot)
     explainability: ExplainabilityState = Field(default_factory=ExplainabilityState)
     world_model: WorldModelSnapshot = Field(default_factory=WorldModelSnapshot)
+    planning: PlanningSnapshot = Field(default_factory=PlanningSnapshot)

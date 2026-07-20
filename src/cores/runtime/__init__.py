@@ -10,6 +10,8 @@ from cores.runtime.runtime_state import (
     EnvironmentSnapshot,
     DetectedObjectSnapshot,
     UncertaintySnapshot,
+    PlanningSnapshot,
+    PlanCandidateSnapshot,
 )
 from cores.runtime.runtime_bridge import (
     RuntimeBridge,
@@ -32,6 +34,8 @@ __all__ = [
     "EnvironmentSnapshot",
     "DetectedObjectSnapshot",
     "UncertaintySnapshot",
+    "PlanningSnapshot",
+    "PlanCandidateSnapshot",
     "RuntimeBridge",
     "InMemoryRuntimeBridge",
     "RuntimeStateBuilder",

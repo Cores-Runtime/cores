@@ -82,6 +82,20 @@ class DefaultCriticalityScoringStrategy(CriticalityScoringStrategy):
         self.weights = weights or CriticalityWeights()
         self.resource_weights = resource_weights or ResourcePenaltyWeights()
 
+    def _plan_boost(self, module: Module, context: RuntimeContext) -> float:
+        plan_result = context.metrics.get("planning_result")
+        if plan_result is None or plan_result.selected is None:
+            return 0.0
+        plan_action_names = {a.name for a in plan_result.selected.actions}
+        module_tags = set(module.profile.mission_tags)
+        if module_tags & plan_action_names:
+            return 0.3
+        for tag in module_tags:
+            for pname in plan_action_names:
+                if tag in pname or pname in tag:
+                    return 0.2
+        return 0.0
+
     def score(
         self,
         module: Module,
@@ -91,11 +105,12 @@ class DefaultCriticalityScoringStrategy(CriticalityScoringStrategy):
     ) -> CriticalityScore:
         safety_factor = self._compute_safety_factor(module, state, context, events)
         mission_factor = self._compute_mission_factor(module, state)
+        plan_boost = self._plan_boost(module, context)
         urgency_factor = self._compute_urgency_factor(module, state, events)
         resource_penalty = self._compute_resource_penalty(module, state, context)
         raw_score = (
             (self.weights.safety * safety_factor)
-            + (self.weights.mission * mission_factor)
+            + (self.weights.mission * (mission_factor + plan_boost))
             + (self.weights.urgency * urgency_factor)
             - (self.weights.resource_penalty * resource_penalty)
         )
