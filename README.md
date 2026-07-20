@@ -27,14 +27,7 @@ Think of it as a real-time scheduler, but for cognition rather than processes.
 
 ## What Makes This Different
 
-| Concern | Typical Approach | CORES |
-|---      |---               |---    |
-| Scheduling | Priority-based (static) or RTOS (deadline-driven) | **Criticality scoring + multi-objective optimization** |
-| Adaptiveness | Fixed policies | **5 policies in progressive complexity**, from trivial to lexicographic Pareto DP |
-| Evidence | Anecdotal | **Every claim backed by reproducible benchmarks, ablation studies, and Monte Carlo trials** |
-| Safety | Best-effort | **Lexicographic: safety coverage > mission utility > energy > time** |
-| Architecture | Monolithic | **Clean strategy pattern with strict component boundaries** |
-| Determinism | Non-deterministic | **Fully deterministic - same inputs always produce the same plan** |
+I tried several scheduling approaches while building CORES. Some were simple priority schedulers, others used optimization. I kept benchmarking each version and gradually improved the runtime instead of trying to build the "best" scheduler from the start.
 
 ---
 
@@ -49,7 +42,7 @@ Today CORES includes:
 - **Runtime replay & simulator** - interactive browser-based simulator with live/replay modes
 - **Benchmark framework** - microbenchmarks for latency, tracking accuracy, prediction error
 - **Validation framework** - comparison, sensitivity, ablation studies, Monte Carlo evaluation
-- **Research documentation** - every hypothesis, result, and finding documented alongside the code
+- **Research documentation** - Research notes and experiments documenting what worked, what didn't, and why.
 
 ---
 
@@ -78,12 +71,12 @@ Runtime (orchestrator)
 └── Modules          → user-defined cognitive processes
 ```
 
-**Design invariants:**
-- `RobotState` is the single source of truth
-- Only the scheduler produces execution plans
-- Only the execution layer invokes modules
-- The event bus knows nothing about other components
-- The bridge is the only boundary between runtime internals and external consumers
+**Runtime rules:**
+- `RobotState` stores the current state of the robot, and other components read from it.
+- Only the scheduler produces execution plans.
+- Only the execution layer invokes modules.
+- The event bus knows nothing about other components.
+- The bridge is the only boundary between runtime internals and external consumers.
 
 ---
 
@@ -102,7 +95,7 @@ python -m pytest
 | If you want to... | Start here |
 |---|---|
 | Understand the scheduler | [docs/scheduling.md](docs/scheduling.md) - policies, execution cycle |
-| Learn how physical understanding works | [docs/state-estimation.md](docs/state-estimation.md) - 6 strategies, benchmarks |
+| State Estimation | [docs/state-estimation.md](docs/state-estimation.md) - 6 strategies, benchmarks |
 | See what's built and what's next | [docs/status.md](docs/status.md) - phase table, key findings |
 | Study the component boundaries | [docs/architecture.md](docs/architecture.md) - design invariants |
 | Run tests, benchmarks, linting | [docs/commands.md](docs/commands.md) - full command reference |
