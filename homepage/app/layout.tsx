@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CORES — Cognitive Runtime for Embodied Systems",
+  title: "CORES: Cognitive Runtime for Embodied Systems",
   description: "A deterministic, modular runtime for autonomous robotics. Research-grade scheduling that ships on real robots.",
   keywords: ["robotics", "runtime", "scheduling", "autonomous systems", "real-time", "lexicographic optimization"],
   authors: [{ name: "CORES Team" }],
