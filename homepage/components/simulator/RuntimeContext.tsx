@@ -96,6 +96,14 @@ export function RuntimeProvider({
     }
   }, [mode, initReplay, initLive]);
 
+  const setMode = useCallback((newMode: SimulatorMode) => {
+    setMode_(newMode);
+  }, []);
+
+  const setWsUrl = useCallback((url: string) => {
+    setWsUrl_(url);
+  }, []);
+
   if (!ready) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-paper">
@@ -139,14 +147,6 @@ export function RuntimeProvider({
     }
     return acc;
   })();
-
-  const setMode = useCallback((newMode: SimulatorMode) => {
-    setMode_(newMode);
-  }, []);
-
-  const setWsUrl = useCallback((url: string) => {
-    setWsUrl_(url);
-  }, []);
 
   const value: SimulatorValue = {
     state,

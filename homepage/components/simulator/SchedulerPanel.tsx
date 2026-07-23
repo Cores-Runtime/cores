@@ -6,39 +6,56 @@ export function SchedulerPanel() {
   const { engine } = useSimulator();
   const d = engine.decision;
 
+  const steps: string[] = [];
+  if (d) {
+    if (d.reason) steps.push(d.reason);
+    for (const id of d.wake) {
+      const def = engine.getModuleDef(id);
+      steps.push(`${def?.name || id} activated`);
+    }
+    for (const id of d.suspend) {
+      const def = engine.getModuleDef(id);
+      steps.push(`${def?.name || id} suspended`);
+    }
+    steps.push(`${d.priority} priority enforced`);
+  }
+
   return (
-    <div className="glass p-5">
-      <h3 className="text-xs font-bold text-ink uppercase tracking-wider mb-3">Scheduler</h3>
+    <div>
+      <h3 className="font-display text-[12px] tracking-tight text-slate uppercase mb-3">Scheduler</h3>
+      <div className="bg-ash rounded-[6px_0px_0px] px-6 py-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="font-sans text-[11px] text-slate uppercase tracking-wider">Policy</span>
+          <span className="font-display text-[14px] tracking-tight text-graphite">Lexicographic</span>
+          <span className="font-mono text-[11px] text-slate tabular-nums">{d ? d.decisionTimeMs.toFixed(2) : "0.00"}ms</span>
+        </div>
 
-      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/10">
-        <span className="text-[10px] text-muted/50 uppercase">Policy</span>
-        <span className="text-sm font-bold text-accent">Lexicographic</span>
-        <span className="ml-auto text-[10px] text-muted/50">{d ? d.decisionTimeMs.toFixed(2) : "0.00"} ms</span>
-      </div>
-
-      <div className="space-y-1 mb-4">
-        <div className="text-[10px] text-muted/50 uppercase mb-1.5">Priority Chain</div>
         {(d?.hierarchy || ["Safety", "Mission", "Energy", "Memory"]).map((h, i) => (
           <div key={h} className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${i === 0 ? "bg-red-500" : i === 1 ? "bg-blue-500" : i === 2 ? "bg-amber-500" : "bg-violet-500"}`} />
-            <div className="flex-1 h-5 rounded bg-white/40 border border-white/10 relative overflow-hidden">
-              <div className="absolute inset-y-0 left-0 rounded bg-accent/10 transition-all" style={{ width: `${i === 0 ? 100 : 100 - i * 20}%` }} />
+            <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${
+              i === 0 ? "bg-ember-orange" : i === 1 ? "bg-brass" : i === 2 ? "bg-slate" : "bg-mist"
+            }`} />
+            <div className="flex-1 h-[6px] bg-mist rounded-none overflow-hidden">
+              <div className="h-full rounded-none bg-graphite/20 transition-all" style={{ width: `${100 - i * 20}%` }} />
             </div>
-            <span className="text-[11px] font-medium text-ink w-16 text-right">{h}</span>
+            <span className="font-sans text-[11px] text-graphite w-16 text-right">{h}</span>
           </div>
         ))}
-      </div>
 
-      {d && (
-        <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-200/30">
-          <div className="text-[10px] font-bold text-amber-700 uppercase mb-1">Decision</div>
-          <div className="text-xs font-medium text-ink mb-1 leading-snug">
-            {d.wake.length > 0 && `Wake: ${d.wake.join(", ")}`}
-            {d.suspend.length > 0 && ` | Suspend: ${d.suspend.join(", ")}`}
+        {steps.length > 0 && (
+          <div className="pt-3 border-t border-mist space-y-2">
+            <span className="font-sans text-[10px] text-slate uppercase tracking-wider block">Why</span>
+            <div className="space-y-1.5">
+              {steps.map((step, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <span className="w-[5px] h-[5px] rounded-full bg-graphite shrink-0 mt-1.5" />
+                  <span className="font-sans text-[12px] text-steel leading-relaxed">{step}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="text-[11px] text-muted/70 leading-relaxed">{d.reason}</div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -1,11 +1,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from cores.core.robot_state import RobotState
 from cores.core.planning.types import PlanningResult, PlanCandidate
 from cores.core.planning.mission import Mission
+
+if TYPE_CHECKING:
+    from cores.core.memory import Memory
 
 
 @dataclass
@@ -16,6 +19,7 @@ class PlanningContext:
     world_state: Dict[str, Any] = field(default_factory=dict)
     environment_changed: bool = False
     metadata: Dict[str, Any] = field(default_factory=dict)
+    memory: Optional[Memory] = None
 
 
 class PlannerStrategy(ABC):

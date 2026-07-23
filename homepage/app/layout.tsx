@@ -1,17 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-sans",
+  variable: "--font-inter",
+  preload: true,
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-display",
   preload: true,
 });
 
 export const metadata: Metadata = {
   title: "CORES: Cognitive Runtime for Embodied Systems",
-  description: "A deterministic, modular runtime for autonomous robotics. Research-grade scheduling that ships on real robots.",
+  description: "A robot has one battery, one CPU, and one chance to get home. CORES decides which cognitive modules run, in what order, and under what constraints.",
   keywords: ["robotics", "runtime", "scheduling", "autonomous systems", "real-time", "lexicographic optimization"],
   authors: [{ name: "CORES Team" }],
   openGraph: {
@@ -22,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0D12",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };
@@ -33,12 +41,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} font-sans`}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
-      <body className="min-h-screen bg-paper text-ink">
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body className="min-h-screen bg-canvas-white text-graphite font-sans">
         {children}
       </body>
     </html>

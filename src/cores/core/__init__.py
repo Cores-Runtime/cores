@@ -35,6 +35,19 @@ from cores.core.lexicographic_scheduler import (
 )
 from cores.core.runtime import Runtime
 from cores.core.state_estimator import StateEstimator, SimulatedStateEstimator
+from cores.core.memory import (
+    MemoryRecord,
+    MemoryQuery,
+    MemoryResult,
+    MemoryMetrics,
+    MemoryStrategy,
+    Memory,
+    FIFOMemoryStrategy,
+    TimeDecayMemoryStrategy,
+    PriorityMemoryStrategy,
+    EpisodicMemoryStrategy,
+    SPSCAMemoryStrategy,
+)
 from cores.core.state_estimation import (
     StateEstimation,
     StateEstimationConfig,
@@ -88,6 +101,18 @@ from cores.core.planning import (
 )
 
 __all__ = [
+    "MemoryRecord",
+    "MemoryQuery",
+    "MemoryResult",
+    "MemoryMetrics",
+    "MemoryStrategy",
+    "Memory",
+    "FIFOMemoryStrategy",
+    "TimeDecayMemoryStrategy",
+    "PriorityMemoryStrategy",
+    "EpisodicMemoryStrategy",
+    "SPSCAMemoryStrategy",
+    "RobotState",
     "RobotState",
     "RuntimeContext",
     "ExecutionLayer",

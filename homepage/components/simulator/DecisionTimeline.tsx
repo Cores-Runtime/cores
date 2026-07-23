@@ -3,22 +3,13 @@
 import { useRef, useEffect } from "react";
 import { useSimulator } from "./RuntimeContext";
 
-const typeStyles: Record<string, string> = {
-  info: "border-l-blue-400 bg-blue-50/30",
-  warning: "border-l-amber-400 bg-amber-50/30",
-  decision: "border-l-violet-400 bg-violet-50/30",
-  module: "border-l-emerald-400 bg-emerald-50/30",
-  success: "border-l-green-400 bg-green-50/30",
-  thinking: "border-l-amber-400 bg-amber-50/20",
-};
-
-const typeIcons: Record<string, string> = {
-  info: "i",
-  warning: "!",
-  decision: "→",
-  module: "◇",
-  success: "✓",
-  thinking: "~",
+const typeDots: Record<string, string> = {
+  info: "bg-graphite",
+  warning: "bg-ember-orange",
+  decision: "bg-brass",
+  module: "bg-steel",
+  success: "bg-graphite",
+  thinking: "bg-slate",
 };
 
 export function DecisionTimeline() {
@@ -30,25 +21,27 @@ export function DecisionTimeline() {
   const recent = engine.eventHistory.slice(-40);
 
   return (
-    <div className="glass p-5 max-h-[420px] overflow-y-auto">
-      <div className="flex items-center justify-between mb-3 sticky top-0 bg-paper/80 backdrop-blur-sm pb-2 z-10">
-        <h3 className="text-xs font-bold text-ink uppercase tracking-wider">Event Log</h3>
-        <span className="text-[10px] text-muted/50 font-mono">{recent.length} events</span>
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-display text-[12px] tracking-tight text-slate uppercase">Event Log</h3>
+        <span className="font-sans text-[11px] text-slate tabular-nums">{recent.length} events</span>
       </div>
-      <div className="space-y-0.5">
-        {recent.map((entry, i) => (
-          <div key={i} className={`flex items-start gap-2 p-1.5 rounded border-l-[3px] text-[11px] ${typeStyles[entry.type] || typeStyles.info}`}>
-            <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5 bg-white/60 text-muted/60 font-mono">{typeIcons[entry.type] || "•"}</span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-muted/50">T{entry.tick}</span>
-                <span className={`text-[9px] font-medium uppercase ${entry.type === "warning" ? "text-amber-600" : entry.type === "success" ? "text-emerald-600" : entry.type === "decision" ? "text-violet-600" : "text-muted/50"}`}>{entry.type}</span>
+      <div className="bg-ash rounded-[6px_0px_0px] px-6 py-5 max-h-[360px] overflow-y-auto">
+        <div className="space-y-[2px]">
+          {recent.map((entry, i) => (
+            <div key={i} className="flex items-start gap-3 py-1.5 border-b border-mist/50 last:border-0">
+              <span className={`w-[5px] h-[5px] rounded-full shrink-0 mt-1.5 ${typeDots[entry.type] || typeDots.info}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-sans text-[10px] text-slate tabular-nums">T{entry.tick}</span>
+                  <span className="font-sans text-[10px] text-slate uppercase tracking-wider">{entry.type}</span>
+                </div>
+                <div className="font-sans text-[12px] text-graphite leading-snug mt-0.5">{entry.event}</div>
               </div>
-              <div className="text-[11px] text-ink/80 leading-snug">{entry.event}</div>
             </div>
-          </div>
-        ))}
-        <div ref={bottomRef} />
+          ))}
+          <div ref={bottomRef} />
+        </div>
       </div>
     </div>
   );

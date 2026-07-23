@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
 import { ModulesSection } from "@/components/ModulesSection";
@@ -12,21 +11,35 @@ import { Footer } from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-paper/80 backdrop-blur-md border-b border-border transition-all duration-200">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-ink text-lg">
-            <span className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-paper font-mono text-sm">CR</span>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-canvas-white/80 backdrop-blur-md">
+        <div className="max-w-page mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="font-display text-base tracking-tight text-graphite">
             CORES
           </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="#modules" className="text-sm text-muted hover:text-ink transition-colors">Modules</Link>
-            <Link href="#policies" className="text-sm text-muted hover:text-ink transition-colors">Policies</Link>
-            <Link href="#scenarios" className="text-sm text-muted hover:text-ink transition-colors">Scenarios</Link>
-            <Link href="#visualizations" className="text-sm text-muted hover:text-ink transition-colors">Visualizations</Link>
-            <Link href="/simulator" className="text-sm text-accent font-medium hover:text-accentHover transition-colors">Simulator</Link>
+
+          <div className="nav-pill flex items-center gap-5">
+            <Link href="#modules" className="font-display text-base tracking-tight text-graphite hover:text-steel transition-colors flex items-center gap-1">
+              Modules
+              <svg className="w-3 h-3 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+            </Link>
+            <Link href="#policies" className="font-display text-base tracking-tight text-graphite hover:text-steel transition-colors flex items-center gap-1">
+              Policies
+              <svg className="w-3 h-3 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+            </Link>
+            <Link href="#scenarios" className="font-display text-base tracking-tight text-graphite hover:text-steel transition-colors flex items-center gap-1">
+              Scenarios
+              <svg className="w-3 h-3 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+            </Link>
+            <Link href="#visualizations" className="font-display text-base tracking-tight text-graphite hover:text-steel transition-colors flex items-center gap-1">
+              Data
+              <svg className="w-3 h-3 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+            </Link>
           </div>
+
           <div className="flex items-center gap-4">
-            <Link href="#policies" className="btn-secondary text-sm px-4 py-2">Compare Policies</Link>
+            <Link href="/simulator" className="btn-primary text-sm px-4 py-2">
+              Simulator
+            </Link>
           </div>
         </div>
       </nav>

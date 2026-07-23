@@ -7,6 +7,8 @@ from cores.core.state_estimator import StateEstimator
 from cores.core.module_registry import ModuleRegistry
 from cores.core.world_model import WorldModelStrategy, SimpleObjectRegistry
 from cores.core.state_estimation import StateEstimation
+from cores.core.memory import Memory
+from cores.core.memory.strategies.priority_memory import PriorityMemoryStrategy
 from cores.core.planning.interface import Planner, PlanningContext
 from cores.core.planning.mission import Mission
 from cores.events.event_bus import EventBus
@@ -33,6 +35,7 @@ class Runtime:
         world_model: Optional[WorldModelStrategy] = None,
         planner: Optional[Planner] = None,
         mission: Optional[Mission] = None,
+        memory: Optional[Memory] = None,
     ) -> None:
         self.state_estimator = state_estimator
         self.state = RobotState()
@@ -54,6 +57,8 @@ class Runtime:
         self.planner = planner
         self.mission = mission or Mission(mission_id="default", goals=[])
         self._last_planning_result = None
+
+        self.memory = memory or Memory(strategy=PriorityMemoryStrategy())
 
         for event_type in EventType:
             self.event_bus.subscribe(event_type, self._on_event)
@@ -83,12 +88,13 @@ class Runtime:
         Execute one complete, sequential runtime cycle:
         1. Wire shared strategy into context for observation modules.
         2. Estimate robot state.
-        3. Run the Planner (propose candidate plans).
-        4. Collect events from the previous cycle.
-        5. Schedule and execute all registered modules.
-        6. Run the StateEstimation's cognitive loop (predict, check, explain).
-        7. Publish runtime state snapshot through the bridge.
-        8. Advance runtime context metadata.
+        3. Memory cognitive loop (store, consolidate, forget).
+        4. Run the Planner (propose candidate plans, informed by memory).
+        5. Collect events from the previous cycle.
+        6. Schedule and execute all registered modules.
+        7. Run the StateEstimation's cognitive loop (predict, check, explain).
+        8. Publish runtime state snapshot through the bridge.
+        9. Advance runtime context metadata.
         """
         # 1. Wire the StateEstimation's reasoning strategy into context
         self.context.world_model = self.state_estimation.strategy
@@ -97,13 +103,18 @@ class Runtime:
         if self.state_estimator is not None:
             self.state = self.state_estimator.estimate(self.context.cycle_count)
 
-        # 3. Planning — run the cognitive planner if configured
+        # 3. Memory — store observations, consolidate, forget
+        memory_result = self.memory.execute(self.state, self.context)
+        self._last_module_results.append(memory_result)
+
+        # 4. Planning — run the cognitive planner if configured
         if self.planner is not None:
             pctx = PlanningContext(
                 cycle_count=self.context.cycle_count,
                 compute_budget=self.context.compute_budget,
                 time_budget_ms=self.context.time_budget_ms,
                 world_state={"obstacle_count": self.state_estimation.strategy.obstacle_count},
+                memory=self.memory,
             )
             self._last_planning_result = self.planner.plan(
                 self.state, self.mission, pctx
@@ -112,11 +123,11 @@ class Runtime:
         else:
             self._last_planning_result = None
 
-        # 4. Collect and flush buffered events
+        # 5. Collect and flush buffered events
         events_to_process = self._buffered_events.copy()
         self._buffered_events.clear()
 
-        # 5. Planning and execution of all modules (observation, planning, etc.)
+        # 6. Planning and execution of all modules (observation, planning, etc.)
         plan = self.scheduler.schedule(
             self.modules, self.state, self.context, events_to_process
         )
@@ -126,19 +137,19 @@ class Runtime:
             for event in result.events:
                 self.event_bus.publish(event)
 
-        # 6. StateEstimation cognitive loop — runs after all observation modules
+        # 7. StateEstimation cognitive loop — runs after all observation modules
         state_estimation_result = self.state_estimation.execute(self.state, self.context)
         self._last_module_results.append(state_estimation_result)
 
-        # 7. Capture decision time from context metrics
+        # 8. Capture decision time from context metrics
         self._last_decision_time_ms = float(
             self.context.metrics.get("decision_time_ms", 0.0)
         )
 
-        # 8. Post-execution cycle maintenance
+        # 9. Post-execution cycle maintenance
         self.context.cycle_count += 1
 
-        # 9. Build runtime state snapshot and publish through bridge
+        # 10. Build runtime state snapshot and publish through bridge
         runtime_state = self._state_builder.build(
             state=self.state,
             context=self.context,

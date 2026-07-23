@@ -1,49 +1,37 @@
-"use client";
-
 import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="py-16 px-6 bg-ink text-paper/60">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+    <footer className="py-16 px-6 bg-ash">
+      <div className="max-w-page mx-auto">
+        <div className="grid md:grid-cols-4 gap-10">
           <div className="md:col-span-2">
-            <h3 className="text-xl font-bold text-paper mb-4">CORES</h3>
-            <p className="text-paper/40 max-w-md leading-relaxed">
-              Cognitive Runtime for Embodied Systems. Deterministic. Modular. 
-              Built for research that ships on real robots.
+            <span className="font-display text-[15px] tracking-tight text-graphite">
+              CORES
+            </span>
+            <p className="font-sans text-[13px] text-slate mt-2 max-w-xs leading-relaxed">
+              Deterministic cognitive operating system for robotics. One battery. One CPU. One chance.
             </p>
           </div>
           <div>
-            <h4 className="font-medium text-paper mb-4">Modules</h4>
-            <ul className="space-y-2 text-sm text-paper/50 hover:text-paper/80 transition-colors">
-              <li><Link href="#modules" className="link-underline">Runtime Foundation</Link></li>
-              <li><Link href="#modules" className="link-underline">Criticality Scheduling</Link></li>
-              <li><Link href="#modules" className="link-underline">Risk-Aware Knapsack</Link></li>
-              <li><Link href="#modules" className="link-underline">Lexicographic Scheduler</Link></li>
-            </ul>
+            <span className="font-display text-[12px] tracking-tight text-brass uppercase">Architecture</span>
+            <div className="mt-4 space-y-2">
+              <Link href="#modules" className="block font-sans text-[13px] text-slate hover:text-graphite transition-colors">Modules</Link>
+              <Link href="#policies" className="block font-sans text-[13px] text-slate hover:text-graphite transition-colors">Policies</Link>
+              <Link href="#visualizations" className="block font-sans text-[13px] text-slate hover:text-graphite transition-colors">Telemetry</Link>
+            </div>
           </div>
           <div>
-            <h4 className="font-medium text-paper mb-4">Artifacts</h4>
-            <ul className="space-y-2 text-sm text-paper/50 hover:text-paper/80 transition-colors">
-              <li><Link href="#" className="link-underline">Validation Reports (Markdown)</Link></li>
-              <li><Link href="#" className="link-underline">Comparison Tables (CSV)</Link></li>
-              <li><Link href="#" className="link-underline">Charts (SVG)</Link></li>
-              <li><Link href="#" className="link-underline">Ablation Data (CSV)</Link></li>
-            </ul>
+            <span className="font-display text-[12px] tracking-tight text-brass uppercase">Resources</span>
+            <div className="mt-4 space-y-2">
+              <Link href="/simulator" className="block font-sans text-[13px] text-slate hover:text-graphite transition-colors">Simulator</Link>
+              <Link href="/design" className="block font-sans text-[13px] text-slate hover:text-graphite transition-colors">Design</Link>
+            </div>
           </div>
         </div>
-
-        <div className="border-t border-paper/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-paper/40">
-            CORES Runtime — deterministic, modular, dependency-free.
-          </p>
-          <div className="flex items-center gap-6 text-sm text-paper/40">
-            <Link href="https://github.com/Cores-Runtime/cores" className="hover:text-paper transition-colors" target="_blank" rel="noopener noreferrer">GitHub</Link>
-            <Link href="#" className="hover:text-paper transition-colors">Documentation</Link>
-            <Link href="#" className="hover:text-paper transition-colors">API Reference</Link>
-            <Link href="/simulator" className="hover:text-paper transition-colors">Simulator</Link>
-          </div>
+        <div className="mt-12 pt-8 border-t border-mist flex items-center justify-between">
+          <span className="font-sans text-[12px] text-slate">CORES v0.1</span>
+          <span className="font-sans text-[12px] text-slate">Deterministic by design</span>
         </div>
       </div>
     </footer>

@@ -1,118 +1,133 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { policies } from "@/lib/data";
+
+const policies = [
+  {
+    name: "Priority",
+    tag: "Baseline",
+    modules: [
+      { name: "Navigation", active: true, meta: "P1" },
+      { name: "Locomotion", active: true, meta: "P2" },
+      { name: "StateEstimation", active: true, meta: "P3" },
+      { name: "Perception", active: true, meta: "P4" },
+      { name: "Mapping", active: true, meta: "P5" },
+    ],
+    scores: { safety: 60, mission: 85, energy: 30 },
+  },
+  {
+    name: "Criticality",
+    tag: "Safety-First",
+    modules: [
+      { name: "StateEstimation", active: true, meta: "SIL-4" },
+      { name: "Navigation", active: true, meta: "SIL-3" },
+      { name: "Locomotion", active: true, meta: "SIL-3" },
+      { name: "Perception", active: false, meta: "SIL-2" },
+      { name: "Mapping", active: false, meta: "SIL-1" },
+    ],
+    scores: { safety: 100, mission: 60, energy: 25 },
+  },
+  {
+    name: "Knapsack",
+    tag: "Optimized",
+    modules: [
+      { name: "Navigation", active: true, meta: "36%" },
+      { name: "Locomotion", active: true, meta: "24%" },
+      { name: "StateEstimation", active: true, meta: "18%" },
+      { name: "Perception", active: false, meta: "12%" },
+      { name: "Mapping", active: false, meta: "10%" },
+    ],
+    scores: { safety: 75, mission: 90, energy: 85 },
+  },
+  {
+    name: "Lexicographic",
+    tag: "Pareto-Optimal",
+    modules: [
+      { name: "StateEstimation", active: true, meta: "S1" },
+      { name: "Navigation", active: true, meta: "S1" },
+      { name: "Locomotion", active: true, meta: "M2" },
+      { name: "Mapping", active: true, meta: "M3" },
+      { name: "Perception", active: false, meta: "E4" },
+    ],
+    scores: { safety: 100, mission: 95, energy: 70 },
+  },
+];
+
+function ScoreBar({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-sans text-[12px] text-slate w-14 shrink-0">{label}</span>
+      <div className="flex-1 h-[6px] bg-mist rounded-none overflow-hidden">
+        <motion.div
+          className="h-full rounded-none"
+          style={{ backgroundColor: color }}
+          initial={{ width: 0 }}
+          whileInView={{ width: `${value}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        />
+      </div>
+      <span className="font-display text-[14px] tracking-tight text-graphite w-8 text-right tabular-nums">{value}</span>
+    </div>
+  );
+}
 
 export function Policies() {
   return (
-    <section 
-      id="policies" 
-      className="py-24 px-6 bg-muted/30"
-      aria-labelledby="policies-heading"
-    >
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <span className="inline-block px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
-            Policy Comparison
+    <section id="policies" className="py-[80px] px-6 bg-canvas-white">
+      <div className="max-w-page mx-auto">
+        <div className="max-w-xl mb-[80px]">
+          <span className="font-display text-[13px] tracking-tight text-brass uppercase">
+            Scheduling
           </span>
-          <h2 id="policies-heading" className="text-4xl md:text-5xl font-bold text-ink mb-4 text-balance">
-            Four Policies. One Interface.
+          <h2 className="font-display text-heading-lg leading-heading-lg tracking-heading-lg text-graphite mt-3 max-w-lg">
+            One robot. Four policies. Four outcomes.
           </h2>
-          <p className="text-lg text-muted max-w-2xl mx-auto text-balance">
-            The <code className="bg-code/5 px-1.5 py-0.5 rounded font-mono text-xs text-accent">SchedulingPolicy</code> abstraction 
-            lets you swap scheduling intelligence without touching the runtime.
+          <p className="font-sans text-caption leading-caption text-steel mt-3 max-w-md">
+            Each policy implements the same trait. Swap it at construction. The runtime never knows the difference.
           </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {policies.map((policy, index) => (
-            <motion.article
-              key={policy.name}
-              className="group relative card p-6 md:p-8 flex flex-col"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${policy.color} text-ink bg-paper border-2`}>
-                  {policy.badge}
-                </span>
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-ink/5 text-ink/70 border border-border">
-                  {policy.type}
-                </span>
-              </div>
-
-              <h3 className="text-xl font-bold text-ink mb-3 group-hover:text-accent transition-colors">
-                {policy.name}
-              </h3>
-
-              <p className="text-muted text-sm mb-6 flex-1 group-hover:text-ink/80 transition-colors">
-                {policy.description.replace(/—/g, " - ")}
-              </p>
-
-              <div className="pt-4 border-t border-border">
-                <div className="flex items-center gap-2 text-xs text-muted mb-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Deterministic
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted mb-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  Synchronous
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted">
-                  <span className="w-2 h-2 rounded-full bg-violet-500" />
-                  Pure Functions
-                </div>
-              </div>
-
-              <Link 
-                href="#" 
-                className="mt-6 inline-flex items-center gap-2 text-accent font-medium text-sm group-hover:gap-3 transition-all opacity-0 group-hover:opacity-100"
-              >
-                Implementation Details
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-            </motion.article>
-          ))}
         </div>
 
-        <motion.div
-          className="mt-16 p-8 card"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h3 className="text-2xl font-bold text-ink mb-6 text-center">The Abstraction That Makes This Possible</h3>
-          <div className="bg-code rounded-lg p-6 overflow-x-auto">
-            <pre className="text-sm text-paper/90 font-mono leading-relaxed"><code>{`// The entire scheduling abstraction — 40 lines
-// Runtime never knows which policy runs
+        <div className="grid md:grid-cols-2 gap-5">
+          {policies.map((policy, i) => (
+            <motion.div
+              key={policy.name}
+              className="card-asymmetric"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <span className="font-sans text-[12px] text-brass font-medium">{policy.tag}</span>
+                  <h3 className="font-display text-[22px] tracking-tight text-graphite mt-1">{policy.name}</h3>
+                </div>
+                <span className="font-display text-[14px] tracking-tight text-mist">0{i + 1}</span>
+              </div>
 
-pub trait SchedulingPolicy {
-    fn schedule(
-        &self,
-        modules: Vec<Module>,
-        state: RobotState,
-        context: RuntimeContext,
-        events: Vec<Event>,
-    ) -> ExecutionPlan;
-}
+              <div className="space-y-[6px] mb-6">
+                {policy.modules.map((mod) => (
+                  <div key={mod.name} className="flex items-center justify-between py-1.5 border-b border-mist/50 last:border-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${mod.active ? "bg-graphite" : "bg-mist"}`} />
+                      <span className={`font-sans text-[13px] ${mod.active ? "text-graphite" : "text-slate"}`}>
+                        {mod.name}
+                      </span>
+                    </div>
+                    <span className="font-mono text-[11px] text-slate">{mod.meta}</span>
+                  </div>
+                ))}
+              </div>
 
-// Swap policies at construction — zero runtime cost
-let scheduler = Scheduler(LexicographicRiskAwareSchedulingPolicy::new());
-// let scheduler = Scheduler(CriticalitySchedulingPolicy::new());
-// let scheduler = Scheduler(RiskAwareKnapsackSchedulingPolicy::new());
-// let scheduler = Scheduler(OperatorSchedulingPolicy::new());`}</code></pre>
-          </div>
-        </motion.div>
+              <div className="space-y-2 pt-5 border-t border-mist">
+                <ScoreBar label="Safety" value={policy.scores.safety} color="#ff682c" />
+                <ScoreBar label="Mission" value={policy.scores.mission} color="#816729" />
+                <ScoreBar label="Energy" value={policy.scores.energy} color="#828282" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

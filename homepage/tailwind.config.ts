@@ -9,6 +9,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Ventriloc design tokens (homepage)
+        graphite: "#202020",
+        "canvas-white": "#ffffff",
+        ash: "#efefef",
+        fog: "#f5f5f5",
+        ivory: "#ebe6dd",
+        steel: "#4d4d4d",
+        slate: "#828282",
+        mist: "#e8e8e8",
+        "ember-orange": "#ff682c",
+        brass: "#816729",
+        // Legacy tokens (simulator pages)
         ink: "#0B0D12",
         paper: "#FAFAF8",
         muted: "#6B7280",
@@ -23,8 +35,31 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
         display: ["Space Grotesk", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+      fontSize: {
+        caption: ["14px", "1.43"],
+        subheading: ["18px", "1.25"],
+        heading: ["32px", "1.19"],
+        "heading-lg": ["40px", "1.2"],
+        display: ["66px", "0.91"],
+      },
+      letterSpacing: {
+        heading: "-0.64px",
+        "heading-lg": "-0.8px",
+        display: "-1.32px",
+        tight: "-0.02em",
+      },
+      borderRadius: {
+        tags: "20px",
+        cards: "8px",
+        buttons: "0px",
+        "nav-pills": "200px",
+        asymmetric: "6px 0px 0px",
+      },
+      maxWidth: {
+        page: "1200px",
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out forwards",

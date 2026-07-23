@@ -4,11 +4,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSimulator } from "./RuntimeContext";
 
-const statusStyles: Record<string, string> = {
-  running: "bg-emerald-500",
-  thinking: "bg-amber-500",
-  sleeping: "bg-gray-400",
-  suspended: "bg-red-500",
+const statusDots: Record<string, string> = {
+  running: "bg-ember-orange",
+  thinking: "bg-brass",
+  sleeping: "bg-mist",
+  suspended: "bg-slate",
 };
 
 export function RuntimeModules() {
@@ -18,31 +18,35 @@ export function RuntimeModules() {
   const defs = engine.activeMission?.modules || [];
 
   return (
-    <div className="glass p-5">
-      <h3 className="text-xs font-bold text-ink uppercase tracking-wider mb-4">Runtime Modules</h3>
-      <div className="grid grid-cols-3 gap-2">
+    <div className="mb-5">
+      <h3 className="font-display text-[12px] tracking-tight text-slate uppercase mb-3">Modules</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         {entries.map(([id, mod]) => {
           const def = defs.find(m => m.id === id);
+          const isSelected = selected === id;
           return (
             <motion.button
               key={id}
-              className={`relative text-left p-2.5 rounded-lg border transition-all duration-200 ${
-                selected === id ? "border-accent bg-accent/5 shadow-sm" : "border-white/10 bg-white/40 hover:bg-white/60"
+              className={`text-left px-4 py-3 transition-all ${
+                isSelected
+                  ? "bg-graphite rounded-[6px_0px_0px]"
+                  : "bg-ash rounded-[6px_0px_0px] hover:bg-fog"
               }`}
-              onClick={() => setSelected(selected === id ? null : id)}
+              onClick={() => setSelected(isSelected ? null : id)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${statusStyles[mod.status]}`} />
-                <span className="text-xs font-bold text-ink">{def?.name || id}</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${statusDots[mod.status] || "bg-mist"}`} />
+                <span className={`font-sans text-[12px] ${isSelected ? "text-canvas-white" : "text-graphite"}`}>
+                  {def?.name || id}
+                </span>
               </div>
-              <div className={`text-[10px] font-medium ${
-                mod.status === "running" ? "text-emerald-600" :
-                mod.status === "thinking" ? "text-amber-600" :
-                mod.status === "suspended" ? "text-red-500" : "text-gray-400"
-              }`}>{mod.status.toUpperCase()}</div>
-              <div className="text-[9px] text-muted/50 mt-0.5 leading-tight">{mod.reason}</div>
+              <span className={`font-sans text-[10px] block ${
+                isSelected ? "text-canvas-white/60" : "text-slate"
+              }`}>
+                {mod.status.toUpperCase()}
+              </span>
             </motion.button>
           );
         })}
@@ -56,22 +60,22 @@ export function RuntimeModules() {
           return (
             <motion.div
               key={selected}
-              className="mt-3 p-3 rounded-lg bg-white/50 border border-white/10 text-xs"
+              className="mt-3 bg-ash rounded-[6px_0px_0px] px-6 py-4"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <div className="font-semibold text-ink mb-1">{def.name}</div>
-              <div className="text-muted/70 mb-2">{def.purpose}</div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted/50">
-                <span>CPU: {mod.cpu}%</span>
-                <span>Task: {mod.task}</span>
-                <span>Wake Count: {mod.wakeCount}</span>
-                <span>Status: {mod.status}</span>
+              <div className="font-display text-[14px] tracking-tight text-graphite mb-1">{def.name}</div>
+              <div className="font-sans text-[12px] text-steel mb-3">{def.purpose}</div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                <span className="font-sans text-[11px] text-slate">CPU: {mod.cpu}%</span>
+                <span className="font-sans text-[11px] text-slate">Task: {mod.task}</span>
+                <span className="font-sans text-[11px] text-slate">Wake Count: {mod.wakeCount}</span>
+                <span className="font-sans text-[11px] text-slate">Status: {mod.status}</span>
               </div>
               {def.deps.length > 0 && (
-                <div className="mt-1 text-muted/50">
-                  <span className="font-medium">Depends on: </span>{def.deps.join(", ")}
+                <div className="mt-2 font-sans text-[11px] text-slate">
+                  <span className="text-slate">Depends on: </span>{def.deps.join(", ")}
                 </div>
               )}
             </motion.div>
