@@ -21,7 +21,7 @@ class EpisodicStore:
     - NEW: just stored, not yet flushed
     - ACTIVE: flushed into the underlying strategy, actively queryable
     - ARCHIVED: low importance or old, eligible for consolidation
-    - CONSOLIDATED: processed by Narrator, preserved for analysis
+    - CONSOLIDATED: processed by Logger, preserved for analysis
     - DISCARDED: removed on next forget cycle
     """
 
@@ -82,11 +82,13 @@ class EpisodicStore:
         """Called by Logger after compression. ARCHIVED → CONSOLIDATED."""
         from cores.core.memory.interface import MemoryQuery as MQ
 
-        for rid in record_ids:
-            result = self._strategy.retrieve(MQ(memory_types=None, min_importance=0.0, max_results=1))
-            for r in result.records:
-                if r.id == rid and r.lifecycle == RecordLifecycle.ARCHIVED:
-                    r.lifecycle = RecordLifecycle.CONSOLIDATED
+        target = set(record_ids)
+        result = self._strategy.retrieve(
+            MQ(memory_types=None, min_importance=0.0, max_results=100000)
+        )
+        for r in result.records:
+            if r.id in target and r.lifecycle == RecordLifecycle.ARCHIVED:
+                r.lifecycle = RecordLifecycle.CONSOLIDATED
 
     @property
     def size(self) -> int:

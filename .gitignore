@@ -2,8 +2,7 @@
 .local.env
 /AI-Instructions
 /.ai
-demo_logger.py
-demo_memory.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

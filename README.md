@@ -35,10 +35,10 @@ Think of it as a real-time operating system, but for cognition rather than proce
 ```bash
 cd cores/
 pip install -r requirements.txt
-python -m pytest    # 210+ tests pass
+python -m pytest    # 587 tests pass
 ```
 
-The runtime is a deterministic, synchronous engine. Same inputs always produce the same plan. It comes with 5 scheduling policies (Priority, Criticality, Knapsack, Lexicographic, Default), a StateEstimation module with 6 pluggable world model strategies, a Planning subsystem with 5 strategies, and WebSocket bridge for live streaming.
+The runtime is a deterministic, synchronous engine. Same inputs always produce the same plan. It comes with 5 scheduling policies (Priority, Criticality, Knapsack, Lexicographic, Default), a StateEstimation module with 6 pluggable world model strategies, a Planning subsystem with 5 strategies, a Memory node with episodic and semantic stores plus a consolidation Logger, and a WebSocket bridge for live streaming.
 
 **Watch it drive a rover on Mars in your browser:**
 
@@ -61,6 +61,10 @@ Runtime (orchestrator)
 |-- EventBus             internal pub/sub (no module talks to another directly)
 |-- StateEstimation      physical understanding: observe, associate, fuse, predict, reason, check, explain
 |   +-- WorldModelStrategy (6 implementations)
+|-- Memory               episodic + semantic stores, consolidation
+|   +-- EpisodicStore    raw records (FIFO / Priority / TimeDecay / Episodic)
+|   +-- Logger           compresses archived records into narratives (SPSCA)
+|   +-- SemanticStore    narratives + facts + confidence
 |-- Planner              propose candidate plans (5 strategies)
 |-- Scheduler            picks which modules run this cycle
 |   +-- SchedulingPolicy (5 implementations)
@@ -92,12 +96,13 @@ The results are documented. Some hypotheses failed. Those are documented too.
 |---|---|
 | Runtime | Deterministic cycle, EventBus, Module interface, RobotState |
 | Schedulers | Priority, Criticality, Knapsack, Lexicographic, Default |
-| StateEstimation | 6 world model strategies, 8 sub-components, 210 tests |
+| StateEstimation | 6 world model strategies, 8 sub-components |
+| Memory | EpisodicStore + SemanticStore + Logger (SPSCA consolidation) |
 | Planning | 5 strategies (Reactive, Utility, GoalPlanner, BehaviorTree, HTN) |
 | Bridge | InMemory + WebSocket for live state streaming |
 | Homepage | Next.js 14 site with docs, charts, interactive simulator, 3D Mars replay |
 | Research | Benchmark results, validation studies, experiment reports |
-| Tests | 210+ tests, microbenchmarks, cross-strategy contract tests |
+| Tests | 587 tests, microbenchmarks, cross-strategy contract tests |
 
 ---
 
@@ -123,6 +128,7 @@ npm run dev
 |---|---|
 | Understand the scheduler | [docs/scheduling.md](docs/scheduling.md) |
 | See how StateEstimation works | [docs/state-estimation.md](docs/state-estimation.md) |
+| Learn how Memory + Logger work | [docs/memory.md](docs/memory.md), [docs/logger.md](docs/logger.md) |
 | Check what's built and what's next | [docs/status.md](docs/status.md) |
 | Study the architecture decisions | [AI-Instructions/ADR/](AI-Instructions/ADR/) |
 | Run tests, benchmarks, linting | [docs/commands.md](docs/commands.md) |

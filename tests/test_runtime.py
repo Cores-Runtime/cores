@@ -134,3 +134,59 @@ def test_runtime_state_estimator_updates_state() -> None:
 
     assert runtime.state.battery_level == 0.99
     assert runtime.state.pose["x"] == 0.1
+
+
+def test_runtime_wires_default_memory_logger() -> None:
+    """
+    Verify Runtime constructs a Memory with a Logger by default.
+    """
+    scheduler = Scheduler(DefaultSchedulingPolicy())
+    execution_layer = ExecutionLayer()
+    runtime = Runtime(scheduler, execution_layer)
+
+    assert runtime.memory.logger is not None
+    assert runtime.memory.episodic is not None
+    assert runtime.memory.semantic is not None
+
+
+def test_runtime_logger_consolidates_outcomes() -> None:
+    """
+    Verify the Episodic -> Logger -> Semantic pipeline runs during Runtime.step().
+    """
+    from cores.core import (
+        Memory,
+        MemoryRecord,
+        MemoryType,
+        EpisodicStore,
+        FIFOMemoryStrategy,
+        Logger,
+        SPSCALogger,
+        CountTrigger,
+    )
+
+    memory = Memory(
+        episodic_store=EpisodicStore(FIFOMemoryStrategy(max_size=100)),
+        logger=Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=3)),
+        archive_below=0.6,
+    )
+
+    scheduler = Scheduler(DefaultSchedulingPolicy())
+    execution_layer = ExecutionLayer()
+    runtime = Runtime(scheduler, execution_layer, memory=memory)
+
+    for cycle in range(4):
+        runtime.memory.store(MemoryRecord(
+            id=f"outcome_{cycle}",
+            content={"action": "OpenDoor", "result": "Failed"},
+            cycle=cycle,
+            importance=0.4,
+            record_type=MemoryType.OUTCOME,
+        ))
+        runtime.step()
+
+    assert runtime.memory.semantic.narrative_count > 0
+
+    narratives = runtime.memory.semantic.query_narratives()
+    assert narratives[0].compression is not None
+    assert len(narratives[0].compression.source_ids) > 0
+

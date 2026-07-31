@@ -10,6 +10,8 @@ Developer documentation for the runtime and validation workflow.
 | [commands.md](commands.md) | Command reference for setup, tests, benchmarks, validation |
 | [scheduling.md](scheduling.md) | Scheduling policies, execution cycle |
 | [state-estimation.md](state-estimation.md) | StateEstimation cognitive node, 6 world model strategies, benchmarks |
+| [memory.md](memory.md) | Memory node: episodic + semantic stores, lifecycle, querying |
+| [logger.md](logger.md) | Logger: trigger-based consolidation, SPSCA, provenance |
 | [status.md](status.md) | Phase completion table, key research findings |
 | [homepage.md](homepage.md) | Next.js homepage site: structure, components, charts, simulator |
 

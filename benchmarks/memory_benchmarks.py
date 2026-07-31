@@ -1,5 +1,8 @@
 """Benchmark each memory strategy for retrieval latency, growth, and forgetting."""
 
+import sys
+sys.path.insert(0, "src")
+
 import time
 import statistics
 from typing import List
@@ -12,7 +15,6 @@ from cores.core.memory import (
     TimeDecayMemoryStrategy,
     PriorityMemoryStrategy,
     EpisodicMemoryStrategy,
-    SPSCAMemoryStrategy,
 )
 
 
@@ -37,9 +39,9 @@ def bench_retrieval(name: str, strategy, num_records: int, num_queries: int) -> 
     latencies: List[float] = []
     for _ in range(num_queries):
         q = MemoryQuery(
-            query="test",
+            query_text="test",
             min_importance=0.0,
-            limit=10,
+            max_results=10,
         )
         start = time.perf_counter()
         strategy.retrieve(q)
@@ -104,7 +106,6 @@ def run_all():
         ("TimeDecay", TimeDecayMemoryStrategy, {"max_size": 10000}),
         ("Priority", PriorityMemoryStrategy, {"max_size": 10000}),
         ("Episodic", EpisodicMemoryStrategy, {"max_episodes": 1000}),
-        ("SPSCA", SPSCAMemoryStrategy, {"max_size": 10000, "max_individual": 10000}),
     ]
 
     print("--- Retrieval Latency (1000 records, 500 queries) ---")

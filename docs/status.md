@@ -11,7 +11,9 @@
 | 3A | ✅ Complete | Runtime Bridge abstraction |
 | 3B | ✅ Complete | WebSocket Bridge - live streaming |
 | 4B | ✅ Complete | State Estimation - 6 strategies, benchmarks |
-| Future | 🔄 Planned | Mode Selection, Adaptive Weight Calibration, Operator Module |
+| 4F | ✅ Complete | Planning - 5 strategies, mission planner |
+| 4G | ✅ Complete | Memory + Logger - episodic/semantic stores, SPSCA consolidation, provenance, full pipeline benchmark |
+| Future | 🔄 Planned | Planning Engine (uses memory), wire narratives into planning, Mode Selection, Adaptive Weight Calibration, Operator Module, memory research (confidence calibration, reconsolidation, forgetting) |
 
 ## Key Findings
 

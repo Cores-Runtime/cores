@@ -140,6 +140,36 @@ python -m pytest tests/test_world_model_implementations.py -v
 
 Runs the same battery of behavioral tests against all 6 strategy implementations (138 tests) to verify they all satisfy the interface contract.
 
+### Run memory strategy benchmarks
+
+```bash
+python benchmarks/memory_benchmarks.py
+```
+
+Compares retrieval latency and forgetting across the FIFO, TimeDecay, Priority, and Episodic strategies.
+
+### Run Logger compression benchmarks
+
+```bash
+python benchmarks/logger_benchmarks.py
+```
+
+Measures SPSCA compression speed and how narrative confidence grows with source count.
+
+### Run full consolidation benchmarks
+
+```bash
+python benchmarks/consolidation_benchmarks.py
+```
+
+Measures the complete Episodic to Logger to Semantic pipeline: latency, throughput, and scaling as the episodic store grows.
+
+### Run Memory and Logger tests
+
+```bash
+python -m pytest tests/test_memory.py tests/test_spsca.py tests/test_logger.py tests/test_trigger_policy.py tests/test_runtime.py -v
+```
+
 ### Review Phase 4B research
 
 ```bash

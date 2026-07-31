@@ -8,7 +8,7 @@ from cores.core.runtime_context import RuntimeContext
 
 
 class TriggerPolicy(ABC):
-    """Determines whether the Narrator should run."""
+    """Determines whether the Logger should run."""
 
     @abstractmethod
     def should_run(self, episodic_store: EpisodicStore, context: RuntimeContext) -> bool:
@@ -16,7 +16,7 @@ class TriggerPolicy(ABC):
 
 
 class CapacityTrigger(TriggerPolicy):
-    """Runs narrator when episodic store exceeds a capacity threshold.
+    """Runs logger when episodic store exceeds a capacity threshold.
 
     Uses episodic_store.size directly. The threshold is an absolute count.
     """
@@ -29,7 +29,7 @@ class CapacityTrigger(TriggerPolicy):
 
 
 class CountTrigger(TriggerPolicy):
-    """Runs narrator after N new records have been added since last run."""
+    """Runs logger after N new records have been added since last run."""
 
     def __init__(self, count: int = 100) -> None:
         self._count = count
@@ -45,7 +45,7 @@ class CountTrigger(TriggerPolicy):
 
 
 class IdleTrigger(TriggerPolicy):
-    """Runs narrator when the robot has been idle for N cycles."""
+    """Runs logger when the robot has been idle for N cycles."""
 
     def __init__(self, idle_cycles: int = 50) -> None:
         self._idle_cycles = idle_cycles

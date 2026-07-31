@@ -1,4 +1,4 @@
-"""Pure algorithm tests for SPSCA as a NarratorStrategy.
+"""Pure algorithm tests for SPSCA as a LoggerStrategy.
 
 Migrated from the old SPSCAMemoryStrategy tests.
 Tests verify the algorithm itself, not storage strategy behavior.
@@ -86,3 +86,31 @@ class TestSPSCAEncoding:
         result = narr.compress(records)
         assert len(result) == 1
         assert 0 <= result[0].confidence <= 1.0
+
+    def test_narrative_tracks_source_ids(self):
+        narr = SPSCALogger()
+        records = [
+            make_outcome_record("r1", "OpenDoor", "Success", cycle=1),
+            make_outcome_record("r2", "OpenDoor", "Failed", cycle=2),
+        ]
+        result = narr.compress(records)
+        assert len(result) == 1
+        narrative = result[0]
+        assert set(narrative.source_ids) == {"r1", "r2"}
+        assert narrative.compression is not None
+        assert set(narrative.compression.source_ids) == {"r1", "r2"}
+        assert narrative.compression.source_count == 2
+        assert narrative.compression.method == "spsca"
+        assert narrative.compression.created_cycle == 1
+
+    def test_compression_metadata_importance_statistics(self):
+        narr = SPSCALogger()
+        records = [
+            make_outcome_record("r1", "OpenDoor", "Success", cycle=1),
+            make_outcome_record("r2", "OpenDoor", "Failed", cycle=2),
+        ]
+        result = narr.compress(records)
+        meta = result[0].compression
+        assert meta is not None
+        assert abs(meta.total_importance - 1.6) < 1e-3
+        assert abs(meta.mean_importance - 0.8) < 1e-3

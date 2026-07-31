@@ -31,7 +31,7 @@ def make_episodic_record(
 
 class TestLoggerPipeline:
     def _setup(self, count: int = 5) -> tuple:
-        """Store records, flush to ACTIVE, then archive them for narrator."""
+        """Store records, flush to ACTIVE, then archive them for logger."""
         episodic = EpisodicStore(FIFOMemoryStrategy(max_size=100))
         semantic = SemanticStore()
         for i in range(count):
@@ -40,49 +40,49 @@ class TestLoggerPipeline:
         episodic.execute(0, archive_below=0.6)
         return episodic, semantic
 
-    def test_narrator_produces_narratives(self):
+    def test_logger_produces_narratives(self):
         episodic, semantic = self._setup(10)
 
-        narrator = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=5))
+        logger = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=5))
         ctx = RuntimeContext()
-        assert narrator.should_run(episodic, ctx) is True
+        assert logger.should_run(episodic, ctx) is True
 
-        produced = narrator.run(episodic, semantic)
+        produced = logger.run(episodic, semantic)
         assert produced > 0
         assert semantic.narrative_count == produced
 
-    def test_narrator_does_not_run_without_trigger(self):
+    def test_logger_does_not_run_without_trigger(self):
         episodic, semantic = self._setup(10)
 
-        narrator = Logger(strategy=SPSCALogger())
+        logger = Logger(strategy=SPSCALogger())
         ctx = RuntimeContext()
-        assert narrator.should_run(episodic, ctx) is False
+        assert logger.should_run(episodic, ctx) is False
 
-    def test_narrator_empty_episodic(self):
+    def test_logger_empty_episodic(self):
         episodic = EpisodicStore(FIFOMemoryStrategy(max_size=100))
         semantic = SemanticStore()
-        narrator = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=1))
-        produced = narrator.run(episodic, semantic)
+        logger = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=1))
+        produced = logger.run(episodic, semantic)
         assert produced == 0
 
     def test_semantic_store_holds_narratives(self):
         episodic, semantic = self._setup(5)
 
-        narrator = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=1))
-        narrator.run(episodic, semantic)
+        logger = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=1))
+        logger.run(episodic, semantic)
 
         narratives = semantic.query_narratives()
         assert len(narratives) > 0
         for n in narratives:
             assert n.memory_type == MemoryType.NARRATIVE
 
-    def test_narrator_metrics(self):
+    def test_logger_metrics(self):
         episodic, semantic = self._setup(10)
 
-        narrator = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=5))
+        logger = Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=5))
         ctx = RuntimeContext()
-        assert narrator.should_run(episodic, ctx) is True
+        assert logger.should_run(episodic, ctx) is True
 
-        narratives_produced = narrator.run(episodic, semantic)
+        narratives_produced = logger.run(episodic, semantic)
         assert narratives_produced > 0
         assert len(semantic.query_narratives()) == narratives_produced

@@ -7,11 +7,11 @@ from cores.core.memory import (
     MemoryType,
     RecordLifecycle,
     Memory,
+    EpisodicStore,
     FIFOMemoryStrategy,
     TimeDecayMemoryStrategy,
     PriorityMemoryStrategy,
     EpisodicMemoryStrategy,
-    SPSCAMemoryStrategy,
     make_record_id,
 )
 from cores.core.memory.semantic_pointers import SemanticPointer, encode_content
@@ -314,74 +314,6 @@ class TestSemanticPointer:
 
 
 # =========================================================================
-# SPSCA Memory Strategy (real semantic pointers)
-# =========================================================================
-
-
-class TestSPSCAMemoryStrategy:
-    def test_store_and_exact_retrieve(self):
-        s = SPSCAMemoryStrategy(max_size=10, similarity_threshold=0.7)
-        s.store(MemoryRecord(id="r1", content="hello world", cycle=0, importance=0.9))
-        result = s.retrieve(MemoryQuery(query_text="hello world", min_importance=0.5))
-        assert len(result.records) == 1
-        assert result.records[0].id == "r1"
-
-    def test_no_match_for_dissimilar_content(self):
-        s = SPSCAMemoryStrategy(max_size=10, similarity_threshold=0.7)
-        s.store(MemoryRecord(id="r1", content="obstacle at north", cycle=0, importance=0.9))
-        result = s.retrieve(MemoryQuery(query_text="completely different", min_importance=0.5))
-        assert len(result.records) == 0
-
-    def test_retrieve_empty_query_returns_all(self):
-        s = SPSCAMemoryStrategy(max_size=10, similarity_threshold=0.0)
-        s.store(MemoryRecord(id="r1", content="a", cycle=0, importance=0.9))
-        s.store(MemoryRecord(id="r2", content="b", cycle=0, importance=0.9))
-        result = s.retrieve(MemoryQuery(query_text="", min_importance=0.0))
-        assert len(result.records) == 2
-
-    def test_forget_compresses_into_chunks(self):
-        s = SPSCAMemoryStrategy(forget_threshold=0.3, max_size=100)
-        s.store(MemoryRecord(id="r1", content="low", cycle=0, importance=0.1, record_type=MemoryType.OBSERVATION))
-        s.store(MemoryRecord(id="r2", content="high", cycle=0, importance=0.9, record_type=MemoryType.OBSERVATION))
-        forgotten = s.forget(current_cycle=0)
-        assert forgotten == 1
-        assert s.size == 1
-        assert s.chunk_count == 1
-
-    def test_clear(self):
-        s = SPSCAMemoryStrategy()
-        s.store(MemoryRecord(id="r1", content="a", cycle=0))
-        s.clear()
-        assert s.size == 0
-        assert s.chunk_count == 0
-
-    def test_enforce_limit_creates_chunks(self):
-        s = SPSCAMemoryStrategy(max_size=5, max_individual=3)
-        for i in range(5):
-            s.store(MemoryRecord(
-                id=f"r{i}", content=f"data_{i}", cycle=i,
-                importance=0.1 + i * 0.2,
-            ))
-        assert s.size <= 5
-        assert s.chunk_count > 0
-
-    def test_metrics(self):
-        s = SPSCAMemoryStrategy(max_size=10, similarity_threshold=0.0)
-        s.store(MemoryRecord(id="r1", content="x", cycle=0, importance=0.9))
-        s.retrieve(MemoryQuery(query_text=""))
-        m = s.metrics
-        assert m.strategy_name == "spsca"
-        assert m.total_records == 1
-        assert m.retrieval_count == 1
-
-    def test_total_stored_includes_chunks(self):
-        s = SPSCAMemoryStrategy(forget_threshold=0.3, max_size=100)
-        s.store(MemoryRecord(id="r1", content="a", cycle=0, importance=0.1, record_type=MemoryType.OBSERVATION))
-        s.forget(current_cycle=0)
-        assert s.total_stored == s.size + s.chunk_count
-
-
-# =========================================================================
 # Memory cognitive node
 # =========================================================================
 
@@ -389,7 +321,7 @@ class TestSPSCAMemoryStrategy:
 class TestMemory:
     def test_execute_stores_pending(self):
         strategy = FIFOMemoryStrategy(max_size=10)
-        mem = Memory(strategy=strategy)
+        mem = Memory(episodic_store=EpisodicStore(strategy))
         mem.store(MemoryRecord(id="r1", content="test", cycle=0))
         result = mem.execute(RobotState(), RuntimeContext())
         assert result.metrics["stored"] == 1
@@ -397,7 +329,7 @@ class TestMemory:
 
     def test_execute_forgets(self):
         strategy = PriorityMemoryStrategy(forget_below=0.3)
-        mem = Memory(strategy=strategy)
+        mem = Memory(episodic_store=EpisodicStore(strategy))
         mem.store(MemoryRecord(id="r1", content="low", cycle=0, importance=0.1))
         mem.store(MemoryRecord(id="r2", content="high", cycle=0, importance=0.9))
         mem.execute(RobotState(), RuntimeContext())
@@ -406,7 +338,7 @@ class TestMemory:
 
     def test_ask(self):
         strategy = FIFOMemoryStrategy(max_size=10)
-        mem = Memory(strategy=strategy)
+        mem = Memory(episodic_store=EpisodicStore(strategy))
         mem.store(MemoryRecord(id="r1", content="stored", cycle=0))
         mem.execute(RobotState(), RuntimeContext())
         result = mem.ask(MemoryQuery(max_results=10))
@@ -418,7 +350,6 @@ class TestMemory:
             TimeDecayMemoryStrategy(max_size=10),
             PriorityMemoryStrategy(max_size=10),
             EpisodicMemoryStrategy(max_episodes=10),
-            SPSCAMemoryStrategy(max_size=10, similarity_threshold=0.0),
         ]
         for strategy in strategies:
             record = MemoryRecord(id="r1", content="test", cycle=0)
@@ -440,7 +371,7 @@ class TestMemory:
 class TestMemoryIntegration:
     def test_memory_stores_observations_across_cycles(self):
         strategy = FIFOMemoryStrategy(max_size=100)
-        mem = Memory(strategy=strategy)
+        mem = Memory(episodic_store=EpisodicStore(strategy))
 
         for cycle in range(5):
             record = MemoryRecord(
@@ -459,7 +390,7 @@ class TestMemoryIntegration:
 
     def test_memory_does_not_grow_unbounded(self):
         strategy = FIFOMemoryStrategy(max_size=10)
-        mem = Memory(strategy=strategy)
+        mem = Memory(episodic_store=EpisodicStore(strategy))
 
         for cycle in range(100):
             record = MemoryRecord(
@@ -475,6 +406,32 @@ class TestMemoryIntegration:
 
     def test_ask_empty_memory(self):
         strategy = FIFOMemoryStrategy(max_size=10)
-        mem = Memory(strategy=strategy)
+        mem = Memory(episodic_store=EpisodicStore(strategy))
         result = mem.ask(MemoryQuery(max_results=10))
         assert len(result.records) == 0
+
+    def test_consolidated_records_not_recompressed(self):
+        from cores.core import Logger, SPSCALogger, CountTrigger
+
+        mem = Memory(
+            episodic_store=EpisodicStore(FIFOMemoryStrategy(max_size=100)),
+            logger=Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=3)),
+            archive_below=0.6,
+        )
+
+        for cycle in range(6):
+            mem.store(MemoryRecord(
+                id=f"fail_{cycle}",
+                content={"action": "OpenDoor", "result": "Failed"},
+                cycle=cycle,
+                importance=0.4,
+                record_type=MemoryType.OUTCOME,
+            ))
+            mem.execute(RobotState(), RuntimeContext())
+
+        narratives = mem.semantic.query_narratives(limit=100)
+        assert len(narratives) == 2
+
+        all_sources = [sid for n in narratives for sid in n.source_ids]
+        assert len(all_sources) == len(set(all_sources)), "records must not be re-consolidated"
+

@@ -8,7 +8,6 @@ from cores.core.module_registry import ModuleRegistry
 from cores.core.world_model import WorldModelStrategy, SimpleObjectRegistry
 from cores.core.state_estimation import StateEstimation
 from cores.core.memory import Memory, MemoryRecord, MemoryType
-from cores.core.memory.strategies.priority_memory import PriorityMemoryStrategy
 
 from cores.core.planning.interface import Planner, PlanningContext
 from cores.core.planning.mission import Mission
@@ -59,7 +58,7 @@ class Runtime:
         self.mission = mission or Mission(mission_id="default", goals=[])
         self._last_planning_result = None
 
-        self.memory = memory or Memory(strategy=PriorityMemoryStrategy())
+        self.memory = memory or Memory()
 
         for event_type in EventType:
             self.event_bus.subscribe(event_type, self._on_event)

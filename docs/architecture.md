@@ -23,6 +23,15 @@ cores/
 │   │   ├── execution_plan.py     Immutable execution contract from Scheduler
 │   │   ├── execution_layer.py    Executes modules from ExecutionPlan
 │   │   ├── scheduler.py          SchedulingPolicy ABC + Scheduler coordinator
+│   │   ├── memory/               Memory cognitive node (episodic + semantic + Logger)
+│   │   │   ├── interface.py      MemoryRecord, MemoryQuery, MemoryStrategy, Memory
+│   │   │   ├── store.py          EpisodicStore, SemanticStore
+│   │   │   ├── types.py          MemoryType, RecordLifecycle, NarrativeRecord
+│   │   │   └── strategies/       FIFO, Priority, TimeDecay, Episodic
+│   │   ├── logger/               Consolidation engine inside Memory
+│   │   │   ├── logger.py         Logger orchestrator
+│   │   │   ├── spsca.py          SPSCALogger (LoggerStrategy)
+│   │   │   └── triggers.py       Capacity / Count / Idle / Composite triggers
 │   │   └── runtime.py            Orchestrates the full execution cycle
 │   ├── events/
 │   │   ├── event.py              Frozen, immutable Event model

@@ -1,4 +1,4 @@
-"""Tests for Narrator trigger policies."""
+"""Tests for Logger trigger policies."""
 
 from cores.core.memory import (
     MemoryRecord,

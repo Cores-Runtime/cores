@@ -2,6 +2,7 @@ from cores.core.memory.types import (
     MemoryType,
     RecordLifecycle,
     NarrativeRecord,
+    CompressionMetadata,
 )
 
 from cores.core.memory.interface import (
@@ -24,13 +25,13 @@ from cores.core.memory.strategies import (
     TimeDecayMemoryStrategy,
     PriorityMemoryStrategy,
     EpisodicMemoryStrategy,
-    SPSCAMemoryStrategy,
 )
 
 __all__ = [
     "MemoryType",
     "RecordLifecycle",
     "NarrativeRecord",
+    "CompressionMetadata",
     "EpisodicStore",
     "SemanticStore",
     "MemoryRecord",
@@ -44,5 +45,4 @@ __all__ = [
     "TimeDecayMemoryStrategy",
     "PriorityMemoryStrategy",
     "EpisodicMemoryStrategy",
-    "SPSCAMemoryStrategy",
 ]

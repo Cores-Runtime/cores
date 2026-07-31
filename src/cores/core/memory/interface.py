@@ -103,38 +103,44 @@ class MemoryStrategy(ABC):
 class Memory(Module):
     """The Memory cognitive node.
 
-    Composes EpisodicStore + SemanticStore + optional Logger.
+    Composes EpisodicStore + SemanticStore + Logger.
 
     EpisodicStore wraps a MemoryStrategy (FIFO / Priority / TimeDecay / EpisodicStrategy)
     for raw record storage. SemanticStore holds compressed narratives and facts.
-    Logger (optional) consolidates episodic records into semantic narratives.
+    Logger consolidates episodic records into semantic narratives when its trigger fires.
 
     Planners access memory through the PlanningContext, calling query() or ask().
     """
 
     def __init__(
         self,
-        strategy: Optional[MemoryStrategy] = None,
-        episodic_store: Optional[EpisodicStore] = None,
-        semantic_store: Optional[SemanticStore] = None,
+        episodic_store: Optional["EpisodicStore"] = None,
+        semantic_store: Optional["SemanticStore"] = None,
         logger: Optional[Any] = None,
+        archive_below: float = 0.3,
         name: str = "memory",
     ) -> None:
         super().__init__(name)
-        if episodic_store is not None:
-            self._episodic = episodic_store
-        elif strategy is not None:
-            from cores.core.memory.store import EpisodicStore as ES
-            self._episodic = ES(strategy)
-        else:
+        if episodic_store is None:
             from cores.core.memory.strategies.priority_memory import PriorityMemoryStrategy
             from cores.core.memory.store import EpisodicStore as ES
-            self._episodic = ES(PriorityMemoryStrategy())
+            episodic_store = ES(PriorityMemoryStrategy())
 
         from cores.core.memory.store import SemanticStore as SS
+        self._episodic = episodic_store
         self._semantic = semantic_store or SS()
-        self._logger = logger
+        self._logger = logger or self._default_logger()
+        self._archive_below = archive_below
         self._pending_store: List[MemoryRecord] = []
+
+    @staticmethod
+    def _default_logger() -> Any:
+        """Build a Logger with a sensible default trigger."""
+        from cores.core.logger.logger import Logger
+        from cores.core.logger.spsca import SPSCALogger
+        from cores.core.logger.triggers import CountTrigger
+
+        return Logger(strategy=SPSCALogger(), trigger=CountTrigger(count=50))
 
     @property
     def episodic(self) -> Any:
@@ -182,8 +188,8 @@ class Memory(Module):
         """Run the memory cognitive loop for one cycle.
 
         1. Store pending records → EpisodicStore
-        2. EpisodicStore lifecycle (flush NEW→ACTIVE, forget low-importance)
-        3. Narrator consolidation (if trigger fires)
+        2. EpisodicStore lifecycle (flush NEW→ACTIVE, archive, forget)
+        3. Logger consolidation (if trigger fires)
         4. Publish metrics
         """
         metrics: Dict[str, Any] = {}
@@ -196,8 +202,10 @@ class Memory(Module):
         else:
             metrics["stored"] = 0
 
-        # 2. EpisodicStore lifecycle pass
-        ep_metrics = self._episodic.execute(context.cycle_count)
+        # 2. EpisodicStore lifecycle pass (archives records below archive_below)
+        ep_metrics = self._episodic.execute(
+            context.cycle_count, archive_below=self._archive_below
+        )
         metrics.update(ep_metrics)
 
         # 3. Logger consolidation (if trigger fires)
