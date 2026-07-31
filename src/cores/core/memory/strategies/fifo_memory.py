@@ -42,7 +42,7 @@ class FIFOMemoryStrategy(MemoryStrategy):
             record = self._records[rid]
             if self._matches(record, query):
                 matched.append(record)
-                if len(matched) >= query.limit:
+                if len(matched) >= query.max_results:
                     break
         self._retrieval_count += 1
         return MemoryResult(records=matched, query=query)
@@ -85,7 +85,7 @@ class FIFOMemoryStrategy(MemoryStrategy):
     def _matches(self, record: MemoryRecord, query: MemoryQuery) -> bool:
         if record.importance < query.min_importance:
             return False
-        if query.record_types and record.record_type not in query.record_types:
+        if query.memory_types and record.record_type not in query.memory_types:
             return False
         if query.max_age_cycles is not None:
             age = abs(record.cycle)

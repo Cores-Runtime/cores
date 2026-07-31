@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Any, Dict
 from pydantic import BaseModel, Field
 
 
@@ -18,3 +18,4 @@ class RuntimeContext(BaseModel):
     metrics: Dict[str, Any] = Field(default_factory=dict)
     profiling: Dict[str, Any] = Field(default_factory=dict)
     world_model: Any = Field(default=None)
+    memory: Any = Field(default=None)

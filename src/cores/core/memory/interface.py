@@ -4,11 +4,16 @@ import hashlib
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from cores.interfaces.module import Module, ModuleResult
 from cores.core.robot_state import RobotState
-from cores.core.runtime_context import RuntimeContext
+
+if TYPE_CHECKING:
+    from cores.core.runtime_context import RuntimeContext
+    from cores.core.memory.store import EpisodicStore, SemanticStore
+
+from cores.core.memory.types import MemoryType, RecordLifecycle, MemoryQuery
 
 
 # ---------------------------------------------------------------------------
@@ -26,19 +31,9 @@ class MemoryRecord:
     importance: float = 0.5
     access_count: int = 0
     last_accessed_cycle: int = 0
-    record_type: str = "generic"
+    record_type: MemoryType = MemoryType.OBSERVATION
+    lifecycle: RecordLifecycle = RecordLifecycle.NEW
     metadata: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class MemoryQuery:
-    """A request to retrieve records from memory."""
-
-    query: str = ""
-    record_types: Optional[List[str]] = None
-    min_importance: float = 0.0
-    max_age_cycles: Optional[int] = None
-    limit: int = 10
 
 
 @dataclass
@@ -108,65 +103,112 @@ class MemoryStrategy(ABC):
 class Memory(Module):
     """The Memory cognitive node.
 
-    Runs after StateEstimation each cycle. Stores current observations,
-    consolidates important records, and forgets stale ones.
+    Composes EpisodicStore + SemanticStore + optional Logger.
 
-    Planners access memory through the PlanningContext.
+    EpisodicStore wraps a MemoryStrategy (FIFO / Priority / TimeDecay / EpisodicStrategy)
+    for raw record storage. SemanticStore holds compressed narratives and facts.
+    Logger (optional) consolidates episodic records into semantic narratives.
+
+    Planners access memory through the PlanningContext, calling query() or ask().
     """
 
     def __init__(
         self,
-        strategy: MemoryStrategy,
+        strategy: Optional[MemoryStrategy] = None,
+        episodic_store: Optional[EpisodicStore] = None,
+        semantic_store: Optional[SemanticStore] = None,
+        logger: Optional[Any] = None,
         name: str = "memory",
     ) -> None:
         super().__init__(name)
-        self._strategy = strategy
+        if episodic_store is not None:
+            self._episodic = episodic_store
+        elif strategy is not None:
+            from cores.core.memory.store import EpisodicStore as ES
+            self._episodic = ES(strategy)
+        else:
+            from cores.core.memory.strategies.priority_memory import PriorityMemoryStrategy
+            from cores.core.memory.store import EpisodicStore as ES
+            self._episodic = ES(PriorityMemoryStrategy())
+
+        from cores.core.memory.store import SemanticStore as SS
+        self._semantic = semantic_store or SS()
+        self._logger = logger
         self._pending_store: List[MemoryRecord] = []
 
     @property
-    def strategy(self) -> MemoryStrategy:
-        return self._strategy
+    def episodic(self) -> Any:
+        return self._episodic
+
+    @property
+    def semantic(self) -> Any:
+        return self._semantic
+
+    @property
+    def logger(self) -> Any:
+        return self._logger
+
+    @property
+    def strategy(self) -> Any:
+        return self._episodic.strategy
 
     def store(self, record: MemoryRecord) -> None:
         """Queue a record for storage on the next cycle."""
+        record.lifecycle = RecordLifecycle.NEW
         self._pending_store.append(record)
 
     def store_batch(self, records: List[MemoryRecord]) -> None:
         """Queue multiple records for storage on the next cycle."""
+        for r in records:
+            r.lifecycle = RecordLifecycle.NEW
         self._pending_store.extend(records)
 
     def ask(self, query: MemoryQuery) -> MemoryResult:
         """Query memory. Called by Planners during their cycle."""
-        return self._strategy.retrieve(query)
+        return self._episodic.query(query)
+
+    def query(self, q: MemoryQuery) -> MemoryResult:
+        """Structured query — merges EpisodicStore + SemanticStore results."""
+        episodic_result = self._episodic.query(q)
+        semantic_records = self._semantic.query(q)
+
+        merged = list(episodic_result.records) + list(semantic_records)
+        merged.sort(key=lambda r: r.importance if hasattr(r, 'importance') else getattr(r, 'confidence', 0.5), reverse=True)
+        merged = merged[: q.max_results]
+
+        return MemoryResult(records=merged, query=q)
 
     def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
         """Run the memory cognitive loop for one cycle.
 
-        1. Flush pending stores into the strategy.
-        2. Consolidate: boost importance for frequently accessed records.
-        3. Forget records below the importance threshold.
-        4. Publish metrics.
+        1. Store pending records → EpisodicStore
+        2. EpisodicStore lifecycle (flush NEW→ACTIVE, forget low-importance)
+        3. Narrator consolidation (if trigger fires)
+        4. Publish metrics
         """
         metrics: Dict[str, Any] = {}
 
-        # 1. Store pending records
+        # 1. Flush pending stores into EpisodicStore
         if self._pending_store:
-            self._strategy.store_batch(self._pending_store)
+            self._episodic.store_batch(self._pending_store)
             metrics["stored"] = len(self._pending_store)
             self._pending_store.clear()
         else:
             metrics["stored"] = 0
 
-        # 2. Consolidate: boost importance for frequently accessed records
-        consolidated = self._consolidate(context.cycle_count)
-        metrics["consolidated"] = consolidated
+        # 2. EpisodicStore lifecycle pass
+        ep_metrics = self._episodic.execute(context.cycle_count)
+        metrics.update(ep_metrics)
 
-        # 3. Forget
-        forgotten = self._strategy.forget(context.cycle_count)
-        metrics["forgotten"] = forgotten
+        # 3. Logger consolidation (if trigger fires)
+        if self._logger is not None and self._logger.should_run(self._episodic, context):
+            narratives_produced = self._logger.run(self._episodic, self._semantic)
+            metrics["narratives_produced"] = narratives_produced
+        else:
+            metrics["narratives_produced"] = 0
 
         # 4. Publish metrics
-        mem_metrics = self._strategy.metrics
+        mem_metrics = self._episodic.strategy.metrics
         metrics["total_records"] = mem_metrics.total_records
         metrics["strategy"] = mem_metrics.strategy_name
         metrics["retrieval_count"] = mem_metrics.retrieval_count
@@ -178,23 +220,6 @@ class Memory(Module):
             metrics=metrics,
             execution_time_ms=0.0,
         )
-
-    def _consolidate(self, current_cycle: int) -> int:
-        """Boost importance for records accessed within the last cycle."""
-        count = 0
-        all_records: List[MemoryRecord] = []
-
-        result = self._strategy.retrieve(
-            MemoryQuery(query="", min_importance=0.0, limit=100000)
-        )
-        all_records = result.records
-
-        for record in all_records:
-            if record.last_accessed_cycle == current_cycle:
-                record.importance = min(1.0, record.importance + 0.05)
-                count += 1
-
-        return count
 
 
 def make_record_id(content: Any, cycle: int) -> str:

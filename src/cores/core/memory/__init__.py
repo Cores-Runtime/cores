@@ -1,3 +1,9 @@
+from cores.core.memory.types import (
+    MemoryType,
+    RecordLifecycle,
+    NarrativeRecord,
+)
+
 from cores.core.memory.interface import (
     MemoryRecord,
     MemoryQuery,
@@ -6,6 +12,11 @@ from cores.core.memory.interface import (
     MemoryStrategy,
     Memory,
     make_record_id,
+)
+
+from cores.core.memory.store import (
+    EpisodicStore,
+    SemanticStore,
 )
 
 from cores.core.memory.strategies import (
@@ -17,6 +28,11 @@ from cores.core.memory.strategies import (
 )
 
 __all__ = [
+    "MemoryType",
+    "RecordLifecycle",
+    "NarrativeRecord",
+    "EpisodicStore",
+    "SemanticStore",
     "MemoryRecord",
     "MemoryQuery",
     "MemoryResult",

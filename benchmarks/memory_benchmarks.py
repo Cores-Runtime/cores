@@ -7,6 +7,7 @@ from typing import List
 from cores.core.memory import (
     MemoryRecord,
     MemoryQuery,
+    MemoryType,
     FIFOMemoryStrategy,
     TimeDecayMemoryStrategy,
     PriorityMemoryStrategy,
@@ -22,7 +23,7 @@ def make_records(count: int) -> List[MemoryRecord]:
             content={"value": i, "data": "x" * 50},
             cycle=i,
             importance=abs(hash(str(i))) % 100 / 100.0,
-            record_type="observation",
+            record_type=MemoryType.OBSERVATION,
         )
         for i in range(count)
     ]

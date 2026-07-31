@@ -94,7 +94,7 @@ class EpisodicMemoryStrategy(MemoryStrategy):
                     all_records.append(record)
 
         all_records.sort(key=lambda r: r.importance, reverse=True)
-        return MemoryResult(records=all_records[: query.limit], query=query)
+        return MemoryResult(records=all_records[: query.max_results], query=query)
 
     def forget(self, current_cycle: int) -> int:
         before = self.size
@@ -141,7 +141,7 @@ class EpisodicMemoryStrategy(MemoryStrategy):
     def _matches(self, record: MemoryRecord, query: MemoryQuery) -> bool:
         if record.importance < query.min_importance:
             return False
-        if query.record_types and record.record_type not in query.record_types:
+        if query.memory_types and record.record_type not in query.memory_types:
             return False
         if query.max_age_cycles is not None:
             age = abs(record.cycle)

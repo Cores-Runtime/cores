@@ -47,9 +47,9 @@ cd cores/homepage/
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000) and click Simulator to see a live dashboard. Click 3D Replay to watch a rover navigate a 500m Martian traverse. Rock falls. Dust storm hits. Battery drains. The runtime reacts. You see every decision, every module wake/sleep, every sensor reading.
-
-No install required beyond a browser and Node.js.
+Then localhost:3000 in your browser.
+OR Just:
+Open [Website link](https://cores-rust.vercel.app/) and click Simulator to see a live dashboard. Click 3D Replay to watch a rover navigate a 500m Martian traverse. Rock falls. Dust storm hits. Battery drains. The runtime reacts. You see every decision, every module wake/sleep, every sensor reading.
 
 ---
 

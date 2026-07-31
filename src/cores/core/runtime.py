@@ -7,8 +7,9 @@ from cores.core.state_estimator import StateEstimator
 from cores.core.module_registry import ModuleRegistry
 from cores.core.world_model import WorldModelStrategy, SimpleObjectRegistry
 from cores.core.state_estimation import StateEstimation
-from cores.core.memory import Memory
+from cores.core.memory import Memory, MemoryRecord, MemoryType
 from cores.core.memory.strategies.priority_memory import PriorityMemoryStrategy
+
 from cores.core.planning.interface import Planner, PlanningContext
 from cores.core.planning.mission import Mission
 from cores.events.event_bus import EventBus
@@ -96,8 +97,9 @@ class Runtime:
         8. Publish runtime state snapshot through the bridge.
         9. Advance runtime context metadata.
         """
-        # 1. Wire the StateEstimation's reasoning strategy into context
+        # 1. Wire shared components into context
         self.context.world_model = self.state_estimation.strategy
+        self.context.memory = self.memory
 
         # 2. State estimation
         if self.state_estimator is not None:
@@ -136,6 +138,21 @@ class Runtime:
         for result in results:
             for event in result.events:
                 self.event_bus.publish(event)
+
+        # 6.5 Store outcomes into Episodic Memory
+        for result in results:
+            outcome_record = MemoryRecord(
+                id=f"outcome_{result.module_name}_{self.context.cycle_count}",
+                content={
+                    "action": result.module_name,
+                    "result": result.status.value,
+                    "cycle": self.context.cycle_count,
+                },
+                cycle=self.context.cycle_count,
+                importance=0.8,
+                record_type=MemoryType.OUTCOME,
+            )
+            self.memory.store(outcome_record)
 
         # 7. StateEstimation cognitive loop — runs after all observation modules
         state_estimation_result = self.state_estimation.execute(self.state, self.context)

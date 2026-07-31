@@ -70,9 +70,9 @@ class SPSCAMemoryStrategy(MemoryStrategy):
 
     def _encode_query(self, query: MemoryQuery) -> SemanticPointer:
         """Encode a query as a semantic pointer for similarity matching."""
-        if not query.query.strip():
+        if not query.query_text.strip():
             return SemanticPointer.zeros(self._dim)
-        return encode_content(query.query, dim=self._dim)
+        return encode_content(query.query_text, dim=self._dim)
 
     # ------------------------------------------------------------------
     # Store
@@ -96,7 +96,7 @@ class SPSCAMemoryStrategy(MemoryStrategy):
     def retrieve(self, query: MemoryQuery) -> MemoryResult:
         self._retrieval_count += 1
         query_sp = self._encode_query(query)
-        has_query = bool(query.query.strip())
+        has_query = bool(query.query_text.strip())
 
         scored: List[Tuple[float, MemoryRecord]] = []
 
@@ -115,7 +115,7 @@ class SPSCAMemoryStrategy(MemoryStrategy):
             scored.append((sim, record))
 
         scored.sort(key=lambda x: x[0], reverse=True)
-        records = [r for _, r in scored[: query.limit]]
+        records = [r for _, r in scored[: query.max_results]]
         return MemoryResult(records=records, query=query)
 
     # ------------------------------------------------------------------
@@ -228,7 +228,7 @@ class SPSCAMemoryStrategy(MemoryStrategy):
     def _matches(self, record: MemoryRecord, query: MemoryQuery) -> bool:
         if record.importance < query.min_importance:
             return False
-        if query.record_types and record.record_type not in query.record_types:
+        if query.memory_types and record.record_type not in query.memory_types:
             return False
         if query.max_age_cycles is not None:
             age = abs(record.cycle)
