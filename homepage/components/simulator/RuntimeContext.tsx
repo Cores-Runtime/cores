@@ -27,11 +27,15 @@ export type SimulatorValue = {
   seek: (tick: number) => void;
   totalTicks: number;
   tick: number;
+  speed: number;
+  setSpeed: (speed: number) => void;
+  eventTicks: number[];
   engine: EngineProxy;
   mode: SimulatorMode;
   setMode: (mode: SimulatorMode) => void;
   wsUrl: string;
   setWsUrl: (url: string) => void;
+  fallbackActive: boolean;
 };
 
 const DEFAULT_WS_URL = "ws://127.0.0.1:8765";
@@ -51,6 +55,7 @@ export function RuntimeProvider({
   const liveRef = useRef<LiveRuntimeSource | null>(null);
   const [, forceRender] = useState(0);
   const [ready, setReady] = useState(false);
+  const [liveConnected, setLiveConnected] = useState(false);
 
   const initReplay = useCallback(() => {
     if (replayRef.current) return;
@@ -72,12 +77,16 @@ export function RuntimeProvider({
       liveRef.current.destroy();
       liveRef.current = null;
     }
+    setLiveConnected(false);
     const ls = new LiveRuntimeSource(wsUrl);
     liveRef.current = ls;
     ls.init().then(() => {
       setReady(true);
     });
-    ls.subscribe(() => forceRender(v => v + 1));
+    ls.subscribe(() => {
+      setLiveConnected(ls.connected);
+      forceRender(v => v + 1);
+    });
   }, [wsUrl]);
 
   useEffect(() => {
@@ -87,11 +96,10 @@ export function RuntimeProvider({
         liveRef.current.destroy();
         liveRef.current = null;
       }
+      setLiveConnected(false);
       initReplay();
     } else {
-      if (replayRef.current) {
-        replayRef.current = null as any;
-      }
+      initReplay();
       initLive();
     }
   }, [mode, initReplay, initLive]);
@@ -117,7 +125,8 @@ export function RuntimeProvider({
     );
   }
 
-  const source = mode === "replay" ? replayRef.current : liveRef.current;
+  const source = mode === "replay" || !liveConnected ? replayRef.current : liveRef.current;
+  const fallbackActive = mode === "live" && !liveConnected;
   if (!source) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-paper">
@@ -148,26 +157,39 @@ export function RuntimeProvider({
     return acc;
   })();
 
+  const isReplaySource = source === replayRef.current;
+
+  const eventTicks = isReplaySource
+    ? ((replayRef.current as any)?.snapshots as readonly TraceSnapshot[] | undefined)
+        ?.filter(s => s.eventHistory && s.eventHistory.length > 0)
+        .map(s => s.tick) ?? []
+    : [];
+
   const value: SimulatorValue = {
     state,
     tick: state.tick,
     running: state.status === "running",
     setRunning: (v) => {
-      if (mode === "replay") replayRef.current?.setStatus(v ? "running" : "paused");
+      if (isReplaySource) replayRef.current?.setStatus(v ? "running" : "paused");
     },
     missions: source.availableMissions as any,
     mission: state.mission as any,
     injectableEvents: source.availableEvents as any,
     injectEvent: (name) => {
-      if (mode === "replay") replayRef.current?.dispatchEvent(name);
+      if (isReplaySource) replayRef.current?.dispatchEvent(name);
     },
     loadMission: (id) => {
-      if (mode === "replay") replayRef.current?.loadMission(id);
+      if (isReplaySource) replayRef.current?.loadMission(id);
     },
     seek: (tick) => {
-      if (mode === "replay") replayRef.current?.seek(tick);
+      if (isReplaySource) replayRef.current?.seek(tick);
     },
     totalTicks: source.totalTicks(),
+    speed: isReplaySource ? (replayRef.current?.speed ?? 1) : 1,
+    setSpeed: (speed) => {
+      if (isReplaySource) replayRef.current?.setSpeed(speed);
+    },
+    eventTicks,
     engine: new Proxy(state as any, {
       get: (target, prop) => {
         const s = target as SimulatorState;
@@ -189,6 +211,7 @@ export function RuntimeProvider({
     setMode,
     wsUrl,
     setWsUrl,
+    fallbackActive,
   };
 
   return <SimulatorCtx.Provider value={value}>{children}</SimulatorCtx.Provider>;

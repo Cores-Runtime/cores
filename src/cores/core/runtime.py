@@ -11,6 +11,7 @@ from cores.core.memory import Memory, MemoryRecord, MemoryType
 
 from cores.core.planning.interface import Planner, PlanningContext
 from cores.core.planning.mission import Mission
+from cores.core.mission_manager import MissionManager, MissionContext
 from cores.events.event_bus import EventBus
 from cores.events.event import Event
 from cores.events.event_type import EventType
@@ -35,6 +36,7 @@ class Runtime:
         world_model: Optional[WorldModelStrategy] = None,
         planner: Optional[Planner] = None,
         mission: Optional[Mission] = None,
+        mission_manager: Optional[MissionManager] = None,
         memory: Optional[Memory] = None,
     ) -> None:
         self.state_estimator = state_estimator
@@ -57,6 +59,12 @@ class Runtime:
         self.planner = planner
         self.mission = mission or Mission(mission_id="default", goals=[])
         self._last_planning_result = None
+
+        self.mission_manager = mission_manager
+        if self.mission_manager is None:
+            self.mission_manager = MissionManager(
+                missions=[mission] if mission is not None else []
+            )
 
         self.memory = memory or Memory()
 
@@ -88,10 +96,12 @@ class Runtime:
         Execute one complete, sequential runtime cycle:
         1. Wire shared strategy into context for observation modules.
         2. Estimate robot state.
+        2.5 Select the active mission and goal (Mission Manager).
         3. Memory cognitive loop (store, consolidate, forget).
         4. Run the Planner (propose candidate plans, informed by memory).
         5. Collect events from the previous cycle.
         6. Schedule and execute all registered modules.
+        6.5 Store outcomes into Episodic Memory.
         7. Run the StateEstimation's cognitive loop (predict, check, explain).
         8. Publish runtime state snapshot through the bridge.
         9. Advance runtime context metadata.
@@ -104,6 +114,9 @@ class Runtime:
         if self.state_estimator is not None:
             self.state = self.state_estimator.estimate(self.context.cycle_count)
 
+        # 2.5 Mission selection - which mission and goal are active right now
+        mission_context = self.mission_manager.execute(self.state, self.context)
+
         # 3. Memory — store observations, consolidate, forget
         memory_result = self.memory.execute(self.state, self.context)
         self._last_module_results.append(memory_result)
@@ -115,12 +128,24 @@ class Runtime:
                 compute_budget=self.context.compute_budget,
                 time_budget_ms=self.context.time_budget_ms,
                 world_state={"obstacle_count": self.state_estimation.strategy.obstacle_count},
+                environment_changed=self.state_estimation.last_environment_changed,
+                change_set=self.state_estimation.last_change_set,
                 memory=self.memory,
             )
-            self._last_planning_result = self.planner.plan(
-                self.state, self.mission, pctx
-            )
-            self.context.metrics["planning_result"] = self._last_planning_result
+            planning_mission = self._planning_mission(mission_context)
+            previous = None
+            if self._last_planning_result is not None:
+                previous = self._last_planning_result.selected
+            if pctx.environment_changed and previous is not None:
+                result = self.planner.replan(
+                    self.state, planning_mission, pctx, previous, changes=pctx.change_set
+                )
+                if result is None:
+                    result = self.planner.plan(self.state, planning_mission, pctx)
+            else:
+                result = self.planner.plan(self.state, planning_mission, pctx)
+            self._last_planning_result = result
+            self.context.metrics["planning_result"] = result
         else:
             self._last_planning_result = None
 
@@ -137,6 +162,9 @@ class Runtime:
         for result in results:
             for event in result.events:
                 self.event_bus.publish(event)
+
+        # 6.2 Mission Manager observes what execution produced
+        self.mission_manager.observe_execution(results, self.state)
 
         # 6.5 Store outcomes into Episodic Memory
         for result in results:
@@ -185,4 +213,18 @@ class Runtime:
             except Exception:
                 pass
         self.bridge.close()
+
+    def _planning_mission(self, context: MissionContext) -> Mission:
+        """Planning sees one active goal only, never the mission queue."""
+        if (
+            context.is_active
+            and context.current_mission is not None
+            and context.current_goal is not None
+        ):
+            return Mission(
+                mission_id=context.current_mission.mission_id,
+                goals=[context.current_goal],
+                metadata=dict(context.mission_metadata),
+            )
+        return Mission(mission_id="default", goals=[])
 

@@ -28,8 +28,14 @@ from cores.core import (
 from cores.events import Event, EventType
 from cores.interfaces import Module
 
-import run_benchmarks as bench
-from validation import write_grouped_bar_chart
+try:
+    from benchmarks import run_benchmarks as bench
+    from benchmarks import validation as validation_mod
+except ImportError:
+    import run_benchmarks as bench
+    import validation as validation_mod
+
+write_grouped_bar_chart = validation_mod.write_grouped_bar_chart
 
 
 DEFAULT_OUTPUT_DIR = Path("benchmarks") / "results" / "phase_2a6"
@@ -386,6 +392,10 @@ class EnergyAwarePriorityPolicy:
         return selected
 
 
+def _build_deterministic_scenarios() -> list[ScenarioSpec]:
+    return generate_scenario_suite()
+
+
 def _evaluate_policy(
     policy_name: str,
     policy,
@@ -642,6 +652,7 @@ def generate_evaluation_artifacts(output_dir: Path = DEFAULT_OUTPUT_DIR) -> Eval
     focus_pairs = {
         scenario: {record.policy: record for record in deterministic_records if record.scenario == scenario}
         for scenario in SCENARIO_FOCUS
+        if any(record.scenario == scenario for record in deterministic_records)
     }
 
     report_lines = [
@@ -749,24 +760,31 @@ def generate_evaluation_artifacts(output_dir: Path = DEFAULT_OUTPUT_DIR) -> Eval
             "",
         ]
     )
-    priority_scores = [focus_pairs[scenario]["priority"].utility_score for scenario in SCENARIO_FOCUS]
-    energy_scores = [focus_pairs[scenario]["energy_aware_priority"].utility_score for scenario in SCENARIO_FOCUS]
-    criticality_scores = [focus_pairs[scenario]["criticality"].utility_score for scenario in SCENARIO_FOCUS]
-    priority_legacy = [focus_pairs[scenario]["priority"].legacy_mission_utility for scenario in SCENARIO_FOCUS]
-    energy_legacy = [focus_pairs[scenario]["energy_aware_priority"].legacy_mission_utility for scenario in SCENARIO_FOCUS]
-    criticality_legacy = [focus_pairs[scenario]["criticality"].legacy_mission_utility for scenario in SCENARIO_FOCUS]
+    if focus_pairs:
+        matched = [s for s in SCENARIO_FOCUS if s in focus_pairs]
+        if matched:
+            priority_scores = [focus_pairs[scenario]["priority"].utility_score for scenario in matched]
+            energy_scores = [focus_pairs[scenario]["energy_aware_priority"].utility_score for scenario in matched]
+            criticality_scores = [focus_pairs[scenario]["criticality"].utility_score for scenario in matched]
+            priority_legacy = [focus_pairs[scenario]["priority"].legacy_mission_utility for scenario in matched]
+            energy_legacy = [focus_pairs[scenario]["energy_aware_priority"].legacy_mission_utility for scenario in matched]
+            criticality_legacy = [focus_pairs[scenario]["criticality"].legacy_mission_utility for scenario in matched]
+            report_lines.extend(
+                [
+                    (
+                        f"- Average legacy utility: priority `{sum(priority_legacy) / len(priority_legacy) * 100.0:.1f}%`, "
+                        f"energy-aware priority `{sum(energy_legacy) / len(energy_legacy) * 100.0:.1f}%`, "
+                        f"criticality `{sum(criticality_legacy) / len(criticality_legacy) * 100.0:.1f}%`."
+                    ),
+                    (
+                        f"- Average revised utility score: priority `{sum(priority_scores) / len(priority_scores) * 100.0:.1f}%`, "
+                        f"energy-aware priority `{sum(energy_scores) / len(energy_scores) * 100.0:.1f}%`, "
+                        f"criticality `{sum(criticality_scores) / len(criticality_scores) * 100.0:.1f}%`."
+                    ),
+                ]
+            )
     report_lines.extend(
         [
-            (
-                f"- Average legacy utility: priority `{sum(priority_legacy) / len(priority_legacy) * 100.0:.1f}%`, "
-                f"energy-aware priority `{sum(energy_legacy) / len(energy_legacy) * 100.0:.1f}%`, "
-                f"criticality `{sum(criticality_legacy) / len(criticality_legacy) * 100.0:.1f}%`."
-            ),
-            (
-                f"- Average revised utility score: priority `{sum(priority_scores) / len(priority_scores) * 100.0:.1f}%`, "
-                f"energy-aware priority `{sum(energy_scores) / len(energy_scores) * 100.0:.1f}%`, "
-                f"criticality `{sum(criticality_scores) / len(criticality_scores) * 100.0:.1f}%`."
-            ),
             "",
             "## Artifacts",
             "",

@@ -353,6 +353,33 @@ function Terrain() {
   );
 }
 
+function SkyDome() {
+  const texture = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 16;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, "#170700");
+    grad.addColorStop(0.4, "#3d1a06");
+    grad.addColorStop(0.72, "#6b2c0d");
+    grad.addColorStop(1, "#C1440E");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 16, 256);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, []);
+
+  const material = useMemo(
+    () => new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide, fog: false, depthWrite: false }),
+    [texture],
+  );
+
+  return <mesh material={material}><sphereGeometry args={[38, 24, 16]} /></mesh>;
+}
+
 function TerrainShadow() {
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(50, 30, 2, 2);
@@ -726,9 +753,12 @@ function DustStorm({ active, state }: { active: boolean; state: SimulatorState }
   useFrame(() => {
     if (pointsRef.current && active) {
       const pos = pointsRef.current.geometry.attributes.position.array as Float32Array;
+      const time = Date.now() * 0.001;
       for (let i = 0; i < DUST_COUNT; i++) {
-        pos[i * 3] += 0.02;
-        pos[i * 3 + 1] += Math.sin(Date.now() * 0.001 + i) * 0.002;
+        const drift = 0.02 + Math.sin(time + i * 0.1) * 0.006;
+        pos[i * 3] += drift;
+        pos[i * 3 + 1] += Math.sin(time + i) * 0.002 + Math.sin(time * 0.8 + i * 0.3) * 0.004;
+        pos[i * 3 + 2] += Math.sin(time * 0.7 + i * 0.17) * 0.008;
         if (pos[i * 3] > 15) pos[i * 3] = -15;
       }
       pointsRef.current.geometry.attributes.position.needsUpdate = true;
@@ -789,7 +819,9 @@ function CameraController({ state, preset: currentPreset }: { state: SimulatorSt
   const { camera } = useThree();
   const targetRef = useRef(new THREE.Vector3());
   const shakeRef = useRef(0);
+  const obstacleShakeRef = useRef(0);
   const prevTickRef = useRef(state.tick);
+  const wasObstacleNearRef = useRef(false);
 
   useEffect(() => {
     const events = state.eventHistory;
@@ -807,6 +839,14 @@ function CameraController({ state, preset: currentPreset }: { state: SimulatorSt
     targetRef.current.copy(pos);
     const target = targetRef.current;
     const shake = shakeRef.current;
+
+    const obstacleNear = state.world.obstacleDistance < 1;
+    if (obstacleNear && !wasObstacleNearRef.current) {
+      obstacleShakeRef.current = 0.45;
+    } else if (obstacleNear) {
+      obstacleShakeRef.current = Math.max(obstacleShakeRef.current, 0.12);
+    }
+    wasObstacleNearRef.current = obstacleNear;
 
     if (currentPreset === "cinematic") {
       const angle = Date.now() * 0.0003;
@@ -836,10 +876,12 @@ function CameraController({ state, preset: currentPreset }: { state: SimulatorSt
       camera.lookAt(target.x, target.y + 0.3, target.z);
     }
 
-    if (shake > 0.01) {
-      camera.position.x += (Math.random() - 0.5) * shake * 0.2;
-      camera.position.y += (Math.random() - 0.5) * shake * 0.15;
+    const combinedShake = Math.max(shake, obstacleShakeRef.current);
+    if (combinedShake > 0.01) {
+      camera.position.x += (Math.random() - 0.5) * combinedShake * 0.2;
+      camera.position.y += (Math.random() - 0.5) * combinedShake * 0.15;
       shakeRef.current *= 0.95;
+      obstacleShakeRef.current *= 0.98;
     }
   });
 
@@ -861,6 +903,7 @@ export function MarsScene({ state, cameraPreset = "free" }: { state: SimulatorSt
         style={{ background: bgColor }}
       >
         <SceneLighting state={state} />
+        <SkyDome />
         <Terrain />
         <TerrainShadow />
         <Rocks state={state} />

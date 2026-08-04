@@ -30,7 +30,6 @@ function SimulatorInner() {
               <Link href="/simulator/replay" className="font-sans text-[12px] text-slate hover:text-graphite transition-colors">
                 3D Replay
               </Link>
-              <span className="font-sans text-[11px] text-slate/60">v0.2</span>
             </div>
           </div>
         </nav>

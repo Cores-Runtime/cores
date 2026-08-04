@@ -11,6 +11,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
   private tickToSnapshot: Map<number, TraceSnapshot> = new Map();
   private eventTicks: Record<string, number> = {};
   private _paused = false;
+  private _speed = 1;
 
   availableMissions: readonly { readonly id: string; readonly name: string; readonly desc: string; readonly constraints: readonly string[] }[] = [];
   availableEvents: readonly EventInfo[] = [];
@@ -137,8 +138,21 @@ export class ReplayRuntimeSource implements RuntimeSource {
     return this.snapshots.length;
   }
 
+  setSpeed(speed: number) {
+    this._speed = Math.max(0.25, speed);
+    if (this.timer) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  get speed(): number {
+    return this._speed;
+  }
+
   private start() {
     if (this.timer) return;
+    const interval = Math.max(60, 1200 / this._speed);
     this.timer = setInterval(() => {
       if (this.index < this.snapshots.length - 1) {
         this.index++;
@@ -146,7 +160,7 @@ export class ReplayRuntimeSource implements RuntimeSource {
       } else {
         this.stop();
       }
-    }, 1200);
+    }, interval);
   }
 
   private stop() {

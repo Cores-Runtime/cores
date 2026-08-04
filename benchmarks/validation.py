@@ -29,7 +29,10 @@ from cores.core import (
 )
 from cores.interfaces import Module
 
-import run_benchmarks as bench
+try:
+    from benchmarks import run_benchmarks as bench
+except ImportError:
+    import run_benchmarks as bench
 
 
 DEFAULT_OUTPUT_DIR = Path("benchmarks") / "results" / "phase_2a5"

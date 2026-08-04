@@ -9,7 +9,7 @@ from cores.core.planning.goal_planner import GoalPlanner, ActionModel
 from cores.core.planning.behavior_tree_planner import (
     BehaviorTreePlanner, BTAction, BTCondition, BTSequence, BTSelector, BTInverter,
 )
-from cores.core.planning.htn_planner import HTNPlanner, HTNDomain, HTNOperator, HTNMethod
+from cores.core.planning.htn_planner import HTNPlanner, HTNDomain, HTNPrimitive, HTNMethod
 
 
 # ---------------------------------------------------------------------------
@@ -655,7 +655,7 @@ class TestHTNPlanner:
 
     def test_primitive_task(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="charge", cost=1.0,
+        domain.add_primitive(HTNPrimitive(name="charge", cost=1.0,
                                         preconditions={"battery": 0.3},
                                         effects={"battery": 1.0}))
         planner = HTNPlanner(domain)
@@ -683,10 +683,10 @@ class TestHTNPlanner:
 
     def test_compound_task_decomposition(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="move_to", cost=2.0,
+        domain.add_primitive(HTNPrimitive(name="move_to", cost=2.0,
                                         preconditions={"at_base": True},
                                         effects={"at_target": True}))
-        domain.add_operator(HTNOperator(name="scan", cost=1.0,
+        domain.add_primitive(HTNPrimitive(name="scan", cost=1.0,
                                         preconditions={"at_target": True},
                                         effects={"scanned": True}))
         domain.add_method(HTNMethod(
@@ -708,7 +708,7 @@ class TestHTNPlanner:
 
     def test_method_condition_blocks_decomposition(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="charge", cost=1.0,
+        domain.add_primitive(HTNPrimitive(name="charge", cost=1.0,
                                         effects={"battery": 1.0}))
         domain.add_method(HTNMethod(
             task="recharge",
@@ -726,9 +726,9 @@ class TestHTNPlanner:
 
     def test_decomposition_with_multiple_methods(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="walk", cost=3.0,
+        domain.add_primitive(HTNPrimitive(name="walk", cost=3.0,
                                         effects={"at_target": True}))
-        domain.add_operator(HTNOperator(name="run", cost=5.0,
+        domain.add_primitive(HTNPrimitive(name="run", cost=5.0,
                                         effects={"at_target": True}))
         domain.add_method(HTNMethod(
             task="travel",
@@ -752,7 +752,7 @@ class TestHTNPlanner:
 
     def test_operator_precondition_check(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="charge", cost=1.0,
+        domain.add_primitive(HTNPrimitive(name="charge", cost=1.0,
                                         preconditions={"has_charger": True},
                                         effects={"battery": 1.0}))
         domain.add_method(HTNMethod(
@@ -770,9 +770,9 @@ class TestHTNPlanner:
 
     def test_multiple_goals_sorted(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="do_a", cost=1.0,
+        domain.add_primitive(HTNPrimitive(name="do_a", cost=1.0,
                                         effects={"a_done": True}))
-        domain.add_operator(HTNOperator(name="do_b", cost=1.0,
+        domain.add_primitive(HTNPrimitive(name="do_b", cost=1.0,
                                         effects={"b_done": True}))
         domain.add_method(HTNMethod(task="task_a", subtasks=["do_a"]))
         domain.add_method(HTNMethod(task="task_b", subtasks=["do_b"]))
@@ -788,10 +788,10 @@ class TestHTNPlanner:
 
     def test_nested_decomposition(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="start", effects={"started": True}))
-        domain.add_operator(HTNOperator(name="process", effects={"processed": True},
+        domain.add_primitive(HTNPrimitive(name="start", effects={"started": True}))
+        domain.add_primitive(HTNPrimitive(name="process", effects={"processed": True},
                                         preconditions={"started": True}))
-        domain.add_operator(HTNOperator(name="finish", effects={"finished": True},
+        domain.add_primitive(HTNPrimitive(name="finish", effects={"finished": True},
                                         preconditions={"processed": True}))
         domain.add_method(HTNMethod(task="production", subtasks=["setup", "run"]))
         domain.add_method(HTNMethod(task="setup", subtasks=["start"]))
@@ -817,9 +817,9 @@ class TestHTNPlanner:
 
     def test_domain_property(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="op1"))
+        domain.add_primitive(HTNPrimitive(name="op1"))
         planner = HTNPlanner(domain)
-        assert planner.domain.operators["op1"].name == "op1"
+        assert planner.domain.primitives["op1"].name == "op1"
 
     def test_name(self):
         planner = HTNPlanner(HTNDomain())
@@ -827,7 +827,7 @@ class TestHTNPlanner:
 
     def test_metrics(self):
         domain = HTNDomain()
-        domain.add_operator(HTNOperator(name="charge", effects={"done": True}))
+        domain.add_primitive(HTNPrimitive(name="charge", effects={"done": True}))
         domain.add_method(HTNMethod(task="charge", subtasks=["charge"]))
         planner = HTNPlanner(domain)
         goal = Goal(goal_id="g1", description="charge",

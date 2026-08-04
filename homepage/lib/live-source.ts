@@ -106,6 +106,7 @@ export class LiveRuntimeSource implements RuntimeSource {
   private _reconnectAttempt = 0;
   private _destroyed = false;
   private _eventHistory: EventEntry[] = [];
+  private _connected = false;
 
   availableMissions: readonly { readonly id: string; readonly name: string; readonly desc: string; readonly constraints: readonly string[] }[] = [];
   availableEvents: readonly EventInfo[] = [];
@@ -113,6 +114,10 @@ export class LiveRuntimeSource implements RuntimeSource {
   constructor(url?: string) {
     this.url = url ?? DEFAULT_WEBSOCKET_URL;
     this._state = this.buildIdleState();
+  }
+
+  get connected(): boolean {
+    return this._connected;
   }
 
   async init(): Promise<void> {
@@ -172,6 +177,8 @@ export class LiveRuntimeSource implements RuntimeSource {
 
     this.ws.onopen = () => {
       this._reconnectAttempt = 0;
+      this._connected = true;
+      this.notify();
     };
 
     this.ws.onmessage = (msg: MessageEvent) => {
@@ -186,12 +193,15 @@ export class LiveRuntimeSource implements RuntimeSource {
 
     this.ws.onclose = () => {
       this.ws = null;
+      this._connected = false;
+      this.notify();
       if (!this._destroyed) {
         this.scheduleReconnect();
       }
     };
 
     this.ws.onerror = () => {
+      this._connected = false;
     };
   }
 
@@ -367,6 +377,7 @@ export class LiveRuntimeSource implements RuntimeSource {
 
   destroy(): void {
     this._destroyed = true;
+    this._connected = false;
     if (this._reconnectTimer) {
       clearTimeout(this._reconnectTimer);
       this._reconnectTimer = null;

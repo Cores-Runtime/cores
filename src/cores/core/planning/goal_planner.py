@@ -5,9 +5,11 @@ from time import perf_counter
 from collections import deque
 
 from cores.core.robot_state import RobotState
-from cores.core.planning.types import Goal, Action, PlanCandidate, PlanningResult, PlanningMetrics
+from cores.core.planning.types import Action, PlanCandidate, PlanningResult, PlanningMetrics
 from cores.core.planning.mission import Mission
 from cores.core.planning.interface import PlanningContext, PlannerStrategy
+from cores.core.planning.state import _extract_state, _check_conditions, _apply_effects
+from cores.core.planning.repair import plan_still_valid, first_blocked_index, state_after_actions
 
 
 @dataclass(frozen=True)
@@ -18,32 +20,6 @@ class ActionModel:
     duration_cycles: int = 1
     preconditions: Dict[str, Any] = field(default_factory=dict)
     effects: Dict[str, Any] = field(default_factory=dict)
-
-
-def _extract_state(state: RobotState, context: PlanningContext) -> Dict[str, Any]:
-    s: Dict[str, Any] = {
-        "battery": state.battery_level,
-        "mission_status": state.mission_status,
-        "cycle": context.cycle_count,
-    }
-    s.update(state.flags)
-    for k, v in state.sensor_summaries.items():
-        s[f"sensor_{k}"] = v
-    s.update(state.metadata)
-    return s
-
-
-def _check_conditions(state: Dict[str, Any], conditions: Dict[str, Any]) -> bool:
-    for key, val in conditions.items():
-        if key not in state or state[key] != val:
-            return False
-    return True
-
-
-def _apply_effects(state: Dict[str, Any], effects: Dict[str, Any]) -> Dict[str, Any]:
-    new = dict(state)
-    new.update(effects)
-    return new
 
 
 class GoalPlanner(PlannerStrategy):
@@ -155,6 +131,73 @@ class GoalPlanner(PlannerStrategy):
                 goals_considered=len(mission.goals),
                 strategy_name=self.name,
             ),
+        )
+
+    def replan(
+        self,
+        state: RobotState,
+        mission: Mission,
+        context: PlanningContext,
+        previous_plan: PlanCandidate,
+        changes: Dict[str, Any],
+    ) -> Optional[PlanningResult]:
+        start = perf_counter()
+        if plan_still_valid(state, context, previous_plan):
+            return None
+
+        blocked = first_blocked_index(state, context, previous_plan)
+        prefix = (
+            previous_plan.actions[:blocked]
+            if blocked is not None
+            else previous_plan.actions
+        )
+        after_state = state_after_actions(state, context, prefix)
+
+        goal = next(
+            (g for g in mission.goals if g.goal_id == previous_plan.goal_id), None
+        )
+        if goal is None:
+            return None
+
+        tail = self._search(after_state, dict(goal.constraints))
+        if tail is None:
+            return None
+
+        actions = list(prefix) + [
+            Action(
+                action_id=a.action_id,
+                name=a.name,
+                cost=a.cost,
+                duration_cycles=a.duration_cycles,
+                preconditions=dict(a.preconditions),
+                effects=dict(a.effects),
+            )
+            for a in tail
+        ]
+        total_cost = sum(a.cost for a in actions)
+        total_duration = sum(a.duration_cycles for a in actions)
+        candidate = PlanCandidate(
+            plan_id=f"{previous_plan.plan_id}_repaired",
+            goal_id=previous_plan.goal_id,
+            actions=actions,
+            confidence=1.0 / (1.0 + total_cost),
+            estimated_cost=total_cost,
+            estimated_duration_cycles=total_duration,
+            utility=goal.priority / (1.0 + total_cost),
+            metadata={"repaired": True, "blocked_index": blocked},
+        )
+        elapsed = (perf_counter() - start) * 1000
+        return PlanningResult(
+            candidates=[candidate],
+            selected=candidate,
+            metrics=PlanningMetrics(
+                planning_latency_ms=elapsed,
+                candidates_generated=1,
+                goals_considered=1,
+                replanning_triggered=True,
+                strategy_name=self.name,
+            ),
+            context={"replan_reason": "blocked_action", "blocked_index": blocked},
         )
 
     @property

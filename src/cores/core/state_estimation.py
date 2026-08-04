@@ -23,13 +23,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from cores.interfaces.module import Module, ModuleResult
 from cores.core.robot_state import RobotState
 from cores.core.runtime_context import RuntimeContext
 from cores.core.world_model.interface import WorldModelStrategy
 from cores.core.world_model.simple_registry import SimpleObjectRegistry
+from cores.core.planning.snapshot import build_planning_snapshot, diff_snapshots
 
 
 # ---------------------------------------------------------------------------
@@ -550,6 +551,9 @@ class StateEstimation(Module):
         self._motion_hypotheses: Dict[str, MotionHypothesis] = {}
         self._consistency_issues: List[ConsistencyIssue] = []
         self._last_explanation: str = ""
+        self._last_snapshot: Optional[Dict[str, Any]] = None
+        self._last_change_set: Dict[str, Any] = {}
+        self._last_environment_changed: bool = False
 
         self._associator = ObservationAssociation(self._heuristics.association)
         self._fuser = SensorFusion(self._heuristics.fusion)
@@ -582,6 +586,25 @@ class StateEstimation(Module):
     @property
     def consistency_issues(self) -> List[ConsistencyIssue]:
         return list(self._consistency_issues)
+
+    @property
+    def last_change_set(self) -> Dict[str, Any]:
+        return dict(self._last_change_set)
+
+    @property
+    def last_environment_changed(self) -> bool:
+        return self._last_environment_changed
+
+    def _update_planning_snapshot(self, state: RobotState) -> None:
+        snapshot = build_planning_snapshot(state, self._strategy)
+        if self._last_snapshot is None:
+            self._last_snapshot = snapshot
+            self._last_change_set = {}
+            self._last_environment_changed = False
+            return
+        self._last_change_set = diff_snapshots(self._last_snapshot, snapshot)
+        self._last_environment_changed = bool(self._last_change_set)
+        self._last_snapshot = snapshot
 
     # --- observation pipeline ---
 
@@ -678,6 +701,11 @@ class StateEstimation(Module):
         metrics["has_sensor_degradation"] = self._strategy.has_sensor_degradation
         metrics["strategy_type"] = type(self._strategy).__name__
         metrics["strategy_last_update"] = self._strategy.last_update_cycle
+
+        # 9. Produce the planning change signal (deterministic snapshot diff)
+        self._update_planning_snapshot(state)
+        metrics["environment_changed"] = self._last_environment_changed
+        metrics["changed_keys"] = sorted(self._last_change_set)
 
         return ModuleResult(
             module_name=self.name,

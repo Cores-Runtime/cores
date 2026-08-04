@@ -194,6 +194,32 @@ Get-Content research/experiment_001.md
 
 Prints the first experiment report that summarizes the current hypothesis, method, results, discussion, and conclusion.
 
+## Simulation Trace Recording
+
+### Record a real runtime trace for the replay simulator
+
+```bash
+python scripts/record_runtime_trace.py
+```
+
+Runs the actual CORES Runtime for 120 cycles with scenario modules, a mission-aware state estimator, the GoalPlanner, and the criticality scheduler. Maps every published `RuntimeState` snapshot into the `TraceSnapshot` shape and writes `homepage/public/data/runtime-trace.json`, the file the replay page loads. Deterministic except for the measured `decisionTimeMs` timing value.
+
+### Stream live snapshots to the replay simulator
+
+```bash
+python scripts/websocket_server.py
+```
+
+Starts the WebSocket bridge that streams `RuntimeState` snapshots. In the replay page, switch the source toggle to `Live` (or open `/simulator/replay?mode=live`) to watch a real runtime instead of the recorded trace. When the bridge is unreachable, the page falls back to the recorded trace and shows an `Offline · Replay` badge.
+
+### Build the homepage
+
+```bash
+cd homepage && npm run build
+```
+
+Compiles the Next.js app: homepage, dashboard, and the 3D simulator replay page.
+
 ## Quality Gate
 
 ### Run the standard pre-commit check

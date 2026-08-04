@@ -44,6 +44,19 @@ result = memory.query(MemoryQuery(
 
 `Memory.query()` merges episodic and semantic results, so planners never choose which store to query. They just ask.
 
+### For planners: `Memory.evidence()`
+
+Planners consume *evidence*, not raw records. `Memory.evidence(query=None)` aggregates
+stored OUTCOME records (matching `query.action` / `query.location` when given) and
+NARRATIVE records into an `EvidenceSet`:
+
+- `failure_count(action)` / `success_count(action)`: how many times an action failed / succeeded
+- `narratives`: `NarrativeEvidence(topic, confidence, count)`
+
+`MemoryAwarePlanner` reads this before planning and biases candidate scores through a
+`MemoryInfluencePolicy`. Because memory owns the record format, planners stay decoupled
+from how records are stored. See `tests/test_memory_evidence.py`.
+
 ### Customising
 
 ```python

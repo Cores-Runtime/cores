@@ -30,7 +30,6 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-mist flex items-center justify-between">
-          <span className="font-sans text-[12px] text-slate">CORES v0.1</span>
           <span className="font-sans text-[12px] text-slate">Deterministic by design</span>
         </div>
       </div>

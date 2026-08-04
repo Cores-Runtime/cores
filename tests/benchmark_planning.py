@@ -22,7 +22,7 @@ from cores.core.planning.goal_planner import GoalPlanner, ActionModel
 from cores.core.planning.behavior_tree_planner import (
     BehaviorTreePlanner, BTAction, BTCondition, BTSequence, BTSelector,
 )
-from cores.core.planning.htn_planner import HTNPlanner, HTNDomain, HTNOperator, HTNMethod
+from cores.core.planning.htn_planner import HTNPlanner, HTNDomain, HTNPrimitive, HTNMethod
 
 
 ALL_STRATEGIES: List[str] = [
@@ -105,16 +105,16 @@ def _build_bt() -> BehaviorTreePlanner:
 
 def _build_htn() -> HTNPlanner:
     domain = HTNDomain()
-    domain.add_operator(HTNOperator(name="move", cost=2.0,
+    domain.add_primitive(HTNPrimitive(name="move", cost=2.0,
                                     preconditions={"at_base": True},
                                     effects={"at_target": True}))
-    domain.add_operator(HTNOperator(name="scan", cost=1.0,
+    domain.add_primitive(HTNPrimitive(name="scan", cost=1.0,
                                     preconditions={"at_target": True},
                                     effects={"scanned": True}))
-    domain.add_operator(HTNOperator(name="charge", cost=3.0,
+    domain.add_primitive(HTNPrimitive(name="charge", cost=3.0,
                                     preconditions={"has_charger": True},
                                     effects={"battery": 1.0}))
-    domain.add_operator(HTNOperator(name="report", cost=0.5,
+    domain.add_primitive(HTNPrimitive(name="report", cost=0.5,
                                     preconditions={"scanned": True},
                                     effects={"reported": True}))
     domain.add_method(HTNMethod(task="explore", subtasks=["move", "scan", "report"]))

@@ -13,7 +13,18 @@ if TYPE_CHECKING:
     from cores.core.runtime_context import RuntimeContext
     from cores.core.memory.store import EpisodicStore, SemanticStore
 
-from cores.core.memory.types import MemoryType, RecordLifecycle, MemoryQuery
+from cores.core.memory.types import (
+    MemoryType,
+    RecordLifecycle,
+    MemoryQuery,
+    NarrativeRecord,
+)
+from cores.core.memory.evidence import (
+    EvidenceSet,
+    FailureEvidence,
+    SuccessEvidence,
+    NarrativeEvidence,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +195,76 @@ class Memory(Module):
 
         return MemoryResult(records=merged, query=q)
 
+    def evidence(self, query: Optional[MemoryQuery] = None) -> EvidenceSet:
+        """Aggregate stored outcomes and narratives into planning evidence.
+
+        Planners consume evidence, never raw records. Memory owns the record
+        format, so it can change internally without touching Planning.
+        """
+        q = query or MemoryQuery()
+        outcomes = self._episodic.query(
+            MemoryQuery(
+                memory_types=[MemoryType.OUTCOME],
+                location=q.location,
+                action=q.action,
+                min_importance=q.min_importance,
+                max_age_cycles=q.max_age_cycles,
+                max_results=100000,
+            )
+        ).records
+        narratives = self._semantic.query(
+            MemoryQuery(
+                memory_types=[MemoryType.NARRATIVE],
+                topic=q.topic,
+                min_importance=q.min_importance,
+                max_results=100000,
+            )
+        )
+
+        failures: Dict[str, List[MemoryRecord]] = {}
+        successes: Dict[str, List[MemoryRecord]] = {}
+        for r in outcomes:
+            content = r.content if isinstance(r.content, dict) else {}
+            action = content.get("action")
+            if not action:
+                continue
+            if q.action is not None and action != q.action:
+                continue
+            if q.location is not None and content.get("location") != q.location:
+                continue
+            result = str(content.get("result", "")).upper()
+            if result == "FAILURE":
+                failures.setdefault(action, []).append(r)
+            elif result == "SUCCESS":
+                successes.setdefault(action, []).append(r)
+
+        failure_evidence = tuple(
+            _outcome_evidence(action, records, FailureEvidence)
+            for action, records in sorted(failures.items())
+        )
+        success_evidence = tuple(
+            _outcome_evidence(action, records, SuccessEvidence)
+            for action, records in sorted(successes.items())
+        )
+
+        by_topic: Dict[str, List[NarrativeRecord]] = {}
+        for n in narratives:
+            by_topic.setdefault(n.topic or "unknown", []).append(n)
+        narrative_evidence = tuple(
+            NarrativeEvidence(
+                topic=topic,
+                confidence=max(r.confidence for r in records),
+                count=len(records),
+            )
+            for topic, records in sorted(by_topic.items())
+        )
+
+        return EvidenceSet(
+            failures=failure_evidence,
+            successes=success_evidence,
+            narratives=narrative_evidence,
+        )
+
     def execute(self, state: RobotState, context: RuntimeContext) -> ModuleResult:
         """Run the memory cognitive loop for one cycle.
 
@@ -234,3 +315,17 @@ def make_record_id(content: Any, cycle: int) -> str:
     """Generate a deterministic record id from content and cycle number."""
     raw = json.dumps(content, sort_keys=True, default=str) + str(cycle)
     return hashlib.md5(raw.encode()).hexdigest()[:16]
+
+
+def _outcome_evidence(
+    action: str, records: List[MemoryRecord], evidence_cls: type
+) -> Any:
+    count = len(records)
+    latest = max(r.cycle for r in records)
+    mean = sum(r.importance for r in records) / count
+    return evidence_cls(
+        action=action,
+        count=count,
+        latest_cycle=latest,
+        mean_importance=mean,
+    )

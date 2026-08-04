@@ -55,7 +55,7 @@ from cores.core import (
     BTInverter,
     HTNPlanner,
     HTNDomain,
-    HTNOperator,
+    HTNPrimitive,
     HTNMethod,
 )
 from cores.events import EventType, Event, EventBus
@@ -130,6 +130,6 @@ __all__ = [
     "BTInverter",
     "HTNPlanner",
     "HTNDomain",
-    "HTNOperator",
+    "HTNPrimitive",
     "HTNMethod",
 ]

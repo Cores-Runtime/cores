@@ -28,7 +28,13 @@ cores/
 │   │   │   ├── store.py          EpisodicStore, SemanticStore
 │   │   │   ├── types.py          MemoryType, RecordLifecycle, NarrativeRecord
 │   │   │   └── strategies/       FIFO, Priority, TimeDecay, Episodic
+│   │   ├── mission_manager/      Mission Manager (lifecycle + goal selection)
+│   │   │   ├── types.py          MissionStatus, GoalStatus, MissionRecord, MissionContext
+│   │   │   ├── policies.py       Selection / Failure / Retry / Transition policies
+│   │   │   ├── constraints.py    Optional automatic goal completion
+│   │   │   └── manager.py        MissionManager orchestrator
 │   │   ├── logger/               Consolidation engine inside Memory
+│   │   │   ├── interface.py      LoggerStrategy ABC
 │   │   │   ├── logger.py         Logger orchestrator
 │   │   │   ├── spsca.py          SPSCALogger (LoggerStrategy)
 │   │   │   └── triggers.py       Capacity / Count / Idle / Composite triggers
@@ -48,17 +54,25 @@ cores/
 One call to `Runtime.step()` executes this exact sequence:
 
 ```
-1. Collect Events     Flush _buffered_events from previous cycle
+1. State Estimation   estimator.estimate() updates RobotState
         ↓
-2. Schedule           scheduler.schedule(modules, state, context, events)
+2. Mission Manager    picks the active mission and active goal
         ↓
-3. ExecutionPlan      Ordered List[Module] - immutable contract
+3. Memory             store observations, consolidate, forget
         ↓
-4. Execute            execution_layer.execute(plan, state, context)
+4. Planning           plan (or replan) for the single active goal
         ↓
-5. Publish Events     Runtime loops List[ModuleResult] and publishes events
+5. Events             flush _buffered_events from previous cycle
         ↓
-6. Advance Context    context.cycle_count += 1
+6. Schedule           scheduler.schedule(modules, state, context, events)
+        ↓
+7. Execute            execution_layer.execute(plan, state, context)
+        ↓
+8. Mission Manager    observes execution results (progress, completion)
+        ↓
+9. Publish            Runtime publishes runtime state through the bridge
+        ↓
+10. Advance Context   context.cycle_count += 1
 ```
 
 ---
@@ -77,6 +91,7 @@ One call to `Runtime.step()` executes this exact sequence:
 | `ExecutionLayer` | `ExecutionPlan`, `ModuleResult` | `EventBus`, `Scheduler`, `Runtime` |
 | `SchedulingPolicy` | `RobotState`, `RuntimeContext`, `Event`, `ExecutionPlan` | `Runtime`, `EventBus` |
 | `Scheduler` | `SchedulingPolicy` | `Runtime`, `EventBus` |
+| `MissionManager` | `RobotState`, `RuntimeContext`, `Mission`, `Goal` | `Planner`, `Scheduler`, `EventBus`, `Memory` |
 | `Runtime` | all of the above | nothing external |
 
 ---
@@ -97,7 +112,7 @@ Module.execute()
 
 ## Design Invariants
 
-1. `RobotState` is the single source of truth. No component modifies it except designated estimators.
+1. `RobotState` is the single source of truth. StateEstimation and MissionManager write to it; all other components read it.
 2. `Scheduler` is the only component that produces execution plans.
 3. `ExecutionLayer` is the only component that invokes `module.execute()`.
 4. `EventBus` has no knowledge of any other runtime component.

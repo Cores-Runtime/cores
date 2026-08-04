@@ -65,6 +65,25 @@ from cores.core.logger import (
     CompositeTrigger,
 )
 
+from cores.core.mission_manager import (
+    MissionManager,
+    MissionContext,
+    MissionRecord,
+    MissionStatus,
+    GoalStatus,
+    FailureAction,
+    MissionSelectionPolicy,
+    PriorityMissionSelectionPolicy,
+    MissionFailurePolicy,
+    DefaultMissionFailurePolicy,
+    MissionRetryPolicy,
+    DefaultMissionRetryPolicy,
+    MissionTransitionPolicy,
+    DefaultMissionTransitionPolicy,
+    GoalConstraintEvaluator,
+    NoAutoCompletion,
+)
+
 from cores.core.state_estimation import (
     StateEstimation,
     StateEstimationConfig,
@@ -113,7 +132,7 @@ from cores.core.planning import (
     BTInverter,
     HTNPlanner,
     HTNDomain,
-    HTNOperator,
+    HTNPrimitive,
     HTNMethod,
 )
 
@@ -173,6 +192,22 @@ __all__ = [
     "LexicographicSelectionStrategy",
     "LexicographicKnapsackSolver",
     "LexicographicValue",
+    "MissionManager",
+    "MissionContext",
+    "MissionRecord",
+    "MissionStatus",
+    "GoalStatus",
+    "FailureAction",
+    "MissionSelectionPolicy",
+    "PriorityMissionSelectionPolicy",
+    "MissionFailurePolicy",
+    "DefaultMissionFailurePolicy",
+    "MissionRetryPolicy",
+    "DefaultMissionRetryPolicy",
+    "MissionTransitionPolicy",
+    "DefaultMissionTransitionPolicy",
+    "GoalConstraintEvaluator",
+    "NoAutoCompletion",
     "StateEstimation",
     "StateEstimationConfig",
     "StateEstimationHeuristics",

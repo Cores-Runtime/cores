@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import NextDynamic from "next/dynamic";
 import { RuntimeProvider, useSimulator } from "@/components/simulator/RuntimeContext";
 import { PATH_LENGTH } from "@/lib/path-constants";
 import type { CameraPreset } from "@/components/simulator/replay/MarsScene";
+import type { SimulatorMode } from "@/components/simulator/RuntimeContext";
 
 const MarsScene = NextDynamic(() => import("@/components/simulator/replay/MarsScene").then(m => ({ default: m.MarsScene })), { ssr: false });
 
@@ -20,8 +21,10 @@ const CAMERA_PRESETS: { key: CameraPreset; label: string; icon: string }[] = [
 
 const EVENT_BUTTONS = ["Rockslide", "Dust Storm", "Battery Drain", "Goal Reached"];
 
+const SPEEDS = [0.5, 1, 2, 4];
+
 function ReplayControls() {
-  const { state, running, setRunning, seek, tick, totalTicks, injectEvent } = useSimulator();
+  const { state, running, setRunning, seek, tick, totalTicks, injectEvent, speed, setSpeed, eventTicks } = useSimulator();
   const maxTick = totalTicks > 0 ? totalTicks - 1 : 0;
 
   return (
@@ -55,19 +58,47 @@ function ReplayControls() {
         </button>
 
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          <input
-            type="range"
-            min={0}
-            max={maxTick}
-            value={Math.min(tick, maxTick)}
-            onChange={(e) => seek(Number(e.target.value))}
-            className="flex-1 h-1.5 rounded-full appearance-none bg-white/20 cursor-pointer accent-accent
-              [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
-              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:shadow-md"
-          />
+          <div className="relative flex-1 flex items-center">
+            <input
+              type="range"
+              min={0}
+              max={maxTick}
+              value={Math.min(tick, maxTick)}
+              onChange={(e) => seek(Number(e.target.value))}
+              className="relative w-full h-1.5 rounded-full appearance-none bg-white/20 cursor-pointer accent-accent z-10
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:shadow-md"
+            />
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none">
+              {eventTicks.map((et) => (
+                <span
+                  key={et}
+                  className="absolute w-1 h-2 rounded-full bg-amber-400/70 -translate-x-1/2"
+                  style={{ left: `${(et / maxTick) * 100}%` }}
+                />
+              ))}
+            </div>
+          </div>
           <span className="text-[11px] font-mono text-white/50 w-16 text-right shrink-0">
             T{tick}/{maxTick}
           </span>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          {SPEEDS.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSpeed(s)}
+              className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono transition-all ${
+                speed === s
+                  ? "bg-accent/20 text-accent border border-accent/30"
+                  : "text-white/40 border border-white/10 hover:text-white hover:border-white/25"
+              }`}
+              title={`${s}x speed`}
+            >
+              {s}x
+            </button>
+          ))}
         </div>
       </div>
 
@@ -231,8 +262,9 @@ function CognitionStream({ state }: { state: SimulatorState }) {
   const [steps, setSteps] = useState<{ id: number; text: string; icon: string; color: string }[]>([]);
   const processedTickRef = useRef(-1);
   const processedEventsLen = useRef(0);
+  const decisionSigRef = useRef("");
   const idCounter = useRef(0);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const pendingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const tick = state.tick;
@@ -246,11 +278,9 @@ function CognitionStream({ state }: { state: SimulatorState }) {
     processedTickRef.current = tick;
     processedEventsLen.current = evLen;
 
-    timers.current.forEach(t => clearTimeout(t));
-    timers.current = [];
-
     const chain: { id: number; text: string; icon: string; color: string }[] = [];
     const add = (text: string, icon: string, color: string) => {
+      if (text === "") return;
       chain.push({ id: idCounter.current++, text, icon, color });
     };
 
@@ -267,10 +297,12 @@ function CognitionStream({ state }: { state: SimulatorState }) {
       }
     }
 
-    if (decision) {
-      if (chain.length > 0) {
-        add("", "", "");
-      }
+    const decisionSig = decision
+      ? JSON.stringify([decision.reason, decision.wake, decision.sleep, decision.suspend])
+      : "";
+
+    if (decision && decisionSig !== decisionSigRef.current) {
+      decisionSigRef.current = decisionSig;
 
       add(`🤔 ${decision.reason}`, "🤔", "text-accent font-bold");
 
@@ -291,20 +323,22 @@ function CognitionStream({ state }: { state: SimulatorState }) {
       });
     }
 
-    chain.forEach((step, i) => {
-      if (!step.text) return;
-      const t1 = setTimeout(() => {
-        setSteps(prev => [...prev, step]);
-        const t2 = setTimeout(() => {
-          setSteps(prev => prev.filter(s => s.id !== step.id));
-        }, 7000);
-        timers.current.push(t2);
-      }, i * 350);
-      timers.current.push(t1);
-    });
+    if (chain.length === 0) return;
 
-    return () => timers.current.forEach(t => clearTimeout(t));
+    chain.forEach((step, i) => {
+      const addDelay = i * 300;
+      pendingTimers.current.push(setTimeout(() => {
+        setSteps(prev => [...prev, step]);
+      }, addDelay));
+      pendingTimers.current.push(setTimeout(() => {
+        setSteps(prev => prev.filter(s => s.id !== step.id));
+      }, addDelay + 7000));
+    });
   }, [state.tick]);
+
+  useEffect(() => {
+    return () => pendingTimers.current.forEach(t => clearTimeout(t));
+  }, []);
 
   if (steps.length === 0) return null;
 
@@ -455,20 +489,79 @@ function MissionPanel({ state }: { state: SimulatorState }) {
 
 function CameraPresetBar({ preset, onChange }: { preset: CameraPreset; onChange: (p: CameraPreset) => void }) {
   return (
-    <div className="absolute top-14 right-3 z-20 flex gap-1">
+    <div className="absolute top-28 right-3 z-20 flex gap-1 p-1 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10">
       {CAMERA_PRESETS.map((p) => (
         <button
           key={p.key}
           onClick={() => onChange(p.key)}
-          className={`px-2 py-1 rounded-lg text-[10px] transition-all ${
+          className={`px-2 py-1 rounded-md text-[10px] transition-all ${
             preset === p.key
               ? "bg-accent text-paper font-bold"
-              : "bg-black/40 text-white/50 hover:bg-white/10 hover:text-white border border-white/10"
+              : "text-white/60 hover:bg-white/10 hover:text-white"
           }`}
         >
           {p.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+function SourceToggle() {
+  const { mode, setMode, wsUrl, setWsUrl, fallbackActive } = useSimulator();
+  const [draft, setDraft] = useState(wsUrl);
+
+  useEffect(() => {
+    setDraft(wsUrl);
+  }, [wsUrl]);
+
+  const applyUrl = () => {
+    const url = draft.trim();
+    if (url && url !== wsUrl) setWsUrl(url);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {mode === "live" && (
+        <span
+          className={`text-[9px] px-1.5 py-0.5 rounded-full border font-bold uppercase tracking-wider ${
+            fallbackActive
+              ? "text-amber-400 border-amber-400/30 bg-amber-400/10"
+              : "text-emerald-400 border-emerald-400/30 bg-emerald-400/10 animate-pulse"
+          }`}
+        >
+          {fallbackActive ? "Offline · Replay" : "Live"}
+        </span>
+      )}
+      {mode === "live" && (
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={applyUrl}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              applyUrl();
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
+          className="w-36 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-mono text-white/70 focus:outline-none focus:border-accent/40"
+          placeholder="ws://127.0.0.1:8765"
+          title="Runtime WebSocket URL (applies on Enter)"
+        />
+      )}
+      <div className="flex p-0.5 rounded-lg bg-white/5 border border-white/10">
+        {([["replay", "Trace"], ["live", "Live"]] as const).map(([m, label]) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={`px-2.5 py-1 rounded-md text-[10px] transition-all ${
+              mode === m ? "bg-accent text-paper font-bold" : "text-white/50 hover:text-white"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -510,10 +603,10 @@ function ReplayPageInner() {
             CORES
           </Link>
           <div className="flex items-center gap-3">
+            <SourceToggle />
             <Link href="/simulator" className="text-[11px] text-white/50 hover:text-white transition-colors">
               Dashboard
             </Link>
-            <span className="text-[11px] font-mono text-white/40">Replay v0.1</span>
           </div>
         </div>
       </nav>
@@ -544,10 +637,20 @@ function ReplayPageInner() {
   );
 }
 
-export default function ReplayPage() {
+function ReplayPageRoute() {
+  const searchParams = useSearchParams();
+  const initialMode: SimulatorMode = searchParams.get("mode") === "live" ? "live" : "replay";
   return (
-    <RuntimeProvider>
+    <RuntimeProvider initialMode={initialMode}>
       <ReplayPageInner />
     </RuntimeProvider>
+  );
+}
+
+export default function ReplayPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReplayPageRoute />
+    </Suspense>
   );
 }

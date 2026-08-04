@@ -20,6 +20,13 @@ from cores.core.memory.store import (
     SemanticStore,
 )
 
+from cores.core.memory.evidence import (
+    FailureEvidence,
+    SuccessEvidence,
+    NarrativeEvidence,
+    EvidenceSet,
+)
+
 from cores.core.memory.strategies import (
     FIFOMemoryStrategy,
     TimeDecayMemoryStrategy,
@@ -41,6 +48,10 @@ __all__ = [
     "MemoryStrategy",
     "Memory",
     "make_record_id",
+    "FailureEvidence",
+    "SuccessEvidence",
+    "NarrativeEvidence",
+    "EvidenceSet",
     "FIFOMemoryStrategy",
     "TimeDecayMemoryStrategy",
     "PriorityMemoryStrategy",

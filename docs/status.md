@@ -13,7 +13,9 @@
 | 4B | ✅ Complete | State Estimation - 6 strategies, benchmarks |
 | 4F | ✅ Complete | Planning - 5 strategies, mission planner |
 | 4G | ✅ Complete | Memory + Logger - episodic/semantic stores, SPSCA consolidation, provenance, full pipeline benchmark |
-| Future | 🔄 Planned | Planning Engine (uses memory), wire narratives into planning, Mode Selection, Adaptive Weight Calibration, Operator Module, memory research (confidence calibration, reconsolidation, forgetting) |
+| 5 | ✅ Complete | Plan repair + memory-aware planning (prefix-preserving replan, memory evidence biasing) |
+| 6 | ✅ Complete | Mission Manager - lifecycle, goal lifecycle, priority selection, policies |
+| Future | 🔄 Planned | Planning Engine (uses memory), wire narratives into planning, Mode Selection, Adaptive Weight Calibration, memory research (confidence calibration, reconsolidation, forgetting) |
 
 ## Key Findings
 

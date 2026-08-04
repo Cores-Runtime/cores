@@ -8,10 +8,11 @@ from cores.core.planning.types import Goal, Action, PlanCandidate, PlanningResul
 from cores.core.planning.mission import Mission
 from cores.core.planning.interface import PlanningContext, PlannerStrategy
 from cores.core.planning.goal_planner import _extract_state, _check_conditions
+from cores.core.planning.repair import plan_still_valid, first_blocked_index, state_after_actions
 
 
 @dataclass(frozen=True)
-class HTNOperator:
+class HTNPrimitive:
     name: str
     preconditions: Dict[str, Any] = field(default_factory=dict)
     effects: Dict[str, Any] = field(default_factory=dict)
@@ -28,11 +29,11 @@ class HTNMethod:
 
 class HTNDomain:
     def __init__(self) -> None:
-        self.operators: Dict[str, HTNOperator] = {}
+        self.primitives: Dict[str, HTNPrimitive] = {}
         self.methods: Dict[str, List[HTNMethod]] = {}
 
-    def add_operator(self, op: HTNOperator) -> None:
-        self.operators[op.name] = op
+    def add_primitive(self, op: HTNPrimitive) -> None:
+        self.primitives[op.name] = op
 
     def add_method(self, method: HTNMethod) -> None:
         if method.task not in self.methods:
@@ -41,7 +42,7 @@ class HTNDomain:
 
 
 def _is_primitive(task: str, domain: HTNDomain) -> bool:
-    return task in domain.operators
+    return task in domain.primitives
 
 
 def _apply_effects(state: Dict[str, Any], effects: Dict[str, Any]) -> Dict[str, Any]:
@@ -56,11 +57,11 @@ def _decompose(
     state: Dict[str, Any],
     depth: int = 0,
     max_depth: int = 20,
-) -> Optional[Tuple[List[HTNOperator], float]]:
+) -> Optional[Tuple[List[HTNPrimitive], float]]:
     if depth > max_depth:
         return None
     if _is_primitive(task, domain):
-        op = domain.operators[task]
+        op = domain.primitives[task]
         if _check_conditions(state, op.preconditions):
             return ([op], op.cost)
         return None
@@ -69,7 +70,7 @@ def _decompose(
     for method in domain.methods[task]:
         if method.condition is not None and not method.condition(state):
             continue
-        all_ops: List[HTNOperator] = []
+        all_ops: List[HTNPrimitive] = []
         total_cost = 0.0
         current_state = dict(state)
         valid = True
@@ -99,12 +100,12 @@ class HTNPlanner(PlannerStrategy):
 
     def _plan_for_goal(
         self, state: Dict[str, Any], goal: Goal
-    ) -> Optional[Tuple[List[HTNOperator], float]]:
+    ) -> Optional[Tuple[List[HTNPrimitive], float]]:
         goal_conditions = dict(goal.constraints)
         if _check_conditions(state, goal_conditions):
             return ([], 0.0)
         task_name = goal.category
-        if task_name not in self._domain.methods and task_name not in self._domain.operators:
+        if task_name not in self._domain.methods and task_name not in self._domain.primitives:
             return None
         return _decompose(task_name, self._domain, state, max_depth=self._max_depth)
 
@@ -168,6 +169,73 @@ class HTNPlanner(PlannerStrategy):
                 goals_considered=len(mission.goals),
                 strategy_name=self.name,
             ),
+        )
+
+    def replan(
+        self,
+        state: RobotState,
+        mission: Mission,
+        context: PlanningContext,
+        previous_plan: PlanCandidate,
+        changes: Dict[str, Any],
+    ) -> Optional[PlanningResult]:
+        start = perf_counter()
+        if plan_still_valid(state, context, previous_plan):
+            return None
+
+        blocked = first_blocked_index(state, context, previous_plan)
+        prefix = (
+            previous_plan.actions[:blocked]
+            if blocked is not None
+            else previous_plan.actions
+        )
+        after_state = state_after_actions(state, context, prefix)
+
+        goal = next(
+            (g for g in mission.goals if g.goal_id == previous_plan.goal_id), None
+        )
+        if goal is None:
+            return None
+
+        tail = self._plan_for_goal(after_state, goal)
+        if tail is None:
+            return None
+        tail_ops, _ = tail
+
+        actions = list(prefix) + [
+            Action(
+                action_id=op.name,
+                name=op.name,
+                cost=op.cost,
+                duration_cycles=op.duration_cycles,
+                preconditions=dict(op.preconditions),
+                effects=dict(op.effects),
+            )
+            for op in tail_ops
+        ]
+        total_cost = sum(a.cost for a in actions)
+        candidate = PlanCandidate(
+            plan_id=f"{previous_plan.plan_id}_repaired",
+            goal_id=previous_plan.goal_id,
+            actions=actions,
+            confidence=1.0 / (1.0 + total_cost) if total_cost > 0 else 1.0,
+            estimated_cost=total_cost,
+            estimated_duration_cycles=sum(a.duration_cycles for a in actions),
+            utility=goal.priority / (1.0 + total_cost),
+            metadata={"repaired": True, "blocked_index": blocked},
+        )
+        elapsed = (perf_counter() - start) * 1000
+        return PlanningResult(
+            candidates=[candidate],
+            selected=candidate,
+            metrics=PlanningMetrics(
+                planning_latency_ms=elapsed,
+                candidates_generated=1,
+                goals_considered=1,
+                replanning_triggered=True,
+                strategy_name=self.name,
+            ),
+            context={"replan_reason": "blocked_action", "blocked_index": blocked},
         )
 
     @property

@@ -13,7 +13,11 @@ from cores.core.planning.behavior_tree_planner import (
     BTSelector,
     BTInverter,
 )
-from cores.core.planning.htn_planner import HTNPlanner, HTNDomain, HTNOperator, HTNMethod
+from cores.core.planning.htn_planner import HTNPlanner, HTNDomain,     HTNPrimitive, HTNMethod
+from cores.core.planning.policy import MemoryInfluencePolicy, LinearInfluencePolicy
+from cores.core.planning.memory_aware import MemoryAwarePlanner
+from cores.core.planning.snapshot import PlanningSnapshotPolicy, build_planning_snapshot, diff_snapshots
+from cores.core.planning.repair import plan_still_valid, first_blocked_index, state_after_actions
 
 __all__ = [
     "Goal",
@@ -40,6 +44,15 @@ __all__ = [
     "BTInverter",
     "HTNPlanner",
     "HTNDomain",
-    "HTNOperator",
+    "HTNPrimitive",
     "HTNMethod",
+    "MemoryInfluencePolicy",
+    "LinearInfluencePolicy",
+    "MemoryAwarePlanner",
+    "PlanningSnapshotPolicy",
+    "build_planning_snapshot",
+    "diff_snapshots",
+    "plan_still_valid",
+    "first_blocked_index",
+    "state_after_actions",
 ]

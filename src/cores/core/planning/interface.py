@@ -18,6 +18,7 @@ class PlanningContext:
     time_budget_ms: float = 100.0
     world_state: Dict[str, Any] = field(default_factory=dict)
     environment_changed: bool = False
+    change_set: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
     memory: Optional[Memory] = None
 

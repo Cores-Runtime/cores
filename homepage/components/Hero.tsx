@@ -13,10 +13,6 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="font-display text-[13px] tracking-tight text-brass uppercase">
-              CORES v0.1
-            </span>
-
             <h1 className="font-display text-display leading-display tracking-display text-graphite mt-4">
               <span className="block">A robot has</span>
               <span className="block">one battery,</span>
