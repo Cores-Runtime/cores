@@ -12,6 +12,7 @@ from cores.core.memory import Memory, MemoryRecord, MemoryType
 from cores.core.planning.interface import Planner, PlanningContext
 from cores.core.planning.mission import Mission
 from cores.core.mission_manager import MissionManager, MissionContext
+from cores.core.safety_supervisor import SafetySupervisor, SafetyDecision
 from cores.events.event_bus import EventBus
 from cores.events.event import Event
 from cores.events.event_type import EventType
@@ -38,6 +39,7 @@ class Runtime:
         mission: Optional[Mission] = None,
         mission_manager: Optional[MissionManager] = None,
         memory: Optional[Memory] = None,
+        safety_supervisor: Optional[SafetySupervisor] = None,
     ) -> None:
         self.state_estimator = state_estimator
         self.state = RobotState()
@@ -68,6 +70,8 @@ class Runtime:
 
         self.memory = memory or Memory()
 
+        self.safety_supervisor = safety_supervisor or SafetySupervisor()
+
         for event_type in EventType:
             self.event_bus.subscribe(event_type, self._on_event)
 
@@ -96,15 +100,13 @@ class Runtime:
         Execute one complete, sequential runtime cycle:
         1. Wire shared strategy into context for observation modules.
         2. Estimate robot state.
-        2.5 Select the active mission and goal (Mission Manager).
-        3. Memory cognitive loop (store, consolidate, forget).
-        4. Run the Planner (propose candidate plans, informed by memory).
-        5. Collect events from the previous cycle.
-        6. Schedule and execute all registered modules.
-        6.5 Store outcomes into Episodic Memory.
-        7. Run the StateEstimation's cognitive loop (predict, check, explain).
-        8. Publish runtime state snapshot through the bridge.
-        9. Advance runtime context metadata.
+        3. Safety Supervisor evaluates state and returns decision.
+        4. Select the active mission and goal (Mission Manager).
+        5. Memory cognitive loop (store, consolidate, forget).
+        6. Run the Planner (propose candidate plans, informed by memory).
+        7. Schedule and execute all registered modules.
+        8. Store outcomes into Episodic Memory.
+        9. Publish runtime state snapshot through the bridge.
         """
         # 1. Wire shared components into context
         self.context.world_model = self.state_estimation.strategy
@@ -114,14 +116,31 @@ class Runtime:
         if self.state_estimator is not None:
             self.state = self.state_estimator.estimate(self.context.cycle_count)
 
-        # 2.5 Mission selection - which mission and goal are active right now
+        # 3. Safety Supervisor evaluates state
+        safety_result = self.safety_supervisor.evaluate(self.state, self.context)
+        self.context.metrics["safety_result"] = safety_result
+
+        # 4. If EMERGENCY_STOP, skip everything and publish state
+        if safety_result.decision == SafetyDecision.EMERGENCY_STOP:
+            self._publish_runtime_state([])
+            return
+
+        # 5. Mission selection - which mission and goal are active right now
         mission_context = self.mission_manager.execute(self.state, self.context)
 
-        # 3. Memory — store observations, consolidate, forget
+        # 6. Handle PAUSE and CANCEL_MISSION from Safety
+        current_mission = self.mission_manager.current_mission()
+        if current_mission is not None:
+            if safety_result.decision == SafetyDecision.PAUSE:
+                self.mission_manager.pause(current_mission.mission_id)
+            elif safety_result.decision == SafetyDecision.CANCEL_MISSION:
+                self.mission_manager.cancel(current_mission.mission_id)
+
+        # 7. Memory — store observations, consolidate, forget
         memory_result = self.memory.execute(self.state, self.context)
         self._last_module_results.append(memory_result)
 
-        # 4. Planning — run the cognitive planner if configured
+        # 8. Planning — run the cognitive planner if configured
         if self.planner is not None:
             pctx = PlanningContext(
                 cycle_count=self.context.cycle_count,
@@ -149,11 +168,11 @@ class Runtime:
         else:
             self._last_planning_result = None
 
-        # 5. Collect and flush buffered events
+        # 9. Collect and flush buffered events
         events_to_process = self._buffered_events.copy()
         self._buffered_events.clear()
 
-        # 6. Planning and execution of all modules (observation, planning, etc.)
+        # 10. Schedule and execute all registered modules
         plan = self.scheduler.schedule(
             self.modules, self.state, self.context, events_to_process
         )
@@ -163,10 +182,10 @@ class Runtime:
             for event in result.events:
                 self.event_bus.publish(event)
 
-        # 6.2 Mission Manager observes what execution produced
+        # 11. Mission Manager observes what execution produced
         self.mission_manager.observe_execution(results, self.state)
 
-        # 6.5 Store outcomes into Episodic Memory
+        # 12. Store outcomes into Episodic Memory
         for result in results:
             outcome_record = MemoryRecord(
                 id=f"outcome_{result.module_name}_{self.context.cycle_count}",
@@ -181,19 +200,23 @@ class Runtime:
             )
             self.memory.store(outcome_record)
 
-        # 7. StateEstimation cognitive loop — runs after all observation modules
+        # 13. StateEstimation cognitive loop — runs after all observation modules
         state_estimation_result = self.state_estimation.execute(self.state, self.context)
         self._last_module_results.append(state_estimation_result)
 
-        # 8. Capture decision time from context metrics
+        # 14. Capture decision time from context metrics
         self._last_decision_time_ms = float(
             self.context.metrics.get("decision_time_ms", 0.0)
         )
 
-        # 9. Post-execution cycle maintenance
+        # 15. Post-execution cycle maintenance
         self.context.cycle_count += 1
 
-        # 10. Build runtime state snapshot and publish through bridge
+        # 16. Build runtime state snapshot and publish through bridge
+        self._publish_runtime_state(events_to_process)
+
+    def _publish_runtime_state(self, events_to_process: List[Event]) -> None:
+        """Build and publish runtime state snapshot through the bridge."""
         runtime_state = self._state_builder.build(
             state=self.state,
             context=self.context,

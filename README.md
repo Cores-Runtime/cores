@@ -133,11 +133,8 @@ npm run dev
 | Learn how Memory + Logger work | [docs/memory.md](docs/memory.md), [docs/logger.md](docs/logger.md) |
 | See how mission selection works | [docs/mission-manager.md](docs/mission-manager.md) |
 | Check what's built and what's next | [docs/status.md](docs/status.md) |
-| Study the architecture decisions | [AI-Instructions/ADR/](AI-Instructions/ADR/) |
 | Run tests, benchmarks, linting | [docs/commands.md](docs/commands.md) |
 | Explore the homepage and simulator | [docs/homepage.md](docs/homepage.md) |
 | Read research reports | [research/](research/) |
 
 ---
-
-CORES is not an AGI project. It is not a chatbot. It is not a replacement for ROS 2. It is a cognitive runtime that any robotic system can depend on.
